@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'user_login.dart';
+import 'user_signup.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -122,7 +124,10 @@ class SplashScreen extends StatelessWidget {
               ),
               child: MaterialButton(
                 onPressed: () {
-                  // Handle login navigation
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const UserLoginPage()),
+                  );
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(50),
@@ -153,7 +158,10 @@ class SplashScreen extends StatelessWidget {
               ),
               child: MaterialButton(
                 onPressed: () {
-                  // Handle create account navigation
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const UserSignupPage()),
+                  );
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(50),
