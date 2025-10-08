@@ -270,24 +270,6 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                     ),
                     
                     const SizedBox(height: 20),
-                    
-                    // Admin Login Link
-                    TextButton(
-                      onPressed: () {
-                        // Handle admin login
-                        _handleAdminLogin();
-                      },
-                      child: const Text(
-                        'Login as Admin/Master',
-                        style: TextStyle(
-                          color: Color(0xFF348AA7),
-                          fontSize: 17,
-                          fontWeight: FontWeight.normal,
-                          fontFamily: 'Kumbh Sans',
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
 
                     TextButton(
                       onPressed: () {

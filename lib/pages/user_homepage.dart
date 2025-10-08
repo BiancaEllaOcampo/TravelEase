@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'user_travel_requirments.dart';
 class UserHomePage extends StatelessWidget {
   const UserHomePage({super.key});
 
@@ -198,7 +198,10 @@ class UserHomePage extends StatelessWidget {
               ),
               child: MaterialButton(
                 onPressed: () {
-                  // Handle travel requirements navigation
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const UserTravelRequirementsPage()),
+                  );
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(50),
