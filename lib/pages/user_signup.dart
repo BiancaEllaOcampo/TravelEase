@@ -37,29 +37,60 @@ class _UserSignupPageState extends State<UserSignupPage> {
             color: const Color(0xFFD9D9D9),
           ),
           
-          // Transparent overlay
+          // Banner
           Positioned(
-            top: 82,
-            left: 6,
-            right: 6,
-            bottom: 0,
+            top: 48,
+            left: 0,
+            right: 0,
+            height: 82,
             child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.75),
+              color: const Color(0xFF125E77),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Welcome to TravelEase',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Kumbh Sans',
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 67,
+                      height: 58,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF348AA7),
+                      ),
+                      child: const Icon(
+                        Icons.airplanemode_active,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
           
           // Back Button
           Positioned(
-            top: 25,
-            left: 18,
+            top: 150,
+            left: 30,
             child: Container(
-              width: 72,
-              height: 72,
-              decoration: const BoxDecoration(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(8),
               ),
               child: IconButton(
                 onPressed: () {
@@ -76,11 +107,11 @@ class _UserSignupPageState extends State<UserSignupPage> {
           
           // Main Signup Card
           Positioned(
-            top: 91,
-            left: 33,
-            right: 33,
+            top: 225,
+            left: 30,
+            right: 30,
             child: Container(
-              height: 611,
+              height: 625,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
@@ -326,7 +357,7 @@ class _UserSignupPageState extends State<UserSignupPage> {
                       ],
                     ),
                     
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 25),
                     
                     // Create Account Button
                     SizedBox(
@@ -363,45 +394,6 @@ class _UserSignupPageState extends State<UserSignupPage> {
             ),
           ),
           
-          // Bottom Links
-          Positioned(
-            bottom: 69,
-            left: 33,
-            right: 33,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    // Handle About Us navigation
-                  },
-                  child: const Text(
-                    'About Us',
-                    style: TextStyle(
-                      color: Color(0xFF348AA7),
-                      fontSize: 25,
-                      fontWeight: FontWeight.w300,
-                      fontFamily: 'Kumbh Sans',
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    // Handle Mission & Vision navigation
-                  },
-                  child: const Text(
-                    'Mission & Vision',
-                    style: TextStyle(
-                      color: Color(0xFF348AA7),
-                      fontSize: 25,
-                      fontWeight: FontWeight.w300,
-                      fontFamily: 'Kumbh Sans',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
