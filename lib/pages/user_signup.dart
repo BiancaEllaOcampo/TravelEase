@@ -116,7 +116,7 @@ class _UserSignupPageState extends State<UserSignupPage> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: SingleChildScrollView(
+              child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -387,7 +387,6 @@ class _UserSignupPageState extends State<UserSignupPage> {
                       ),
                     ),
                     
-                    const SizedBox(height: 20),
                   ],
                 ),
               ),

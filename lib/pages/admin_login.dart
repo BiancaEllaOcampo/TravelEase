@@ -295,45 +295,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
             ),
           ),
           
-          // Bottom Links
-          Positioned(
-            bottom: 69,
-            left: 33,
-            right: 33,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    // Handle About Us navigation
-                  },
-                  child: const Text(
-                    'About Us',
-                    style: TextStyle(
-                      color: Color(0xFF348AA7),
-                      fontSize: 25,
-                      fontWeight: FontWeight.w300,
-                      fontFamily: 'Kumbh Sans',
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    // Handle Mission & Vision navigation
-                  },
-                  child: const Text(
-                    'Mission & Vision',
-                    style: TextStyle(
-                      color: Color(0xFF348AA7),
-                      fontSize: 25,
-                      fontWeight: FontWeight.w300,
-                      fontFamily: 'Kumbh Sans',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          
         ],
       ),
     );
