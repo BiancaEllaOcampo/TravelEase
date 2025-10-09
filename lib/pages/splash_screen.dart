@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'user_login.dart';
 import 'user_signup.dart';
-import 'admin_login.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -179,41 +178,6 @@ class SplashScreen extends StatelessWidget {
               ),
             ),
           ),
-
-          // For testing purposes: Going to admin dashboard
-           Positioned(
-            top: 690,
-            left: 45,
-            right: 45,
-            child: Container(
-              height: 65,
-              decoration: BoxDecoration(
-                color: const Color(0xFF348AA7),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: MaterialButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const AdminLoginPage()),
-                  );
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                child: const Text(
-                  'Admin Testing',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Kumbh Sans',
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Admin Testing button remove later
 
           // Bottom Links
           Positioned(

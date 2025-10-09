@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 
-class UserTravelRequirementsPage extends StatefulWidget {
-  const UserTravelRequirementsPage({super.key});
+class AdminUserManagement extends StatefulWidget {
+  const AdminUserManagement({super.key});
 
   @override
-  State<UserTravelRequirementsPage> createState() => _UserTravelRequirementsPageState();
+  State<AdminUserManagement> createState() => _AdminUserManagementState();
 }
 
-class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage> {
-  String selectedCountry = 'Japan';
-
+class _AdminUserManagementState extends State<AdminUserManagement> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +19,6 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
             height: double.infinity,
             color: const Color(0xFFD9D9D9),
           ),
-
           // Header Banner
           Positioned(
             top: 48,
@@ -35,23 +32,28 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // Menu Button
                     IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        // Handle menu tap
+                      },
                       icon: const Icon(
                         Icons.menu,
                         color: Color(0xFFF3F3F3),
                         size: 24,
                       ),
                     ),
+                    // Title
                     const Text(
-                      'Travel Requirements',
+                      'User Management',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 25,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Kumbh Sans',
                       ),
                     ),
+                    // Logo
                     Container(
                       width: 67,
                       height: 58,
@@ -71,56 +73,10 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
             ),
           ),
 
-          // Destination
-          Positioned(
-            top: 150,
-            left: 28,
-            right: 28,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Destination',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    fontFamily: 'Kumbh Sans',
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: DropdownButtonFormField<String>(
-                    value: selectedCountry,
-                    items: const [
-                      DropdownMenuItem(value: 'Japan', child: Text('Japan')),
-                      DropdownMenuItem(value: 'USA', child: Text('USA')),
-                      DropdownMenuItem(value: 'France', child: Text('France')),
-                      DropdownMenuItem(value: 'Poland', child: Text('Poland')),
-                      DropdownMenuItem(value: 'Germany', child: Text('Germany')),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        selectedCountry = value!;
-                      });
-                    },
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
 
           // Lists (Empty for now)
           Positioned(
-            top: 250,
+            top: 150,
             left: 28,
             right: 28,
             child: Column(
@@ -139,9 +95,9 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
                       Column(
                         children: [
                           Text(
-                            'Required Documents',
+                            'User List',
                             style: TextStyle(
-                              fontSize: 17,
+                              fontSize: 22,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Kumbh Sans',
                               color: Color(0xFF125E77),
@@ -169,65 +125,50 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
                   height: 60,
                   child: ElevatedButton(
                     onPressed: () {
-                      _handleAddToChecklist();
+                      _handleAddUser();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF125E77),
+                      backgroundColor: const Color.fromARGB(255, 70, 220, 15),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
                       ),
                       elevation: 0,
                     ),
                     child: const Text(
-                      'Add to My Checklist',
+                      'Add User',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Kumbh Sans',
                       ),
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
 
-          // Bottom Links
-          Positioned(
-            bottom: 32,
-            left: 33,
-            right: 33,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    // Handle Need Help navigation
-                  },
-                  child: const Text(
-                    'Need Help?',
-                    style: TextStyle(
-                      color: Color(0xFF348AA7),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: 'Kumbh Sans',
-                      decoration: TextDecoration.underline,
+                SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  height: 60,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _handleDeleteUser();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromARGB(217, 241, 5, 5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      elevation: 0,
                     ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    // Handle Send a Ticket navigation
-                  },
-                  child: const Text(
-                    'Send a Ticket',
-                    style: TextStyle(
-                      color: Color(0xFF348AA7),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: 'Kumbh Sans',
-                      decoration: TextDecoration.underline,
+                    child: const Text(
+                      'Delete User',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Kumbh Sans',
+                      ),
                     ),
                   ),
                 ),
@@ -239,7 +180,11 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
     );
   }
 
-  void _handleAddToChecklist() {
-    // Do nothing for now
+  void _handleAddUser(){
+    //Does nothing for now
+  }
+
+  void _handleDeleteUser(){
+    //Does nothing for now
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'admin_user_management.dart';
 
 class AdminDashboardPage extends StatelessWidget {
   const AdminDashboardPage({super.key});
@@ -101,7 +102,12 @@ class AdminDashboardPage extends StatelessWidget {
               children: [
                 _AdminActionButton(
                   text: 'User Management',
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const AdminUserManagement()),
+                    );
+                  },
                 ),
                 _AdminActionButton(
                   text: 'Travel Requirements\nConfiguration',

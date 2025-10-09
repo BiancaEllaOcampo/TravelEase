@@ -274,7 +274,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                     TextButton(
                       onPressed: () {
                         // Handle admin login
-                        _handleAdminLogin();
+                        _handleMasterLogin();
                       },
                       child: const Text(
                         'Login as Master',
@@ -364,7 +364,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
     // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserHomePage()));
   }
 
-  void _handleAdminLogin() {
+  void _handleMasterLogin() {
     // TODO: Navigate to admin login page
     _showSnackBar('Admin login not implemented yet');
   }
