@@ -45,6 +45,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
             ),
           ),
 
+          // Banner
           Positioned(
             top: 48,
             left: 0,
@@ -167,14 +168,14 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                           child: TextField(
                             controller: _emailController,
                             decoration: const InputDecoration(
-                              hintText: 'OMSIM@gmail.com',
+                              hintText: 'Enter your email',
                               hintStyle: TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
                                 fontFamily: 'Kumbh Sans',
                               ),
                               border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             ),
                             keyboardType: TextInputType.emailAddress,
                           ),
@@ -209,14 +210,14 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                             controller: _passwordController,
                             obscureText: _obscurePassword,
                             decoration: InputDecoration(
-                              hintText: '********************',
+                              hintText: 'Enter your password',
                               hintStyle: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
                                 fontFamily: 'Kumbh Sans',
                               ),
                               border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               suffixIcon: IconButton(
                                 onPressed: () {
                                   setState(() {
@@ -270,29 +271,11 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                     ),
                     
                     const SizedBox(height: 20),
-                    
-                    // Admin Login Link
-                    TextButton(
-                      onPressed: () {
-                        // Handle admin login
-                        _handleAdminLogin();
-                      },
-                      child: const Text(
-                        'Login as Admin/Master',
-                        style: TextStyle(
-                          color: Color(0xFF348AA7),
-                          fontSize: 17,
-                          fontWeight: FontWeight.normal,
-                          fontFamily: 'Kumbh Sans',
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
 
                     TextButton(
                       onPressed: () {
-                        // Handle admin login
-                        _handleAdminLogin();
+                        // Handle master login
+                        _handleMasterLogin();
                       },
                       child: const Text(
                         'Login as Master',
@@ -382,9 +365,9 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
     // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserHomePage()));
   }
 
-  void _handleAdminLogin() {
-    // TODO: Navigate to admin login page
-    _showSnackBar('Admin login not implemented yet');
+  void _handleMasterLogin() {
+    // TODO: Navigate to master login page
+    _showSnackBar('Master login not implemented yet');
   }
 
   void _showSnackBar(String message) {

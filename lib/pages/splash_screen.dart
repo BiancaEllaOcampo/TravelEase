@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'user_login.dart';
 import 'user_signup.dart';
-import 'admin_login.dart';
+import 'debug_page.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -180,40 +180,33 @@ class SplashScreen extends StatelessWidget {
             ),
           ),
 
-          // For testing purposes: Going to admin dashboard
-           Positioned(
-            top: 690,
-            left: 45,
-            right: 45,
+          // Debug Button (Small, discrete button for development)
+          Positioned(
+            top: 48,
+            right: 10,
             child: Container(
-              height: 65,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFF348AA7),
-                borderRadius: BorderRadius.circular(50),
+                color: Colors.red.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(20),
               ),
-              child: MaterialButton(
+              child: IconButton(
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const AdminLoginPage()),
+                    MaterialPageRoute(builder: (context) => const DebugPage()),
                   );
                 },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
+                icon: const Icon(
+                  Icons.bug_report,
+                  color: Colors.white,
+                  size: 20,
                 ),
-                child: const Text(
-                  'Admin Testing',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Kumbh Sans',
-                  ),
-                ),
+                padding: EdgeInsets.zero,
               ),
             ),
           ),
-          // Admin Testing button remove later
 
           // Bottom Links
           Positioned(
