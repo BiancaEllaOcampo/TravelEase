@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'admin_login.dart';
+import 'user_homepage.dart';
 
 class UserLoginPage extends StatefulWidget {
   const UserLoginPage({super.key});
@@ -357,7 +358,7 @@ class _UserLoginPageState extends State<UserLoginPage> {
     _showSnackBar('Login successful!');
     
     // Navigate to homepage or next screen
-    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserHomePage()));
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserHomePage()));
   }
 
   void _handleAdminLogin() {
