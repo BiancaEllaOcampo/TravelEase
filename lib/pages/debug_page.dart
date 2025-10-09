@@ -5,6 +5,9 @@ import 'user_signup.dart';
 import 'user_homepage.dart';
 import 'template.dart';
 import 'admin_login.dart';
+import 'admin_dashboard.dart';
+import 'admin_user_management.dart';
+import 'user_travel_requirments.dart';
 
 class DebugPage extends StatelessWidget {
   const DebugPage({super.key});
@@ -102,6 +105,39 @@ class DebugPage extends StatelessWidget {
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const TemplatePage()),
+              ),
+            ),
+            
+            _buildDebugButton(
+              context,
+              'Admin Dashboard',
+              'Administrator overview and actions',
+              Icons.dashboard_customize,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'Admin User Management',
+              'Manage users (add/delete)',
+              Icons.group,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AdminUserManagement()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'Travel Requirements',
+              'Configure/view travel requirements',
+              Icons.rule,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UserTravelRequirementsPage()),
               ),
             ),
             
