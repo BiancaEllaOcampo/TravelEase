@@ -25,7 +25,7 @@ class UserHomePage extends StatelessWidget {
                   icon: const Icon(
                     Icons.menu,
                     color: Color(0xFFF3F3F3),
-                    size: 24,
+                    size: 40,
                   ),
                 ),
                 
@@ -73,7 +73,7 @@ class UserHomePage extends StatelessWidget {
           
           // Welcome Message
           Positioned(
-            top: 31, // Reduced gap - was 161 + 48, now much closer to banner
+            top: 31,
             left: 36,
             child: RichText(
               text: const TextSpan(
@@ -102,7 +102,7 @@ class UserHomePage extends StatelessWidget {
           
           // User Alert Card
           Positioned(
-            top: 76, // Reduced gap - was 206 + 48, now much closer
+            top: 76,
             left: 34,
             right: 34,
             child: Container(
@@ -110,6 +110,10 @@ class UserHomePage extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: const Color(0xFF348AA7),
+                  width: 2,
+                ),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.1),
@@ -187,7 +191,7 @@ class UserHomePage extends StatelessWidget {
           
           // Travel Requirements Button
           Positioned(
-            top: 329, // Reduced gap - was 459 + 48, now properly spaced
+            top: 329,
             left: 34,
             right: 34,
             child: _buildFeatureButton(
@@ -204,7 +208,7 @@ class UserHomePage extends StatelessWidget {
           
           // Documents Checklist Button
           Positioned(
-            top: 445, // Reduced gap - was 575 + 48, now properly spaced
+            top: 445,
             left: 34,
             right: 34,
             child: _buildFeatureButton(
@@ -220,7 +224,7 @@ class UserHomePage extends StatelessWidget {
           
           // View My Documents Button
           Positioned(
-            top: 561, // Reduced gap - was 691 + 48, now properly spaced
+            top: 561,
             left: 34,
             right: 34,
             child: _buildFeatureButton(
@@ -236,7 +240,7 @@ class UserHomePage extends StatelessWidget {
           
           // View AI Feedback Button
           Positioned(
-            top: 677, // Reduced gap - was 807 + 48, now properly spaced
+            top: 677,
             left: 34,
             right: 34,
             child: _buildFeatureButton(

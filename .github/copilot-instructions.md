@@ -12,6 +12,32 @@ All pages use **Stack-based absolute positioning** instead of standard Flutter l
 - UI elements positioned with specific `Positioned` widgets and fixed coordinates
 - Cards and buttons use precise pixel positioning (e.g., `top: 255, left: 30, right: 30`)
 
+#### Card Styling Pattern
+```dart
+// Standard card container with blue border
+Container(
+  decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(10),
+    border: Border.all(
+      color: const Color(0xFF348AA7),
+      width: 2,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: Colors.black.withOpacity(0.1),
+        blurRadius: 8,
+        offset: const Offset(0, 2),
+      ),
+    ],
+  ),
+  child: Padding(
+    padding: const EdgeInsets.all(16),
+    child: /* card content */,
+  ),
+)
+```
+
 Example from `template.dart` and `splash_screen.dart`:
 ```dart
 Positioned(
@@ -38,12 +64,16 @@ Positioned(
 - **Title Text**: 25px, FontWeight.bold, white on dark backgrounds
 - **Body Text**: 16-20px, varies by context
 - **Button Text**: 20-25px, FontWeight.bold, white
+- **Welcome Text**: RichText with emphasized user name in bold
+- **Feature Text**: 18px titles, 14px descriptions with grey[600] color
 
 ### Navigation Pattern
 - Uses basic `Navigator.push/pop` - no named routes or advanced routing
 - Back buttons are custom 60x60 white containers with black arrow icons
 - Each page includes a debug-accessible `DebugPage` for development navigation
 - Pages import their direct navigation targets (no central router)
+- User homepage uses custom AppBar with menu, title, and logo layout
+- Feature navigation uses list-style buttons with icons and descriptions
 
 ## Development Workflow
 
@@ -91,9 +121,11 @@ const Text(
 )
 ```
 
-### Button Styling Pattern
+### Button Styling Patterns
+
+#### Primary Action Buttons
 ```dart
-// Standard button container pattern used throughout
+// Standard button container pattern for primary actions
 Container(
   height: 65,
   decoration: BoxDecoration(
@@ -106,6 +138,48 @@ Container(
       borderRadius: BorderRadius.circular(50),
     ),
     child: const Text(/* button text */),
+  ),
+)
+```
+
+#### Feature Buttons (List Style)
+```dart
+// Feature button pattern used in user homepage
+ElevatedButton(
+  onPressed: onPressed,
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.white,
+    foregroundColor: const Color(0xFF125E77),
+    padding: const EdgeInsets.all(16),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+      side: const BorderSide(color: Color(0xFF348AA7), width: 2),
+    ),
+    elevation: 3,
+  ),
+  child: Row(
+    children: [
+      // Icon container with background
+      Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFF348AA7).withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, color: const Color(0xFF348AA7), size: 28),
+      ),
+      const SizedBox(width: 16),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: /* title style */),
+            Text(description, style: /* description style */),
+          ],
+        ),
+      ),
+      const Icon(Icons.arrow_forward_ios, color: Color(0xFF348AA7)),
+    ],
   ),
 )
 ```
