@@ -24,6 +24,45 @@ class _UserLoginPageState extends State<UserLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(130),
+        child: Container(
+          height: 130,
+          color: const Color(0xFF125E77),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 48, left: 24, right: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Welcome to TravelEase',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Kumbh Sans',
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 67,
+                  height: 58,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFF348AA7),
+                  ),
+                  child: const Icon(
+                    Icons.airplanemode_active,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
       body: Stack(
         children: [
           // Background
@@ -35,7 +74,7 @@ class _UserLoginPageState extends State<UserLoginPage> {
           
           // Transparent overlay
           Positioned(
-            top: 82,
+            top: 0, // Start from top since AppBar handles the banner
             left: 6,
             right: 6,
             bottom: 0,
@@ -46,52 +85,9 @@ class _UserLoginPageState extends State<UserLoginPage> {
             ),
           ),
 
-          // Banner
-          Positioned(
-            top: 48,
-            left: 0,
-            right: 0,
-            height: 82,
-            child: Container(
-              color: const Color(0xFF125E77),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        'Welcome to TravelEase',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Kumbh Sans',
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 67,
-                      height: 58,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFF348AA7),
-                      ),
-                      child: const Icon(
-                        Icons.airplanemode_active,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          
             // Back Button
             Positioned(
-            top: 180,
+            top: 50, // Reduced gap - was 180 - 48, now properly positioned
             left: 30,
             child: Container(
               width: 60,
@@ -116,7 +112,7 @@ class _UserLoginPageState extends State<UserLoginPage> {
           
           // Main Login Card
           Positioned(
-            top: 255,
+            top: 125, // Reduced gap - was 255 - 48, now properly positioned
             left: 30,
             right: 30,
             child: Container(
@@ -290,7 +286,7 @@ class _UserLoginPageState extends State<UserLoginPage> {
               ),
             ),
           ),
-          
+
         ],
       ),
     );

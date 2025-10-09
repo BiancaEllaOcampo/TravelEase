@@ -1,79 +1,79 @@
 import 'package:flutter/material.dart';
 import 'user_travel_requirments.dart';
+
 class UserHomePage extends StatelessWidget {
   const UserHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // Background
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: const Color(0xFFD9D9D9),
-          ),
-          
-          // Header Banner
-          Positioned(
-            top: 48,
-            left: 0,
-            right: 0,
-            height: 82,
-            child: Container(
-              color: const Color(0xFF125E77),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 22),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Menu Button
-                    IconButton(
-                      onPressed: () {
-                        // Handle menu tap
-                      },
-                      icon: const Icon(
-                        Icons.menu,
-                        color: Color(0xFFF3F3F3),
-                        size: 24,
-                      ),
-                    ),
-                    
-                    // Title
-                    const Text(
-                      'TravelEase',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Kumbh Sans',
-                      ),
-                    ),
-                    
-                    // Logo
-                    Container(
-                      width: 67,
-                      height: 58,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFF348AA7),
-                      ),
-                      child: const Icon(
-                        Icons.airplanemode_active,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                  ],
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(130),
+        child: Container(
+          height: 130,
+          color: const Color(0xFF125E77),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 48, left: 22, right: 22),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Menu Button
+                IconButton(
+                  onPressed: () {
+                    // Handle menu tap
+                  },
+                  icon: const Icon(
+                    Icons.menu,
+                    color: Color(0xFFF3F3F3),
+                    size: 24,
+                  ),
                 ),
-              ),
+                
+                // Title
+                const Text(
+                  'TravelEase',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Kumbh Sans',
+                  ),
+                ),
+                
+                // Logo
+                Container(
+                  width: 67,
+                  height: 58,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFF348AA7),
+                  ),
+                  child: const Icon(
+                    Icons.airplanemode_active,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ],
             ),
           ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height + 200, // Extra height for scrolling
+          child: Stack(
+            children: [
+              // Background
+              Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: const Color(0xFFD9D9D9),
+              ),
           
           // Welcome Message
           Positioned(
-            top: 161,
+            top: 31, // Reduced gap - was 161 + 48, now much closer to banner
             left: 36,
             child: RichText(
               text: const TextSpan(
@@ -102,7 +102,7 @@ class UserHomePage extends StatelessWidget {
           
           // User Alert Card
           Positioned(
-            top: 206,
+            top: 76, // Reduced gap - was 206 + 48, now much closer
             left: 34,
             right: 34,
             child: Container(
@@ -187,128 +187,66 @@ class UserHomePage extends StatelessWidget {
           
           // Travel Requirements Button
           Positioned(
-            top: 459,
-            left: 47,
-            right: 53,
-            child: Container(
-              height: 65,
-              decoration: BoxDecoration(
-                color: const Color(0xFF348AA7),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: MaterialButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const UserTravelRequirementsPage()),
-                  );
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                child: const Text(
-                  'Travel Requirements',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Kumbh Sans',
-                  ),
-                ),
+            top: 329, // Reduced gap - was 459 + 48, now properly spaced
+            left: 34,
+            right: 34,
+            child: _buildFeatureButton(
+              context,
+              'Travel Requirements',
+              'Check requirements for your destination',
+              Icons.flight_takeoff,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UserTravelRequirementsPage()),
               ),
             ),
           ),
           
           // Documents Checklist Button
           Positioned(
-            top: 545,
-            left: 48,
-            right: 52,
-            child: Container(
-              height: 65,
-              decoration: BoxDecoration(
-                color: const Color(0xFF348AA7),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: MaterialButton(
-                onPressed: () {
-                  // Handle documents checklist navigation
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                child: const Text(
-                  'Documents Checklist',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Kumbh Sans',
-                  ),
-                ),
-              ),
+            top: 445, // Reduced gap - was 575 + 48, now properly spaced
+            left: 34,
+            right: 34,
+            child: _buildFeatureButton(
+              context,
+              'Documents Checklist',
+              'Create and manage your travel document checklist',
+              Icons.checklist_rtl,
+              () {
+                // Handle documents checklist navigation
+              },
             ),
           ),
           
           // View My Documents Button
           Positioned(
-            top: 631,
-            left: 50,
-            right: 50,
-            child: Container(
-              height: 65,
-              decoration: BoxDecoration(
-                color: const Color(0xFF348AA7),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: MaterialButton(
-                onPressed: () {
-                  // Handle view documents navigation
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                child: const Text(
-                  'View My Documents',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Kumbh Sans',
-                  ),
-                ),
-              ),
+            top: 561, // Reduced gap - was 691 + 48, now properly spaced
+            left: 34,
+            right: 34,
+            child: _buildFeatureButton(
+              context,
+              'View My Documents',
+              'Access your uploaded documents and verification status',
+              Icons.folder_open,
+              () {
+                // Handle view documents navigation
+              },
             ),
           ),
           
           // View AI Feedback Button
           Positioned(
-            top: 717,
-            left: 50,
-            right: 50,
-            child: Container(
-              height: 65,
-              decoration: BoxDecoration(
-                color: const Color(0xFF348AA7),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: MaterialButton(
-                onPressed: () {
-                  // Handle AI feedback navigation
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                child: const Text(
-                  'View AI Feedback',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Kumbh Sans',
-                  ),
-                ),
-              ),
+            top: 677, // Reduced gap - was 807 + 48, now properly spaced
+            left: 34,
+            right: 34,
+            child: _buildFeatureButton(
+              context,
+              'View AI Feedback',
+              'Get AI-powered insights on your documents',
+              Icons.psychology,
+              () {
+                // Handle AI feedback navigation
+              },
             ),
           ),
           
@@ -352,6 +290,80 @@ class UserHomePage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeatureButton(
+    BuildContext context,
+    String title,
+    String description,
+    IconData icon,
+    VoidCallback onPressed,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: const Color(0xFF125E77),
+          padding: const EdgeInsets.all(16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: Color(0xFF348AA7), width: 2),
+          ),
+          elevation: 3,
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF348AA7).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: const Color(0xFF348AA7),
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF125E77),
+                      fontFamily: 'Kumbh Sans',
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                      fontFamily: 'Kumbh Sans',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Color(0xFF348AA7),
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }

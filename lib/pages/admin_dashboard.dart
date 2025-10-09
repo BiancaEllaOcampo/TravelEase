@@ -7,6 +7,51 @@ class AdminDashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(130),
+        child: Container(
+          height: 130,
+          color: const Color(0xFF125E77),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 48, left: 22, right: 22),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(
+                    Icons.menu,
+                    color: Color(0xFFF3F3F3),
+                    size: 24,
+                  ),
+                ),
+                const Text(
+                  'TravelEase',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Kumbh Sans',
+                  ),
+                ),
+                Container(
+                  width: 67,
+                  height: 58,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFF348AA7),
+                  ),
+                  child: const Icon(
+                    Icons.airplanemode_active,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
       body: Stack(
         children: [
           // Background
@@ -16,58 +61,9 @@ class AdminDashboardPage extends StatelessWidget {
             color: const Color(0xFFD9D9D9),
           ),
 
-          // Header Banner
-          Positioned(
-            top: 48,
-            left: 0,
-            right: 0,
-            height: 82,
-            child: Container(
-              color: const Color(0xFF125E77),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 22),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.menu,
-                        color: Color(0xFFF3F3F3),
-                        size: 24,
-                      ),
-                    ),
-                    const Text(
-                      'TravelEase',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Kumbh Sans',
-                      ),
-                    ),
-                    Container(
-                      width: 67,
-                      height: 58,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFF348AA7),
-                      ),
-                      child: const Icon(
-                        Icons.airplanemode_active,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
           // Stats Cards
           Positioned(
-            top: 150,
+            top: 20, // Reduced gap - was 150 - 48, now properly positioned after AppBar
             left: 0,
             right: 0,
             child: Column(
@@ -95,7 +91,7 @@ class AdminDashboardPage extends StatelessWidget {
 
           // Admin Action Buttons
           Positioned(
-            top: 450,
+            top: 320, // Reduced gap - was 450 - 48, now properly positioned
             left: 0,
             right: 0,
             child: Column(

@@ -9,6 +9,45 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(130),
+        child: Container(
+          height: 130,
+          color: const Color(0xFF125E77),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 48, left: 24, right: 24),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Welcome to TravelEase',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Kumbh Sans',
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 67,
+                  height: 58,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFF348AA7),
+                  ),
+                  child: const Icon(
+                    Icons.airplanemode_active,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
       body: Stack(
         children: [
           // Background
@@ -20,7 +59,7 @@ class SplashScreen extends StatelessWidget {
           
           // Background Image with opacity
           Positioned(
-            top: 82,
+            top: 0, // Start from top since AppBar now handles the banner
             left: 0,
             right: 0,
             height: 835,
@@ -37,53 +76,9 @@ class SplashScreen extends StatelessWidget {
             ),
           ),
           
-          
-          // Banner
-          Positioned(
-            top: 48,
-            left: 0,
-            right: 0,
-            height: 82,
-            child: Container(
-              color: const Color(0xFF125E77),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        'Welcome to TravelEase',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 25,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Kumbh Sans',
-                        ),
-                      ),
-                    ),
-                    Container(
-                      width: 67,
-                      height: 58,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFF348AA7),
-                      ),
-                      child: const Icon(
-                        Icons.airplanemode_active,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          
           // Main Tagline
           Positioned(
-            top: 250,
+            top: 120, // Reduced gap - was 250 + 48, now properly positioned
             left: 50,
             right: 50,
             child: Container(
@@ -110,7 +105,7 @@ class SplashScreen extends StatelessWidget {
           
           // Login Button
           Positioned(
-            top: 512,
+            top: 382, // Reduced gap - was 512 + 48, now properly positioned
             left: 45,
             right: 45,
             child: Container(
@@ -148,7 +143,7 @@ class SplashScreen extends StatelessWidget {
           
           // Create Account Button
           Positioned(
-            top: 614,
+            top: 484, // Reduced gap - was 614 + 48, now properly positioned
             left: 45,
             right: 45,
             child: Container(
@@ -182,7 +177,7 @@ class SplashScreen extends StatelessWidget {
 
           // Debug Button (Small, discrete button for development)
           Positioned(
-            top: 48,
+            top: 10, // Position relative to AppBar content area
             right: 10,
             child: Container(
               width: 40,
