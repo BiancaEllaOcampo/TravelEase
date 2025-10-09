@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'user_login.dart';
 import 'user_signup.dart';
+import 'debug_page.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -175,6 +176,34 @@ class SplashScreen extends StatelessWidget {
                     fontFamily: 'Kumbh Sans',
                   ),
                 ),
+              ),
+            ),
+          ),
+
+          // Debug Button (Small, discrete button for development)
+          Positioned(
+            top: 48,
+            right: 10,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.7),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const DebugPage()),
+                  );
+                },
+                icon: const Icon(
+                  Icons.bug_report,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                padding: EdgeInsets.zero,
               ),
             ),
           ),

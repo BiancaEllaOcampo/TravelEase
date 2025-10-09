@@ -46,6 +46,7 @@ class _UserLoginPageState extends State<UserLoginPage> {
             ),
           ),
 
+          // Banner
           Positioned(
             top: 48,
             left: 0,
@@ -168,14 +169,14 @@ class _UserLoginPageState extends State<UserLoginPage> {
                           child: TextField(
                             controller: _emailController,
                             decoration: const InputDecoration(
-                              hintText: 'dr.house@gmail.com',
+                              hintText: 'Enter your email',
                               hintStyle: TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
                                 fontFamily: 'Kumbh Sans',
                               ),
                               border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                             ),
                             keyboardType: TextInputType.emailAddress,
                           ),
@@ -210,14 +211,14 @@ class _UserLoginPageState extends State<UserLoginPage> {
                             controller: _passwordController,
                             obscureText: _obscurePassword,
                             decoration: InputDecoration(
-                              hintText: '********************',
+                              hintText: 'Enter your password',
                               hintStyle: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
                                 fontFamily: 'Kumbh Sans',
                               ),
                               border: InputBorder.none,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                               suffixIcon: IconButton(
                                 onPressed: () {
                                   setState(() {
@@ -362,9 +363,9 @@ class _UserLoginPageState extends State<UserLoginPage> {
 
   void _handleAdminLogin() {
     Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const AdminLoginPage()),
-  );
+      context,
+      MaterialPageRoute(builder: (context) => const AdminLoginPage()),
+    );
   }
 
   void _showSnackBar(String message) {
