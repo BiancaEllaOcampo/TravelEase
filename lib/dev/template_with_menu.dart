@@ -96,3 +96,18 @@ class TemplateWithMenuPage extends StatelessWidget {
     );
   }
 }
+
+// Todo: Implement the actual menu bar functionality
+class MenuBar extends StatefulWidget {
+  const MenuBar({super.key});
+
+  @override
+  State<MenuBar> createState() => _MenuBarState();
+}
+
+class _MenuBarState extends State<MenuBar> {
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}
