@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../dev/template_with_menu.dart';
+import '../../dev/template_with_menu.dart';
 
 class UserTravelRequirementsPage extends StatefulWidget {
   const UserTravelRequirementsPage({super.key});

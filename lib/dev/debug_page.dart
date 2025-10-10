@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import '../pages/splash_screen.dart';
-import '../pages/user_login.dart';
-import '../pages/user_signup.dart';
-import '../pages/user_homepage.dart';
+import '../pages/user/user_login.dart';
+import '../pages/user/user_signup.dart';
+import '../pages/user/user_homepage.dart';
 import 'template.dart';
 import 'template_with_menu.dart';
-import '../pages/admin_login.dart';
-import '../pages/admin_dashboard.dart';
-import '../pages/admin_user_management.dart';
-import '../pages/user_travel_requirments.dart';
+import '../pages/admin/admin_login.dart';
+import '../pages/admin/admin_dashboard.dart';
+import '../pages/admin/admin_user_management.dart';
+import '../pages/user/user_travel_requirments.dart';
 
 class DebugPage extends StatelessWidget {
   const DebugPage({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'user_login.dart';
-import 'user_signup.dart';
+import 'user/user_login.dart';
+import 'user/user_signup.dart';
 import '../dev/debug_page.dart';
 
 class SplashScreen extends StatelessWidget {
