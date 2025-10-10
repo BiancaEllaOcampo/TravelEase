@@ -6,6 +6,7 @@ class TemplateWithMenuPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const TravelEaseDrawer(),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(130),
         child: Container(
@@ -16,16 +17,19 @@ class TemplateWithMenuPage extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Menu Button (matches style in user_homepage.dart)
-                IconButton(
-                  onPressed: () {
-                    // TODO: open drawer or menu
+                Builder(
+                  builder: (BuildContext context) {
+                    return IconButton(
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                      icon: const Icon(
+                        Icons.menu,
+                        color: Color(0xFFF3F3F3),
+                        size: 50,
+                      ),
+                    );
                   },
-                  icon: const Icon(
-                    Icons.menu,
-                    color: Color(0xFFF3F3F3),
-                    size: 50,
-                  ),
                 ),
 
                 // Title
@@ -97,17 +101,222 @@ class TemplateWithMenuPage extends StatelessWidget {
   }
 }
 
-// Todo: Implement the actual menu bar functionality
-class MenuBar extends StatefulWidget {
-  const MenuBar({super.key});
+// TravelEase Drawer Menu
+class TravelEaseDrawer extends StatelessWidget {
+  const TravelEaseDrawer({super.key});
 
-  @override
-  State<MenuBar> createState() => _MenuBarState();
-}
-
-class _MenuBarState extends State<MenuBar> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Drawer(
+      width: 340,
+      backgroundColor: const Color(0xFF125E77),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // Header with logo and title
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.menu,
+                    color: Colors.white,
+                    size: 50,
+                  ),
+                  const SizedBox(width: 16),
+                  const Text(
+                    'TravelEase',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Kumbh Sans',
+                    ),
+                  ),
+                  const Spacer(),
+                ],
+              ),
+            ),
+            
+            const Divider(color: Colors.white24, height: 1),
+            
+            // Menu Items
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  _buildMenuItem(
+                    context,
+                    'Home',
+                    Icons.home_outlined,
+                    () {
+                      Navigator.pop(context);
+                      // TODO: Navigate to home
+                    },
+                  ),
+                  _buildMenuItem(
+                    context,
+                    'My Profile',
+                    Icons.person_outline,
+                    () {
+                      Navigator.pop(context);
+                      // TODO: Navigate to profile
+                    },
+                    badgeCount: 3,
+                  ),
+                  _buildMenuItem(
+                    context,
+                    'View My Documents',
+                    Icons.folder_open_outlined,
+                    () {
+                      Navigator.pop(context);
+                      // TODO: Navigate to documents
+                    },
+                  ),
+                  _buildMenuItem(
+                    context,
+                    'Travel Requirements',
+                    Icons.flight_takeoff,
+                    () {
+                      Navigator.pop(context);
+                      // TODO: Navigate to travel requirements
+                    },
+                  ),
+                  _buildMenuItem(
+                    context,
+                    'Announcements',
+                    Icons.campaign_outlined,
+                    () {
+                      Navigator.pop(context);
+                      // TODO: Navigate to announcements
+                    },
+                  ),
+                  _buildMenuItem(
+                    context,
+                    'Feedback',
+                    Icons.feedback_outlined,
+                    () {
+                      Navigator.pop(context);
+                      // TODO: Navigate to feedback
+                    },
+                  ),
+                  _buildMenuItem(
+                    context,
+                    'Support',
+                    Icons.help_outline,
+                    () {
+                      Navigator.pop(context);
+                      // TODO: Navigate to support
+                    },
+                  ),
+                  _buildMenuItem(
+                    context,
+                    'Settings',
+                    Icons.settings_outlined,
+                    () {
+                      Navigator.pop(context);
+                      // TODO: Navigate to settings
+                    },
+                  ),
+                  _buildMenuItem(
+                    context,
+                    'Privacy Policy',
+                    Icons.privacy_tip_outlined,
+                    () {
+                      Navigator.pop(context);
+                      // TODO: Navigate to privacy policy
+                    },
+                  ),
+                  _buildMenuItem(
+                    context,
+                    'Terms of Service',
+                    Icons.description_outlined,
+                    () {
+                      Navigator.pop(context);
+                      // TODO: Navigate to terms
+                    },
+                  ),
+                ],
+              ),
+            ),
+            
+            // Log Out Button at bottom
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    // TODO: Implement logout
+                  },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: const Text(
+                    'Log Out',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Kumbh Sans',
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(
+    BuildContext context,
+    String title,
+    IconData icon,
+    VoidCallback onTap, {
+    int? badgeCount,
+  }) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: Colors.white,
+        size: 24,
+      ),
+      title: Row(
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontFamily: 'Kumbh Sans',
+            ),
+          ),
+          if (badgeCount != null) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: const BoxDecoration(
+                color: Color(0xFFE53935),
+                shape: BoxShape.circle,
+              ),
+              child: Text(
+                badgeCount.toString(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Kumbh Sans',
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+    );
   }
 }
