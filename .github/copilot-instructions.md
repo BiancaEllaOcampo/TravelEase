@@ -1,28 +1,98 @@
 # TravelEase AI Coding Instructions
 
 ## Project Overview
-TravelEase is a Flutter mobile app for Philippine travel document verification with AI-assisted checklist systems. Primary development target is Android, with iOS structure present but not actively developed.
+Flutter mobile app for Philippine travel document verification with AI-assisted checklists. **Android-first** development (iOS structure exists but inactive). Pure Flutter - no external packages for auth/networking yet.
 
-## Architecture & Design Patterns
+## Critical Architecture Decisions
 
-### UI Layout Strategy
-All pages use **Stack-based absolute positioning** instead of standard Flutter layouts:
-- Background container fills entire screen with `Color(0xFFD9D9D9)`
-- Banner positioned at `top: 48, height: 82` with brand colors
-- UI elements positioned with specific `Positioned` widgets and fixed coordinates
-- Cards and buttons use precise pixel positioning (e.g., `top: 255, left: 30, right: 30`)
-
-#### Card Styling Pattern
+### Stack-Based Absolute Positioning (Not Standard Flutter Layouts!)
+Every page uses `Stack` with `Positioned` widgets instead of Column/Row:
 ```dart
-// Standard card container with blue border
+// From template.dart - all pages follow this structure
+Stack(
+  children: [
+    Container(color: Color(0xFFD9D9D9)), // Full-screen background
+    Positioned(top: 50, left: 30, child: /* Back button */),
+    Positioned(top: 125, left: 30, right: 30, child: /* Content card */),
+  ],
+)
+```
+**Why**: Design requires pixel-perfect positioning. Don't refactor to Column/ListView without understanding this constraint.
+
+### AppBar Pattern (Not Using Standard AppBar)
+Uses `PreferredSize` widget for custom 130px header:
+```dart
+appBar: PreferredSize(
+  preferredSize: const Size.fromHeight(130),
+  child: Container(
+    height: 130,
+    color: const Color(0xFF125E77), // Primary dark color
+    child: Padding(
+      padding: const EdgeInsets.only(top: 48, left: 24, right: 24),
+      child: Row(/* Title, logo, menu button */),
+    ),
+  ),
+)
+```
+
+### Brand Colors (Hard-coded, No Theme)
+- `0xFF125E77`: Dark teal (headers, titles)  
+- `0xFF348AA7`: Light teal (buttons, borders, accents)  
+- `0xFFD9D9D9`: Light gray (backgrounds)  
+- `0xFFA54547`: Red (alerts/destructive actions)
+
+**Don't use `Theme.of(context).primaryColor`** - colors are directly specified throughout codebase.
+
+## Development Workflow
+
+### Creating New Pages
+1. Copy `lib/dev/template.dart` (simple) or `template_with_menu.dart` (with drawer)
+2. Adjust `Positioned` coordinates for your content
+3. Add navigation entry to `lib/dev/debug_page.dart` for testing
+4. Import in source pages that navigate to it
+
+### Debug Navigation
+- `lib/dev/debug_page.dart`: Central navigation hub during development
+- Access via red button in top-right of `splash_screen.dart`
+- **Remove before production**: Delete debug button and `debug_page.dart` imports
+
+### Running the App
+```bash
+flutter pub get              # Install dependencies
+flutter run                  # Run on connected Android device/emulator
+flutter run -d <device-id>   # If multiple devices
+flutter build apk            # Build Android APK
+```
+
+No tests exist yet (`test/` directory doesn't exist).
+
+## Code Patterns You'll See Everywhere
+
+### Back Button Pattern
+```dart
+Positioned(
+  top: 50, left: 30,
+  child: Container(
+    width: 60, height: 60,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: IconButton(
+      onPressed: () => Navigator.pop(context),
+      icon: const Icon(Icons.arrow_back, color: Colors.black),
+    ),
+  ),
+)
+```
+
+### Card Container Pattern
+```dart
 Container(
   decoration: BoxDecoration(
     color: Colors.white,
     borderRadius: BorderRadius.circular(10),
-    border: Border.all(
-      color: const Color(0xFF348AA7),
-      width: 2,
-    ),
+    border: Border.all(color: const Color(0xFF348AA7), width: 2),
     boxShadow: [
       BoxShadow(
         color: Colors.black.withOpacity(0.1),
@@ -31,200 +101,45 @@ Container(
       ),
     ],
   ),
-  child: Padding(
-    padding: const EdgeInsets.all(16),
-    child: /* card content */,
-  ),
+  child: Padding(padding: const EdgeInsets.all(16), child: /* content */),
 )
 ```
 
-Example from `template.dart` and `splash_screen.dart`:
+### Form State Management
+- Uses `StatefulWidget` + `TextEditingController` (no Provider/Riverpod/Bloc)
+- Validation is inline in button `onPressed` handlers
+- User feedback via `ScaffoldMessenger.of(context).showSnackBar()`
+- Example: `lib/pages/user_login.dart`
+
+### Navigation (No Named Routes)
 ```dart
-Positioned(
-  top: 48,
-  left: 0,
-  right: 0,
-  height: 82,
-  child: Container(
-    color: const Color(0xFF125E77),
-    // Banner content
-  ),
-),
+// Direct MaterialPageRoute - used everywhere
+Navigator.push(
+  context,
+  MaterialPageRoute(builder: (context) => const UserHomePage()),
+);
 ```
 
-### Color Scheme (Consistent Across All Pages)
-- Primary dark: `Color(0xFF125E77)` (headers, titles)
-- Primary light: `Color(0xFF348AA7)` (buttons, accents)
-- Background: `Color(0xFFD9D9D9)` (light gray)
-- Alert/Error: `Color(0xFFA54547)` (red for important actions)
-- Text: White on colored backgrounds, black/dark on light backgrounds
+## Key Files
+- `lib/main.dart`: Entry point, sets global font to 'Kumbh Sans', routes to `SplashScreen`
+- `lib/pages/splash_screen.dart`: Landing page with login/signup buttons
+- `lib/dev/debug_page.dart`: Dev-only navigation menu (remove for production)
+- `lib/dev/template.dart`: Template for new pages
+- `lib/pages/user_*.dart`: User-facing pages (login, signup, homepage, travel requirements)
+- `lib/pages/admin_*.dart`: Admin pages (login, dashboard, user management)
 
-### Typography Standards
-- **Font Family**: 'Kumbh Sans' (set globally in `main.dart`)
-- **Title Text**: 25px, FontWeight.bold, white on dark backgrounds
-- **Body Text**: 16-20px, varies by context
-- **Button Text**: 20-25px, FontWeight.bold, white
-- **Welcome Text**: RichText with emphasized user name in bold
-- **Feature Text**: 18px titles, 14px descriptions with grey[600] color
+## Important Constraints
+- **No backend integration yet**: Forms have TODO comments where API calls should go
+- **No state management library**: Just StatefulWidget + local controllers
+- **No routing library**: Direct Navigator.push everywhere
+- **No database/persistence**: All data is ephemeral
+- **iOS not tested**: Android emulator/device only
+- **Typography**: 'Kumbh Sans' font family hardcoded in all TextStyle widgets (set globally but also repeated locally)
 
-### Navigation Pattern
-- Uses basic `Navigator.push/pop` - no named routes or advanced routing
-- Back buttons are custom 60x60 white containers with black arrow icons
-- Each page includes a debug-accessible `DebugPage` for development navigation
-- Pages import their direct navigation targets (no central router)
-- User homepage uses custom AppBar with menu, title, and logo layout
-- Feature navigation uses list-style buttons with icons and descriptions
-
-## Development Workflow
-
-### Page Creation Process
-1. Start with `template.dart` as the base structure
-2. Copy the Stack layout with background, banner, and back button
-3. Add page-specific content using `Positioned` widgets
-4. Update banner text and add page to `debug_page.dart` for testing
-5. Import new page in relevant navigation source files
-
-### Debug & Development
-- `debug_page.dart` provides navigation to all pages during development
-- Red debug button in top-right of splash screen (remove for production)
-- All form interactions show placeholder `TODO:` comments for backend integration
-- SnackBar pattern used for user feedback (see `user_login.dart`)
-
-### State Management
-- Currently uses basic StatefulWidget for forms
-- TextEditingController pattern for input fields
-- No external state management (Redux, Provider, etc.) implemented yet
-- Form validation is inline within button handlers
-
-## Key Files & Structure
-
-- `lib/main.dart`: App entry point, theme configuration, routes to SplashScreen
-- `lib/pages/splash_screen.dart`: Landing page with login/signup options
-- `lib/pages/debug_page.dart`: Development navigation hub (remove for production)
-- `lib/pages/template.dart`: Base template for new page creation
-- `lib/pages/user_*.dart`: User-facing authentication and main app pages
-- `lib/pages/admin_*.dart`: Administrative interface pages
-
-## Code Style & Patterns
-
-### Widget Organization
-```dart
-// Always use const constructors where possible
-const Text(
-  'Welcome to TravelEase',
-  style: TextStyle(
-    color: Colors.white,
-    fontSize: 25,
-    fontWeight: FontWeight.bold,
-    fontFamily: 'Kumbh Sans',
-  ),
-)
-```
-
-### Button Styling Patterns
-
-#### Primary Action Buttons
-```dart
-// Standard button container pattern for primary actions
-Container(
-  height: 65,
-  decoration: BoxDecoration(
-    color: const Color(0xFF348AA7),
-    borderRadius: BorderRadius.circular(50),
-  ),
-  child: MaterialButton(
-    onPressed: () { /* handler */ },
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(50),
-    ),
-    child: const Text(/* button text */),
-  ),
-)
-```
-
-#### Feature Buttons (List Style)
-```dart
-// Feature button pattern used in user homepage
-ElevatedButton(
-  onPressed: onPressed,
-  style: ElevatedButton.styleFrom(
-    backgroundColor: Colors.white,
-    foregroundColor: const Color(0xFF125E77),
-    padding: const EdgeInsets.all(16),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-      side: const BorderSide(color: Color(0xFF348AA7), width: 2),
-    ),
-    elevation: 3,
-  ),
-  child: Row(
-    children: [
-      // Icon container with background
-      Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: const Color(0xFF348AA7).withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(icon, color: const Color(0xFF348AA7), size: 28),
-      ),
-      const SizedBox(width: 16),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: /* title style */),
-            Text(description, style: /* description style */),
-          ],
-        ),
-      ),
-      const Icon(Icons.arrow_forward_ios, color: Color(0xFF348AA7)),
-    ],
-  ),
-)
-```
-
-### Input Field Pattern
-- Black border, white background
-- Custom height (typically 50px)
-- Kumbh Sans font family
-- Password fields include visibility toggle
-- Validation happens in button press handlers
-
-## Dependencies & Build
-
-### Current Dependencies
-- Pure Flutter with material design - minimal external packages
-- `flutter_lints` for code quality
-- No authentication, networking, or database packages yet
-
-### Development Commands
-```bash
-# Get dependencies
-flutter pub get
-
-# Run on Android (primary target)
-flutter run
-
-# Build for Android
-flutter build apk
-```
-
-### Platform Focus
-- **Primary**: Android development and testing
-- **Secondary**: iOS project structure exists but not actively developed
-- **Not implemented**: Web, desktop platforms
-
-## TODO Integration Points
-- Authentication backend integration needed in login pages
-- Document upload and AI verification system (referenced in UI but not implemented)
-- Profile management system
-- Travel requirements database
-- Real-time document verification API
-
-## Important Notes
-- Remove `debug_page.dart` and debug button before production
-- All "About Us", "Mission & Vision" links are placeholder implementations
-- Form validation is basic - enhance before production
-- No data persistence layer implemented yet
-- AI feedback system referenced in UI but backend not connected
+## Before Production
+- Remove `lib/dev/debug_page.dart` and its imports
+- Remove debug button from `splash_screen.dart`
+- Implement proper form validation
+- Add backend API integration
+- Add proper error handling beyond SnackBars
+- Test on physical Android devices

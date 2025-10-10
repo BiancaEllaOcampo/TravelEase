@@ -113,19 +113,33 @@ class TravelEaseDrawer extends StatelessWidget {
       child: SafeArea(
         child: Column(
           children: [
+            
             // Header with logo and title
             Container(
               padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.menu,
-                    color: Colors.white,
-                    size: 50,
+
+                  // Menu Icon/Button
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close the drawer when pressed
+                    },
+                    icon: const Icon(
+                      Icons.menu,
+                      color: Colors.white,
+                      size: 50,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
+                  
                   const SizedBox(width: 16),
+                  
+                  // Text Title
                   const Text(
                     'TravelEase',
+                    textAlign: TextAlign.right,
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 25,
@@ -282,7 +296,7 @@ class TravelEaseDrawer extends StatelessWidget {
       leading: Icon(
         icon,
         color: Colors.white,
-        size: 24,
+        size: 35,
       ),
       title: Row(
         children: [
@@ -306,7 +320,7 @@ class TravelEaseDrawer extends StatelessWidget {
                 badgeCount.toString(),
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Kumbh Sans',
                 ),

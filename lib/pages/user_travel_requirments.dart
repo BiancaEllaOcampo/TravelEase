@@ -92,7 +92,7 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
                     border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: DropdownButtonFormField<String>(
-                    value: selectedCountry,
+                    initialValue: selectedCountry,
                     items: const [
                       DropdownMenuItem(value: 'Japan', child: Text('Japan')),
                       DropdownMenuItem(value: 'USA', child: Text('USA')),
