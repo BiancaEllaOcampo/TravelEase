@@ -70,7 +70,7 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
           ),
           // Destination
           Positioned(
-            top: 20, // Reduced gap - was 150 - 48, now properly positioned after AppBar
+            top: 20,
             left: 28,
             right: 28,
             child: Column(

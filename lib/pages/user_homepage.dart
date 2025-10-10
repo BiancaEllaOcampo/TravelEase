@@ -25,7 +25,7 @@ class UserHomePage extends StatelessWidget {
                   icon: const Icon(
                     Icons.menu,
                     color: Color(0xFFF3F3F3),
-                    size: 40,
+                    size: 50,
                   ),
                 ),
                 

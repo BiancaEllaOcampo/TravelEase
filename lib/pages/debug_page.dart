@@ -4,6 +4,7 @@ import 'user_login.dart';
 import 'user_signup.dart';
 import 'user_homepage.dart';
 import 'template.dart';
+import 'template_with_menu.dart';
 import 'admin_login.dart';
 import 'admin_dashboard.dart';
 import 'admin_user_management.dart';
@@ -105,6 +106,17 @@ class DebugPage extends StatelessWidget {
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const TemplatePage()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'Template (with Menu)',
+              'Template page that uses the menu-style app bar',
+              Icons.menu,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TemplateWithMenuPage()),
               ),
             ),
             
