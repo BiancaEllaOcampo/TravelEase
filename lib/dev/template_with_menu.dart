@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../pages/user_homepage.dart';
 
 class TemplateWithMenuPage extends StatelessWidget {
   const TemplateWithMenuPage({super.key});
@@ -33,13 +34,19 @@ class TemplateWithMenuPage extends StatelessWidget {
                 ),
 
                 // Title
-                const Text(
-                  'TravelEase',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Kumbh Sans',
+                Flexible(
+                  child: const Text(
+                    'Sample Text Here',
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                    maxLines: 2,
+                    overflow: TextOverflow.visible,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Kumbh Sans',
+                    ),
                   ),
                 ),
 
@@ -108,7 +115,7 @@ class TravelEaseDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      width: 340,
+      width: 310,
       backgroundColor: const Color(0xFF125E77),
       child: SafeArea(
         child: Column(
@@ -165,7 +172,10 @@ class TravelEaseDrawer extends StatelessWidget {
                     Icons.home_outlined,
                     () {
                       Navigator.pop(context);
-                      // TODO: Navigate to home
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const UserHomePage()),
+                      );
                     },
                   ),
                   _buildMenuItem(
@@ -299,13 +309,17 @@ class TravelEaseDrawer extends StatelessWidget {
         size: 35,
       ),
       title: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontFamily: 'Kumbh Sans',
+          Expanded(
+            child: Text(
+              title,
+              softWrap: true,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontFamily: 'Kumbh Sans',
+              ),
             ),
           ),
           if (badgeCount != null) ...[

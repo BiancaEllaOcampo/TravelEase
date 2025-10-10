@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../dev/template_with_menu.dart';
 
 class UserTravelRequirementsPage extends StatefulWidget {
   const UserTravelRequirementsPage({super.key});
@@ -13,6 +14,7 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const TravelEaseDrawer(),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(130),
         child: Container(
@@ -23,23 +25,35 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
+                // Menu Button (opens drawer)
+                Builder(
+                  builder: (BuildContext context) {
+                    return IconButton(
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                      icon: const Icon(
+                        Icons.menu,
+                        color: Color(0xFFF3F3F3),
+                        size: 50,
+                      ),
+                    );
                   },
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: Colors.white,
-                    size: 24,
-                  ),
                 ),
-                const Text(
-                  'Travel Requirements',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Kumbh Sans',
+                // Title
+                Flexible(
+                  child: const Text(
+                    'Travel Requirements',
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                    maxLines: 2,
+                    overflow: TextOverflow.visible,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Kumbh Sans',
+                    ),
                   ),
                 ),
                 Container(

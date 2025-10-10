@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'user_travel_requirments.dart';
-
+import '../dev/template_with_menu.dart';
+  
 class UserHomePage extends StatelessWidget {
   const UserHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const TravelEaseDrawer(),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(130),
         child: Container(
@@ -17,18 +19,22 @@ class UserHomePage extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Menu Button
-                IconButton(
-                  onPressed: () {
-                    // Handle menu tap
+                // Menu Button (opens drawer)
+                Builder(
+                  builder: (BuildContext context) {
+                    return IconButton(
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                      icon: const Icon(
+                        Icons.menu,
+                        color: Color(0xFFF3F3F3),
+                        size: 50,
+                      ),
+                    );
                   },
-                  icon: const Icon(
-                    Icons.menu,
-                    color: Color(0xFFF3F3F3),
-                    size: 50,
-                  ),
                 ),
-                
+  
                 // Title
                 const Text(
                   'TravelEase',
