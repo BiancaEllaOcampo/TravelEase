@@ -9,6 +9,10 @@ import '../pages/admin/admin_login.dart';
 import '../pages/admin/admin_dashboard.dart';
 import '../pages/admin/admin_user_management.dart';
 import '../pages/user/user_travel_requirments.dart';
+import '../pages/user/user_fticket.dart';
+import '../pages/admin/admin_announcement.dart';
+import '../pages/admin/admin_requirement_configuration.dart';
+import '../pages/admin/admin_document_veification.dart';
 
 class DebugPage extends StatelessWidget {
   const DebugPage({super.key});
@@ -150,6 +154,50 @@ class DebugPage extends StatelessWidget {
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const UserTravelRequirementsPage()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'User Flight Ticket',
+              'Configure/view User Flight ticket',
+              Icons.rule,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FlightTicketPage()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'Admin Announcement',
+              'Configure/view Admin Announcement',
+              Icons.rule,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AdminAnnouncementPage()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'Admin Document Verification',
+              'Configure/view Admin Document Verification',
+              Icons.rule,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AdminDocumentVerificationPage()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'Admin Requirement Configuration',
+              'Configure/view Admin Requirement Configuration',
+              Icons.rule,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AdminReqConfigPage()),
               ),
             ),
             
