@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'admin_user_management.dart';
-import 'admin_requirement_configuration.dart';
-import 'admin_document_veification.dart';
-import 'admin_announcement.dart';
 
 class AdminDashboardPage extends StatelessWidget {
   const AdminDashboardPage({super.key});
@@ -110,36 +107,15 @@ class AdminDashboardPage extends StatelessWidget {
                 ),
                 _AdminActionButton(
                   text: 'Travel Requirements\nConfiguration',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AdminReqConfigPage(),
-                      ),
-                    );
-                  },
+                  onPressed: () {},
                 ),
                 _AdminActionButton(
                   text: 'Documents Verification\nQueue',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AdminDocumentVerificationPage(),
-                      ),
-                    );
-                  },
+                  onPressed: () {},
                 ),
                 _AdminActionButton(
                   text: 'Announcements',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AdminAnnouncementPage(),
-                      ),
-                    );
-                  },
+                  onPressed: () {},
                 ),
               ],
             ),
