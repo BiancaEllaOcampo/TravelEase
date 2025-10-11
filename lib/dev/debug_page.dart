@@ -296,3 +296,4 @@ class DebugPage extends StatelessWidget {
     );
   }
 }
+
