@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'user_travel_requirments.dart';
 import '../../dev/template_with_menu.dart';
   
 class UserHomePage extends StatelessWidget {
-  const UserHomePage({super.key});
+  final String? username;
+
+  const UserHomePage({super.key, this.username});
 
   @override
   Widget build(BuildContext context) {
@@ -81,29 +84,36 @@ class UserHomePage extends StatelessWidget {
           Positioned(
             top: 31,
             left: 36,
-            child: RichText(
-              text: const TextSpan(
-                style: TextStyle(
-                  fontSize: 20,
-                  fontFamily: 'Kumbh Sans',
-                  color: Colors.black,
+            child: Builder(builder: (context) {
+              // Determine display name: constructor -> Firebase displayName -> email prefix -> fallback
+              final user = FirebaseAuth.instance.currentUser;
+              String displayName = username ?? user?.displayName ?? (user?.email != null ? user!.email!.split('@').first : 'Traveler');
+              if (displayName.trim().isEmpty) displayName = 'Traveler';
+
+              return RichText(
+                text: TextSpan(
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontFamily: 'Kumbh Sans',
+                    color: Colors.black,
+                  ),
+                  children: [
+                    const TextSpan(
+                      text: 'Welcome back, ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ),
+                    TextSpan(
+                      text: '$displayName!',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-                children: [
-                  TextSpan(
-                    text: 'Welcome back, ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.normal,
-                    ),
-                  ),
-                  TextSpan(
-                    text: 'Bianca!',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+              );
+            }),
           ),
           
           // User Alert Card
