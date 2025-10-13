@@ -50,19 +50,19 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAnWeKrmmiVDMREXdXXN7eoWHOqxSC8MkE',
-    appId: '1:31288440511:android:e2a65f02774d929846380a',
-    messagingSenderId: '31288440511',
-    projectId: 'travelease-7729f',
-    storageBucket: 'travelease-7729f.firebasestorage.app',
+    apiKey: '',
+    appId: '',
+    messagingSenderId: '',
+    projectId: '',
+    storageBucket: '',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCpRPyfiyZSZmcumHYXbaFM1wQlXHhj2iA',
-    appId: '1:31288440511:ios:3b7bd51824efdb5a46380a',
-    messagingSenderId: '31288440511',
-    projectId: 'travelease-7729f',
-    storageBucket: 'travelease-7729f.firebasestorage.app',
-    iosBundleId: 'com.example.travelease2',
+    apiKey: '',
+    appId: '',
+    messagingSenderId: '',
+    projectId: '',
+    storageBucket: '',
+    iosBundleId: '',
   );
 }
