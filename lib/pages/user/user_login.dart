@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../admin/admin_login.dart';
 import 'user_homepage.dart';
 
@@ -13,6 +14,7 @@ class _UserLoginPageState extends State<UserLoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -165,7 +167,7 @@ class _UserLoginPageState extends State<UserLoginPage> {
                           child: TextField(
                             controller: _emailController,
                             decoration: const InputDecoration(
-                              hintText: 'Enter your email',
+                              hintText: '',
                               hintStyle: TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
@@ -207,7 +209,7 @@ class _UserLoginPageState extends State<UserLoginPage> {
                             controller: _passwordController,
                             obscureText: _obscurePassword,
                             decoration: InputDecoration(
-                              hintText: 'Enter your password',
+                              hintText: '',
                               hintStyle: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
@@ -239,10 +241,7 @@ class _UserLoginPageState extends State<UserLoginPage> {
                       width: 235,
                       height: 52,
                       child: ElevatedButton(
-                        onPressed: () {
-                          // Handle login logic
-                          _handleLogin();
-                        },
+                        onPressed: _isLoading ? null : () => _handleLogin(),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF348AA7),
                           shape: RoundedRectangleBorder(
@@ -250,15 +249,24 @@ class _UserLoginPageState extends State<UserLoginPage> {
                           ),
                           elevation: 2,
                         ),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Kumbh Sans',
-                          ),
-                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Login',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Kumbh Sans',
+                                ),
+                              ),
                       ),
                     ),
                     
@@ -315,13 +323,38 @@ class _UserLoginPageState extends State<UserLoginPage> {
       _showSnackBar('Email contains invalid characters');
       return;
     }
-    
-    // TODO: Implement actual login logic here
-    // For now, just show a success message
-    _showSnackBar('Login successful!');
-    
-    // Navigate to homepage or next screen
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserHomePage()));
+
+    _performFirebaseLogin();
+  }
+
+  Future<void> _performFirebaseLogin() async {
+    setState(() => _isLoading = true);
+    try {
+      final auth = FirebaseAuth.instance;
+      await auth.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      _showSnackBar('Login successful!');
+      if (mounted) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const UserHomePage()));
+      }
+    } on FirebaseAuthException catch (e) {
+      var message = 'Login failed. Please try again.';
+      if (e.code == 'user-not-found') {
+        message = 'No user found for that email.';
+      } else if (e.code == 'wrong-password') {
+        message = 'Incorrect password.';
+      } else if (e.code == 'invalid-email') {
+        message = 'Invalid email address.';
+      }
+      _showSnackBar(message);
+    } catch (e) {
+      _showSnackBar('An unexpected error occurred.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _handleAdminLogin() {

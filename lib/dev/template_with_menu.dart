@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../pages/user/user_homepage.dart';
+import '../pages/splash_screen.dart';
 
 class TemplateWithMenuPage extends StatelessWidget {
   const TemplateWithMenuPage({super.key});
@@ -270,9 +272,25 @@ class TravelEaseDrawer extends StatelessWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: TextButton(
-                  onPressed: () {
+                  onPressed: () async {
                     Navigator.pop(context);
-                    // TODO: Implement logout
+                    try {
+                      await FirebaseAuth.instance.signOut();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Logged out')),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Logout failed')),
+                      );
+                    }
+
+                    // Return to splash and clear navigation history
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SplashScreen()),
+                      (route) => false,
+                    );
                   },
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),

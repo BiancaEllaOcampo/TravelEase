@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'user_homepage.dart';
 
 class UserSignupPage extends StatefulWidget {
   const UserSignupPage({super.key});
@@ -11,16 +13,15 @@ class _UserSignupPageState extends State<UserSignupPage> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _mobileController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
-    _mobileController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -78,7 +79,7 @@ class _UserSignupPageState extends State<UserSignupPage> {
           
           // Back Button
           Positioned(
-            top: 20, // Reduced gap - was 150 - 48, now properly positioned
+            top: 50,
             left: 30,
             child: Container(
               width: 60,
@@ -103,11 +104,11 @@ class _UserSignupPageState extends State<UserSignupPage> {
           
           // Main Signup Card
           Positioned(
-            top: 95, // Reduced gap - was 225 - 48, now properly positioned
+            top: 125,
             left: 30,
             right: 30,
             child: Container(
-              height: 625,
+              height: 560,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
@@ -160,7 +161,7 @@ class _UserSignupPageState extends State<UserSignupPage> {
                                 child: TextField(
                                   controller: _firstNameController,
                                   decoration: const InputDecoration(
-                                    hintText: 'Jonathan House',
+                                    hintText: '',
                                     hintStyle: TextStyle(
                                       color: Colors.black,
                                       fontSize: 15,
@@ -202,7 +203,7 @@ class _UserSignupPageState extends State<UserSignupPage> {
                                 child: TextField(
                                   controller: _lastNameController,
                                   decoration: const InputDecoration(
-                                    hintText: 'De Guzman',
+                                    hintText: '',
                                     hintStyle: TextStyle(
                                       color: Colors.black,
                                       fontSize: 15,
@@ -245,7 +246,7 @@ class _UserSignupPageState extends State<UserSignupPage> {
                           child: TextField(
                             controller: _emailController,
                             decoration: const InputDecoration(
-                              hintText: 'dr.house@gmail.com',
+                              hintText: '',
                               hintStyle: TextStyle(
                                 color: Colors.black,
                                 fontSize: 15,
@@ -255,47 +256,6 @@ class _UserSignupPageState extends State<UserSignupPage> {
                               contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 15),
                             ),
                             keyboardType: TextInputType.emailAddress,
-                          ),
-                        ),
-                      ],
-                    ),
-                    
-                    const SizedBox(height: 24),
-                    
-                    // Mobile Number Field
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Mobile Number',
-                          style: TextStyle(
-                            color: Color(0xFF125E77),
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Kumbh Sans',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          height: 49,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(color: Colors.black),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: TextField(
-                            controller: _mobileController,
-                            decoration: const InputDecoration(
-                              hintText: '+63 090890742186',
-                              hintStyle: TextStyle(
-                                color: Colors.black,
-                                fontSize: 15,
-                                fontFamily: 'Kumbh Sans',
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 15),
-                            ),
-                            keyboardType: TextInputType.phone,
                           ),
                         ),
                       ],
@@ -328,7 +288,7 @@ class _UserSignupPageState extends State<UserSignupPage> {
                             controller: _passwordController,
                             obscureText: _obscurePassword,
                             decoration: InputDecoration(
-                              hintText: '********************',
+                              hintText: '',
                               hintStyle: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 15,
@@ -353,17 +313,14 @@ class _UserSignupPageState extends State<UserSignupPage> {
                       ],
                     ),
                     
-                    const SizedBox(height: 25),
+                    const SizedBox(height: 40),
                     
                     // Create Account Button
                     SizedBox(
                       width: 238,
                       height: 52,
                       child: ElevatedButton(
-                        onPressed: () {
-                          // Handle signup logic
-                          _handleSignup();
-                        },
+                        onPressed: _isLoading ? null : () => _handleSignup(),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF348AA7),
                           shape: RoundedRectangleBorder(
@@ -371,15 +328,24 @@ class _UserSignupPageState extends State<UserSignupPage> {
                           ),
                           elevation: 2,
                         ),
-                        child: const Text(
-                          'Create Account',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Kumbh Sans',
-                          ),
-                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Create Account',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Kumbh Sans',
+                                ),
+                              ),
                       ),
                     ),
                     
@@ -411,10 +377,6 @@ class _UserSignupPageState extends State<UserSignupPage> {
       return;
     }
     
-    if (_mobileController.text.isEmpty) {
-      _showSnackBar('Please enter your mobile number');
-      return;
-    }
     
     if (_passwordController.text.isEmpty) {
       _showSnackBar('Please enter a password');
@@ -432,13 +394,46 @@ class _UserSignupPageState extends State<UserSignupPage> {
       _showSnackBar('Password must be at least 6 characters long');
       return;
     }
-    
-    // TODO: Implement actual signup logic here
-    // For now, just show a success message
-    _showSnackBar('Account created successfully!');
-    
-    // Navigate to login page or homepage
-    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserLoginPage()));
+    _performFirebaseSignup();
+  }
+
+  Future<void> _performFirebaseSignup() async {
+    setState(() => _isLoading = true);
+    try {
+      final auth = FirebaseAuth.instance;
+      final userCredential = await auth.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      // Update display name (first + last)
+      final displayName = '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
+      await userCredential.user?.updateDisplayName(displayName);
+
+      _showSnackBar('Account created successfully!');
+
+      // Navigate to user homepage (replace stack)
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const UserHomePage()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      var message = 'Signup failed. Please try again.';
+      if (e.code == 'email-already-in-use') {
+        message = 'Email already in use. Try logging in or use another email.';
+      } else if (e.code == 'invalid-email') {
+        message = 'Invalid email address.';
+      } else if (e.code == 'weak-password') {
+        message = 'Password is too weak.';
+      }
+      _showSnackBar(message);
+    } catch (e) {
+      _showSnackBar('An unexpected error occurred.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   void _showSnackBar(String message) {

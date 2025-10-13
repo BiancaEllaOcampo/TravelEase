@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:travelease2/firebase_options.dart';
 import 'pages/splash_screen.dart';
+import 'pages/user/user_homepage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,7 +24,18 @@ class MainApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         fontFamily: 'Kumbh Sans',
       ),
-      home: const SplashScreen(),
+      home: StreamBuilder(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, asyncSnapshot) {
+          if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (asyncSnapshot.hasData) {
+            return const UserHomePage();
+          }
+          return const SplashScreen();
+        }
+      ),
       debugShowCheckedModeBanner: false,
     );
   }
