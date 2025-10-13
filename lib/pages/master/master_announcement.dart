@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class AdminAnnouncementPage extends StatefulWidget {
-	const AdminAnnouncementPage({Key? key}) : super(key: key);
+class MasterAnnouncementPage extends StatefulWidget {
+	const MasterAnnouncementPage({Key? key}) : super(key: key);
 
 	@override
-	State<AdminAnnouncementPage> createState() => _AdminAnnouncementPageState();
+	State<MasterAnnouncementPage> createState() => _MasterAnnouncementPageState();
 }
 
-class _AdminAnnouncementPageState extends State<AdminAnnouncementPage> {
+class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
 	final TextEditingController titleController = TextEditingController();
 	final TextEditingController contentController = TextEditingController();
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'admin_dashboard.dart';
+import '../master/master_login.dart';
 
 class AdminLoginPage extends StatefulWidget {
   const AdminLoginPage({super.key});
@@ -241,11 +242,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                         onPressed: () {
                           //Future validation for now testing
                           // Handle login logic
-                          //_handleLogin();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
-                          );
+                          _handleLogin();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF348AA7),
@@ -314,6 +311,19 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
       _showSnackBar('Please enter a valid email address');
       return;
     }
+
+    final invalidChars = ['>', '<', '(', ')', '{', '}', '[', ']', ';'];
+    if (invalidChars.any((char) => _emailController.text.contains(char))) {
+      _showSnackBar('Email contains invalid characters');
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
+    );
+
+    
     
     // TODO: Implement actual login logic here
     // For now, just show a success message
@@ -323,9 +333,13 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
     // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserHomePage()));
   }
 
+
   void _handleMasterLogin() {
     // TODO: Navigate to master login page
-    _showSnackBar('Master login not implemented yet');
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const MasterLoginPage()),
+    );
   }
 
   void _showSnackBar(String message) {

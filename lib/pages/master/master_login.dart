@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'master_dashboard.dart';
 import '../admin/admin_login.dart';
-import 'user_homepage.dart';
 
-class UserLoginPage extends StatefulWidget {
-  const UserLoginPage({super.key});
+class MasterLoginPage extends StatefulWidget {
+  const MasterLoginPage({super.key});
 
   @override
-  State<UserLoginPage> createState() => _UserLoginPageState();
+  State<MasterLoginPage> createState() => _MasterLoginPageState();
 }
 
-class _UserLoginPageState extends State<UserLoginPage> {
+class _MasterLoginPageState extends State<MasterLoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -130,7 +130,7 @@ class _UserLoginPageState extends State<UserLoginPage> {
                     
                     // Title
                     const Text(
-                      'User Login',
+                      'Master User Login',
                       style: TextStyle(
                         color: Color(0xFF125E77),
                         fontSize: 25,
@@ -240,7 +240,6 @@ class _UserLoginPageState extends State<UserLoginPage> {
                       height: 52,
                       child: ElevatedButton(
                         onPressed: () {
-                          // Handle login logic
                           _handleLogin();
                         },
                         style: ElevatedButton.styleFrom(
@@ -263,15 +262,14 @@ class _UserLoginPageState extends State<UserLoginPage> {
                     ),
                     
                     const SizedBox(height: 20),
-                    
-                    // Admin Login Link
+
                     TextButton(
                       onPressed: () {
-                        // Handle admin login
+                        // Handle master login
                         _handleAdminLogin();
                       },
                       child: const Text(
-                        'Login as Admin/Master',
+                        'Login as Admin',
                         style: TextStyle(
                           color: Color(0xFF348AA7),
                           fontSize: 17,
@@ -281,12 +279,14 @@ class _UserLoginPageState extends State<UserLoginPage> {
                         ),
                       ),
                     ),
+                    
                   ],
                 ),
               ),
             ),
           ),
-
+          
+          
         ],
       ),
     );
@@ -315,16 +315,23 @@ class _UserLoginPageState extends State<UserLoginPage> {
       _showSnackBar('Email contains invalid characters');
       return;
     }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const MasterDashboardPage()),
+    );
+
     
     // TODO: Implement actual login logic here
     // For now, just show a success message
     _showSnackBar('Login successful!');
     
     // Navigate to homepage or next screen
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserHomePage()));
+    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserHomePage()));
   }
 
   void _handleAdminLogin() {
+    // TODO: Navigate to master login page
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AdminLoginPage()),
