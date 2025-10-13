@@ -13,6 +13,11 @@ import '../pages/user/user_fticket.dart';
 import '../pages/admin/admin_announcement.dart';
 import '../pages/admin/admin_requirement_configuration.dart';
 import '../pages/admin/admin_document_veification.dart';
+import '../pages/master/master_login.dart';
+import '../pages/master/master_dashboard.dart';
+import '../pages/master/master_admin&user_management.dart';
+import '../pages/master/master_document_veification.dart';
+import '../pages/master/master_announcement.dart';
 
 class DebugPage extends StatelessWidget {
   const DebugPage({super.key});
@@ -198,6 +203,61 @@ class DebugPage extends StatelessWidget {
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const AdminReqConfigPage()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'Master Login',
+              'Configure/view Master User Login Configuration',
+              Icons.rule,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MasterLoginPage()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'Master Admin & User',
+              'Configure/view Master User Admin & User Configuration',
+              Icons.rule,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MasterAdminUserManagement()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'Master Use Verification Queu',
+              'Configure/view Master User Document Verification Configuration',
+              Icons.rule,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MasterDocumentVerificationPage()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'Master User Announcement',
+              'Configure/view Master User Announcement Configuration',
+              Icons.rule,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MasterAnnouncementPage()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'Master User Dashboard',
+              'Configure/view Master User Dashboard Configuration',
+              Icons.rule,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MasterDashboardPage()),
               ),
             ),
             
