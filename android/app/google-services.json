@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "31288440511",
+    "project_id": "travelease-7729f",
+    "storage_bucket": "travelease-7729f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:31288440511:android:e2a65f02774d929846380a",
+        "android_client_info": {
+          "package_name": "com.example.travelease2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAnWeKrmmiVDMREXdXXN7eoWHOqxSC8MkE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
