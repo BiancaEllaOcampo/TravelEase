@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../pages/user/user_homepage.dart';
 import '../pages/splash_screen.dart';
+import '../pages/user/user_travel_requirments.dart';
 
 class TemplateWithMenuPage extends StatelessWidget {
   const TemplateWithMenuPage({super.key});
@@ -192,20 +193,23 @@ class TravelEaseDrawer extends StatelessWidget {
                   ),
                   _buildMenuItem(
                     context,
+                    'Travel Requirements',
+                    Icons.flight_takeoff,
+                    () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const UserTravelRequirementsPage()),
+                      );
+                    },
+                  ),
+                  _buildMenuItem(
+                    context,
                     'View My Documents',
                     Icons.folder_open_outlined,
                     () {
                       Navigator.pop(context);
                       // TODO: Navigate to documents
-                    },
-                  ),
-                  _buildMenuItem(
-                    context,
-                    'Travel Requirements',
-                    Icons.flight_takeoff,
-                    () {
-                      Navigator.pop(context);
-                      // TODO: Navigate to travel requirements
                     },
                   ),
                   _buildMenuItem(
