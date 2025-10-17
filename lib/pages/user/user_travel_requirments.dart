@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../dev/template_with_menu.dart';
+import '../../utils/user_app_drawer.dart';
 import '../splash_screen.dart';
 import 'user_documents_checklist.dart';
 
@@ -94,7 +94,7 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
     }
 
     return Scaffold(
-      drawer: const TravelEaseDrawer(),
+      drawer: const UserAppDrawer(),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(130),
         child: Container(

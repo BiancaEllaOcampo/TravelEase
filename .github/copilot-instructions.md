@@ -110,6 +110,19 @@ Navigator.push(context, MaterialPageRoute(
 
 ## Development Workflow
 
+### Navigation Drawer (UserAppDrawer)
+**ALWAYS import from centralized location** - Never copy/paste the drawer class:
+```dart
+import '../../utils/user_app_drawer.dart';  // Adjust path as needed
+
+Scaffold(
+  drawer: const UserAppDrawer(),
+  // ... rest of page
+)
+```
+The user navigation drawer lives in `lib/utils/user_app_drawer.dart` as a single source of truth.
+Future admin and master drawers will follow the same pattern (admin_app_drawer.dart, master_app_drawer.dart).
+
 ### Creating New Pages
 1. Copy `lib/dev/template.dart` (simple back) or `template_with_menu.dart` (with drawer)
 2. Adjust `Positioned` coordinates for layout
@@ -135,9 +148,10 @@ flutter build apk            # Build APK
 - `lib/pages/user/user_homepage.dart` - User dashboard (responsive layout)
 - `lib/pages/user/user_travel_requirments.dart` - Destination selector, checklist creator
 - `lib/pages/user/user_documents_checklist.dart` - Document upload/status tracking
+- `lib/utils/user_app_drawer.dart` - **User navigation drawer** (use for all user pages)
 - `lib/utils/checklist_helper.dart` - Shared checklist navigation logic
 - `lib/dev/template.dart` - Page template with back button
-- `lib/dev/template_with_menu.dart` - Page template with drawer menu
+- `lib/dev/template_with_menu.dart` - Page template with drawer menu (imports user_app_drawer)
 - `lib/dev/debug_page.dart` - Dev navigation hub (**remove for prod**)
 
 ## Recurring Code Patterns

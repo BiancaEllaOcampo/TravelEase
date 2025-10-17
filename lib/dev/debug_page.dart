@@ -54,6 +54,11 @@ class DebugPage extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),
+
+            // ============================================
+            // GENERAL / SPLASH
+            // ============================================
+            _buildSectionHeader('General'),
             
             _buildDebugButton(
               context,
@@ -65,6 +70,13 @@ class DebugPage extends StatelessWidget {
                 MaterialPageRoute(builder: (context) => const SplashScreen()),
               ),
             ),
+
+            const SizedBox(height: 20),
+
+            // ============================================
+            // USER PAGES
+            // ============================================
+            _buildSectionHeader('User Pages'),
             
             _buildDebugButton(
               context,
@@ -74,17 +86,6 @@ class DebugPage extends StatelessWidget {
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const UserLoginPage()),
-              ),
-            ),
-            
-            _buildDebugButton(
-              context,
-              'Admin Login',
-              'Administrator authentication page',
-              Icons.admin_panel_settings,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AdminLoginPage()),
               ),
             ),
             
@@ -120,56 +121,12 @@ class DebugPage extends StatelessWidget {
                 MaterialPageRoute(builder: (context) => const UserProfilePage()),
               ),
             ),
-            
-            _buildDebugButton(
-              context,
-              'Template Page',
-              'Design template for new pages',
-              Icons.article,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const TemplatePage()),
-              ),
-            ),
-
-            _buildDebugButton(
-              context,
-              'Template (with Menu)',
-              'Template page that uses the menu-style app bar',
-              Icons.menu,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const TemplateWithMenuPage()),
-              ),
-            ),
-            
-            _buildDebugButton(
-              context,
-              'Admin Dashboard',
-              'Administrator overview and actions',
-              Icons.dashboard_customize,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
-              ),
-            ),
-
-            _buildDebugButton(
-              context,
-              'Admin User Management',
-              'Manage users (add/delete)',
-              Icons.group,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AdminUserManagement()),
-              ),
-            ),
 
             _buildDebugButton(
               context,
               'Travel Requirements',
-              'Configure/view travel requirements',
-              Icons.rule,
+              'Select destination and view travel requirements',
+              Icons.flight_takeoff,
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const UserTravelRequirementsPage()),
@@ -207,31 +164,60 @@ class DebugPage extends StatelessWidget {
 
             _buildDebugButton(
               context,
-              'User Flight Ticket',
-              'Configure/view User Flight ticket',
-              Icons.rule,
+              'Flight Ticket (Example)',
+              'Example flight ticket document view',
+              Icons.confirmation_number,
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const FlightTicketPage()),
               ),
             ),
 
+            const SizedBox(height: 20),
+
+            // ============================================
+            // ADMIN PAGES
+            // ============================================
+            _buildSectionHeader('Admin Pages'),
+            
             _buildDebugButton(
               context,
-              'Admin Announcement',
-              'Configure/view Admin Announcement',
-              Icons.rule,
+              'Admin Login',
+              'Administrator authentication page',
+              Icons.admin_panel_settings,
               () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const AdminAnnouncementPage()),
+                MaterialPageRoute(builder: (context) => const AdminLoginPage()),
+              ),
+            ),
+            
+            _buildDebugButton(
+              context,
+              'Admin Dashboard',
+              'Administrator overview and actions',
+              Icons.dashboard_customize,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'Admin User Management',
+              'Manage users (add/delete)',
+              Icons.group,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AdminUserManagement()),
               ),
             ),
 
             _buildDebugButton(
               context,
               'Admin Document Verification',
-              'Configure/view Admin Document Verification',
-              Icons.rule,
+              'Review and verify user documents',
+              Icons.verified_user,
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const AdminDocumentVerificationPage()),
@@ -241,8 +227,8 @@ class DebugPage extends StatelessWidget {
             _buildDebugButton(
               context,
               'Admin Requirement Configuration',
-              'Configure/view Admin Requirement Configuration',
-              Icons.rule,
+              'Configure travel document requirements',
+              Icons.settings,
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const AdminReqConfigPage()),
@@ -251,9 +237,27 @@ class DebugPage extends StatelessWidget {
 
             _buildDebugButton(
               context,
+              'Admin Announcements',
+              'Manage system announcements',
+              Icons.campaign,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AdminAnnouncementPage()),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // ============================================
+            // MASTER PAGES
+            // ============================================
+            _buildSectionHeader('Master Pages'),
+
+            _buildDebugButton(
+              context,
               'Master Login',
-              'Configure/view Master User Login Configuration',
-              Icons.rule,
+              'Master admin authentication',
+              Icons.lock_person,
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const MasterLoginPage()),
@@ -262,9 +266,20 @@ class DebugPage extends StatelessWidget {
 
             _buildDebugButton(
               context,
-              'Master Admin & User',
-              'Configure/view Master User Admin & User Configuration',
-              Icons.rule,
+              'Master Dashboard',
+              'Master admin overview and system controls',
+              Icons.dashboard,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const MasterDashboardPage()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'Master Admin & User Management',
+              'Manage all admins and users',
+              Icons.supervisor_account,
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const MasterAdminUserManagement()),
@@ -273,9 +288,9 @@ class DebugPage extends StatelessWidget {
 
             _buildDebugButton(
               context,
-              'Master Use Verification Queu',
-              'Configure/view Master User Document Verification Configuration',
-              Icons.rule,
+              'Master Document Verification Queue',
+              'Oversee all document verification processes',
+              Icons.fact_check,
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const MasterDocumentVerificationPage()),
@@ -284,23 +299,41 @@ class DebugPage extends StatelessWidget {
 
             _buildDebugButton(
               context,
-              'Master User Announcement',
-              'Configure/view Master User Announcement Configuration',
-              Icons.rule,
+              'Master Announcements',
+              'Manage system-wide announcements',
+              Icons.announcement,
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const MasterAnnouncementPage()),
               ),
             ),
 
+            const SizedBox(height: 20),
+
+            // ============================================
+            // TEMPLATES
+            // ============================================
+            _buildSectionHeader('Templates (Dev Only)'),
+            
             _buildDebugButton(
               context,
-              'Master User Dashboard',
-              'Configure/view Master User Dashboard Configuration',
-              Icons.rule,
+              'Template Page',
+              'Design template for new pages',
+              Icons.article,
               () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const MasterDashboardPage()),
+                MaterialPageRoute(builder: (context) => const TemplatePage()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'Template (with Menu)',
+              'Template page that uses the menu-style app bar',
+              Icons.menu,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TemplateWithMenuPage()),
               ),
             ),
             
@@ -325,6 +358,36 @@ class DebugPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12, top: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF125E77),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.label,
+            color: Colors.white,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontFamily: 'Kumbh Sans',
+            ),
+          ),
+        ],
       ),
     );
   }

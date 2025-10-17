@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'user_travel_requirments.dart';
 import 'user_profile.dart' as user_profile;
-import '../../dev/template_with_menu.dart';
+import '../../utils/user_app_drawer.dart';
 import '../../utils/checklist_helper.dart';
 import '../splash_screen.dart';
+import '../../dev/debug_page.dart';
   
 class UserHomePage extends StatelessWidget {
   final String? username;
@@ -40,7 +41,7 @@ class UserHomePage extends StatelessWidget {
     }
 
     return Scaffold(
-      drawer: const TravelEaseDrawer(),
+      drawer: const UserAppDrawer(),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(130),
         child: Container(
@@ -101,13 +102,16 @@ class UserHomePage extends StatelessWidget {
         width: double.infinity,
         height: double.infinity,
         color: const Color(0xFFD9D9D9),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 34, vertical: 31),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Welcome Message
-              Builder(builder: (context) {
+        child: Stack(
+          children: [
+            // Main scrollable content
+            SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 34, vertical: 31),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Welcome Message
+                  Builder(builder: (context) {
                 // Determine display name: constructor -> Firebase displayName -> email prefix -> fallback
                 final user = FirebaseAuth.instance.currentUser;
                 String displayName = username ?? user?.displayName ?? (user?.email != null ? user!.email!.split('@').first : 'Traveler');
@@ -322,6 +326,36 @@ class UserHomePage extends StatelessWidget {
               const SizedBox(height: 32),
             ],
           ),
+        ),
+
+            // Debug Button (Small, discrete button for development)
+            Positioned(
+              top: 10,
+              right: 10,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const DebugPage()),
+                    );
+                  },
+                  icon: const Icon(
+                    Icons.bug_report,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  padding: EdgeInsets.zero,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
