@@ -458,77 +458,142 @@ class _UserProfilePageState extends State<UserProfilePage> {
                 padding: const EdgeInsets.only(bottom: 20),
                 child: Column(
                   children: [
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     
-                    // Profile Picture Section
-                    Stack(
-                      children: [
-                        Container(
-                          width: 114,
-                          height: 113,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: const Color(0xFF348AA7),
-                              width: 3,
+                    // Profile Picture Section with improved design
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            width: 130,
+                            height: 130,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF348AA7), Color(0xFF125E77)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF125E77).withOpacity(0.3),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
                             ),
-                            image: DecorationImage(
-                              image: _profileImageUrl != null
-                                  ? NetworkImage(_profileImageUrl!)
-                                  : const NetworkImage('https://via.placeholder.com/114'),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: GestureDetector(
-                            onTap: _changeProfilePicture,
+                            padding: const EdgeInsets.all(4),
                             child: Container(
-                              width: 33,
-                              height: 33,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF348AA7),
+                              decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.camera_alt,
                                 color: Colors.white,
-                                size: 18,
+                              ),
+                              child: _profileImageUrl != null
+                                  ? ClipOval(
+                                      child: Image.network(
+                                        _profileImageUrl!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return const Icon(
+                                            Icons.person,
+                                            size: 80,
+                                            color: Color(0xFF348AA7),
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  : const Center(
+                                      child: Icon(
+                                        Icons.person,
+                                        size: 80,
+                                        color: Color(0xFF348AA7),
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 5,
+                            right: 5,
+                            child: GestureDetector(
+                              onTap: _changeProfilePicture,
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF348AA7),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.camera_alt,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
 
-                    const SizedBox(height: 23),
+                    const SizedBox(height: 8),
 
                     // Personal Information Card
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 38),
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
                       child: Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(5),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 20,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(15),
+                          padding: const EdgeInsets.all(20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Personal Information',
-                                style: TextStyle(
-                                  color: Color(0xFF125E77),
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Kumbh Sans',
-                                ),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF125E77).withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Icon(
+                                      Icons.person_outline,
+                                      color: Color(0xFF125E77),
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Text(
+                                    'Personal Information',
+                                    style: TextStyle(
+                                      color: Color(0xFF125E77),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Kumbh Sans',
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 20),
 
                               // Full Name and Email
                               _buildDoubleField(
@@ -536,53 +601,53 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                 controller1: _fullNameController,
                                 label2: 'Email Address',
                                 controller2: _emailController,
-                                height: 58,
+                                height: 68,
                               ),
 
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 12),
 
                               // Phone Number
                               _buildSingleField(
                                 label: 'Phone Number',
                                 controller: _phoneController,
-                                height: 48,
+                                height: 58,
+                                icon: Icons.phone_outlined,
                               ),
 
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 12),
 
                               // Address
                               _buildSingleField(
                                 label: 'Address',
                                 controller: _addressController,
-                                height: 52,
+                                height: 58,
+                                icon: Icons.location_on_outlined,
                               ),
 
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 12),
 
                               // Passport Number and Expiration Date
                               Row(
                                 children: [
                                   Expanded(
-                                    flex: 151,
                                     child: _buildFieldBox(
                                       label: 'Passport Number',
                                       controller: _passportController,
-                                      height: 44,
+                                      height: 58,
                                     ),
                                   ),
-                                  const SizedBox(width: 5),
+                                  const SizedBox(width: 12),
                                   Expanded(
-                                    flex: 165,
                                     child: _buildFieldBox(
                                       label: 'Expiration Date',
                                       controller: _expirationDateController,
-                                      height: 44,
+                                      height: 58,
                                     ),
                                   ),
                                 ],
                               ),
 
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 12),
 
                               // Visa Type and Travel Insurance
                               _buildDoubleFieldTall(
@@ -592,32 +657,30 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                 controller2: _insuranceController,
                               ),
 
-                              const SizedBox(height: 11),
+                              const SizedBox(height: 12),
 
                               // Emergency Contact and Preferred Airport
                               Row(
                                 children: [
                                   Expanded(
-                                    flex: 151,
                                     child: _buildFieldBox(
                                       label: 'Emergency Contact',
                                       controller: _emergencyContactController,
-                                      height: 44,
+                                      height: 58,
                                     ),
                                   ),
-                                  const SizedBox(width: 11),
+                                  const SizedBox(width: 12),
                                   Expanded(
-                                    flex: 159,
                                     child: _buildFieldBox(
                                       label: 'Preferred Airport',
                                       controller: _preferredAirportController,
-                                      height: 44,
+                                      height: 58,
                                     ),
                                   ),
                                 ],
                               ),
 
-                              const SizedBox(height: 9),
+                              const SizedBox(height: 12),
 
                               // Preferred Languages
                               _buildLanguageField(),
@@ -627,130 +690,203 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       ),
                     ),
 
-                    const SizedBox(height: 23),
+                    const SizedBox(height: 24),
 
                     // Security Card
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 38),
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
                       child: Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(5),
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 20,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(15),
+                          padding: const EdgeInsets.all(20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Security',
-                                style: TextStyle(
-                                  color: Color(0xFF125E77),
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Kumbh Sans',
-                                ),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF125E77).withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Icon(
+                                      Icons.security_outlined,
+                                      color: Color(0xFF125E77),
+                                      size: 24,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  const Text(
+                                    'Security',
+                                    style: TextStyle(
+                                      color: Color(0xFF125E77),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Kumbh Sans',
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 18),
+                              const SizedBox(height: 20),
 
                               // Change Password Button
                               SizedBox(
                                 width: double.infinity,
-                                height: 25,
-                                child: ElevatedButton(
+                                height: 50,
+                                child: ElevatedButton.icon(
                                   onPressed: _changePassword,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF125E77),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(5),
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                    padding: EdgeInsets.zero,
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(horizontal: 16),
                                   ),
-                                  child: const Text(
+                                  icon: const Icon(
+                                    Icons.lock_outline,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  label: const Text(
                                     'Change Password',
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 17,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
                                       fontFamily: 'Kumbh Sans',
                                     ),
                                   ),
                                 ),
                               ),
 
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 16),
 
                               // Two-Factor Authentication Toggle
                               Container(
-                                height: 31,
+                                height: 60,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF5F5F5),
-                                  borderRadius: BorderRadius.circular(3),
+                                  color: const Color(0xFFF8F9FA),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Colors.grey.shade200,
+                                    width: 1,
+                                  ),
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      const Text(
-                                        'Enable Two-Factor Authentication',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontFamily: 'Kumbh Sans',
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: _twoFactorEnabled
+                                              ? const Color(0xFF34C759).withOpacity(0.1)
+                                              : Colors.grey.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Icon(
+                                          Icons.verified_user_outlined,
+                                          color: _twoFactorEnabled
+                                              ? const Color(0xFF34C759)
+                                              : Colors.grey,
+                                          size: 20,
                                         ),
                                       ),
-                                      Transform.scale(
-                                        scale: 0.7,
-                                        child: Switch(
-                                          value: _twoFactorEnabled,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              _twoFactorEnabled = value;
-                                            });
-                                            // TODO: Implement 2FA toggle
-                                          },
-                                          activeColor: Colors.white,
-                                          activeTrackColor: const Color(0xFF34C759),
+                                      const SizedBox(width: 12),
+                                      const Expanded(
+                                        child: Text(
+                                          'Two-Factor Authentication',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            fontFamily: 'Kumbh Sans',
+                                          ),
                                         ),
+                                      ),
+                                      Switch(
+                                        value: _twoFactorEnabled,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _twoFactorEnabled = value;
+                                          });
+                                          // TODO: Implement 2FA toggle
+                                        },
+                                        activeColor: const Color(0xFF34C759),
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
 
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 12),
 
                               // Data Processing Consent Checkbox
                               Container(
-                                height: 31,
+                                height: 60,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF5F5F5),
-                                  borderRadius: BorderRadius.circular(3),
+                                  color: const Color(0xFFF8F9FA),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Colors.grey.shade200,
+                                    width: 1,
+                                  ),
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
                                   child: Row(
                                     children: [
-                                      Transform.scale(
-                                        scale: 0.9,
-                                        child: Checkbox(
-                                          value: _consentToDataProcessing,
-                                          onChanged: (value) {
-                                            setState(() {
-                                              _consentToDataProcessing = value ?? false;
-                                            });
-                                            // TODO: Handle consent change
-                                          },
-                                          activeColor: const Color(0xFF2C2C2C),
-                                          checkColor: Colors.white,
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: _consentToDataProcessing
+                                              ? const Color(0xFF125E77).withOpacity(0.1)
+                                              : Colors.grey.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Icon(
+                                          Icons.privacy_tip_outlined,
+                                          color: _consentToDataProcessing
+                                              ? const Color(0xFF125E77)
+                                              : Colors.grey,
+                                          size: 20,
                                         ),
                                       ),
-                                      const SizedBox(width: 10),
-                                      const Text(
-                                        'I consent to data processing',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontFamily: 'Kumbh Sans',
+                                      const SizedBox(width: 12),
+                                      const Expanded(
+                                        child: Text(
+                                          'I consent to data processing',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            fontFamily: 'Kumbh Sans',
+                                          ),
+                                        ),
+                                      ),
+                                      Checkbox(
+                                        value: _consentToDataProcessing,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _consentToDataProcessing = value ?? false;
+                                          });
+                                          // TODO: Handle consent change
+                                        },
+                                        activeColor: const Color(0xFF125E77),
+                                        checkColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(4),
                                         ),
                                       ),
                                     ],
@@ -758,18 +894,24 @@ class _UserProfilePageState extends State<UserProfilePage> {
                                 ),
                               ),
 
-                              const SizedBox(height: 10),
+                              const SizedBox(height: 16),
 
                               // Delete Account Link
                               Align(
                                 alignment: Alignment.centerRight,
-                                child: GestureDetector(
-                                  onTap: _deleteAccount,
-                                  child: const Text(
+                                child: TextButton.icon(
+                                  onPressed: _deleteAccount,
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: Color(0xFFA54547),
+                                    size: 18,
+                                  ),
+                                  label: const Text(
                                     'Delete Account',
                                     style: TextStyle(
-                                      color: Color(0xFF125E77),
-                                      fontSize: 12,
+                                      color: Color(0xFFA54547),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
                                       decoration: TextDecoration.underline,
                                       fontFamily: 'Kumbh Sans',
                                     ),
@@ -782,27 +924,35 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       ),
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
 
                     // Save Information Button
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 39),
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
                       child: SizedBox(
                         width: double.infinity,
-                        height: 45,
-                        child: ElevatedButton(
+                        height: 56,
+                        child: ElevatedButton.icon(
                           onPressed: _saveInformation,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF34C759),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
+                              borderRadius: BorderRadius.circular(12),
                             ),
+                            elevation: 4,
+                            shadowColor: const Color(0xFF34C759).withOpacity(0.3),
                           ),
-                          child: const Text(
+                          icon: const Icon(
+                            Icons.check_circle_outline,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                          label: const Text(
                             'Save Information',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 20,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                               fontFamily: 'Kumbh Sans',
                             ),
                           ),
@@ -810,7 +960,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 30),
                   ],
                 ),
               ),
@@ -825,34 +975,41 @@ class _UserProfilePageState extends State<UserProfilePage> {
     required String label,
     required TextEditingController controller,
     required double height,
+    IconData? icon,
   }) {
     return Container(
-      height: height,
+      constraints: BoxConstraints(minHeight: height),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(3),
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 12,
+              style: TextStyle(
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Kumbh Sans',
+                color: Colors.grey.shade700,
               ),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 4),
             TextField(
               controller: controller,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 13,
                 fontFamily: 'Kumbh Sans',
+                fontWeight: FontWeight.w500,
               ),
               decoration: const InputDecoration(
                 isDense: true,
@@ -874,77 +1031,91 @@ class _UserProfilePageState extends State<UserProfilePage> {
     required double height,
   }) {
     return Container(
-      height: height,
+      constraints: BoxConstraints(minHeight: height),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(3),
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    label1,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Kumbh Sans',
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      label1,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Kumbh Sans',
+                        color: Colors.grey.shade700,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 3),
-                  TextField(
-                    controller: controller1,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'Kumbh Sans',
+                    const SizedBox(height: 4),
+                    TextField(
+                      controller: controller1,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontFamily: 'Kumbh Sans',
+                        fontWeight: FontWeight.w500,
+                      ),
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                        border: InputBorder.none,
+                      ),
                     ),
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    label2,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Kumbh Sans',
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  TextField(
-                    controller: controller2,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'Kumbh Sans',
-                    ),
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ],
+              Container(
+                width: 1,
+                color: Colors.grey.shade300,
+                margin: const EdgeInsets.symmetric(horizontal: 12),
               ),
-            ),
-          ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      label2,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Kumbh Sans',
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    TextField(
+                      controller: controller2,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontFamily: 'Kumbh Sans',
+                        fontWeight: FontWeight.w500,
+                      ),
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -956,31 +1127,37 @@ class _UserProfilePageState extends State<UserProfilePage> {
     required double height,
   }) {
     return Container(
-      height: height,
+      constraints: BoxConstraints(minHeight: height),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(3),
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 12,
+              style: TextStyle(
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Kumbh Sans',
+                color: Colors.grey.shade700,
               ),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 4),
             TextField(
               controller: controller,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 13,
                 fontFamily: 'Kumbh Sans',
+                fontWeight: FontWeight.w500,
               ),
               decoration: const InputDecoration(
                 isDense: true,
@@ -1001,77 +1178,91 @@ class _UserProfilePageState extends State<UserProfilePage> {
     required TextEditingController controller2,
   }) {
     return Container(
-      height: 54,
+      constraints: const BoxConstraints(minHeight: 68),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(3),
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    label1,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Kumbh Sans',
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        child: IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      label1,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Kumbh Sans',
+                        color: Colors.grey.shade700,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  TextField(
-                    controller: controller1,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'Kumbh Sans',
+                    const SizedBox(height: 4),
+                    TextField(
+                      controller: controller1,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontFamily: 'Kumbh Sans',
+                        fontWeight: FontWeight.w500,
+                      ),
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                        border: InputBorder.none,
+                      ),
                     ),
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 11),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    label2,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Kumbh Sans',
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  TextField(
-                    controller: controller2,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontFamily: 'Kumbh Sans',
-                    ),
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ],
+              Container(
+                width: 1,
+                color: Colors.grey.shade300,
+                margin: const EdgeInsets.symmetric(horizontal: 12),
               ),
-            ),
-          ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      label2,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Kumbh Sans',
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    TextField(
+                      controller: controller2,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontFamily: 'Kumbh Sans',
+                        fontWeight: FontWeight.w500,
+                      ),
+                      decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                        border: InputBorder.none,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1079,37 +1270,49 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildLanguageField() {
     return Container(
-      height: 30,
+      constraints: const BoxConstraints(minHeight: 58),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(3),
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Preferred Language/s:',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Kumbh Sans',
+                color: Colors.grey.shade700,
               ),
             ),
+            const SizedBox(width: 8),
             Expanded(
               child: TextField(
                 controller: _preferredLanguagesController,
                 style: const TextStyle(
-                  fontSize: 12,
+                  fontSize: 13,
                   fontFamily: 'Kumbh Sans',
+                  fontWeight: FontWeight.w500,
                 ),
                 textAlign: TextAlign.right,
                 decoration: const InputDecoration(
                   isDense: true,
                   contentPadding: EdgeInsets.zero,
                   border: InputBorder.none,
+                  hintText: 'e.g., English, Spanish',
+                  hintStyle: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey,
+                  ),
                 ),
               ),
             ),

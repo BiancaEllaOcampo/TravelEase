@@ -12,6 +12,7 @@ import '../pages/admin/admin_user_management.dart';
 import '../pages/user/user_travel_requirments.dart';
 import '../pages/user/user_fticket.dart';
 import '../pages/user/user_documents_checklist.dart';
+import '../pages/user/user_view_document_with_ai.dart';
 import '../pages/admin/admin_announcement.dart';
 import '../pages/admin/admin_requirement_configuration.dart';
 import '../pages/admin/admin_document_veification.dart';
@@ -184,6 +185,22 @@ class DebugPage extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => const UserDocumentsChecklistPage(country: 'Japan'),
+                ),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'View Document with AI (Flight Ticket)',
+              'View document details with AI analysis',
+              Icons.analytics,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const UserViewDocumentWithAIPage(
+                    documentName: 'Flight Ticket',
+                    country: 'Japan',
+                  ),
                 ),
               ),
             ),
