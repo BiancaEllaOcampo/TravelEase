@@ -3,6 +3,7 @@ import '../pages/splash_screen.dart';
 import '../pages/user/user_login.dart';
 import '../pages/user/user_signup.dart';
 import '../pages/user/user_homepage.dart';
+import '../pages/user/user_profile.dart';
 import 'template.dart';
 import 'template_with_menu.dart';
 import '../pages/admin/admin_login.dart';
@@ -104,6 +105,17 @@ class DebugPage extends StatelessWidget {
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const UserHomePage()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'User Profile',
+              'User profile page with personal information and security settings',
+              Icons.person,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UserProfilePage()),
               ),
             ),
             

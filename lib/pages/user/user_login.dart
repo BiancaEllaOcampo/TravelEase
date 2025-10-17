@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../admin/admin_login.dart';
 import 'user_homepage.dart';
 
@@ -331,10 +332,43 @@ class _UserLoginPageState extends State<UserLoginPage> {
     setState(() => _isLoading = true);
     try {
       final auth = FirebaseAuth.instance;
-      await auth.signInWithEmailAndPassword(
+      final firestore = FirebaseFirestore.instance;
+      
+      // Sign in user
+      final userCredential = await auth.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
+
+      // Check if user profile exists in Firestore, create if not
+      if (userCredential.user != null) {
+        final userDoc = await firestore
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .get();
+
+        if (!userDoc.exists) {
+          // Create profile for existing auth users who don't have a Firestore profile yet
+          await firestore.collection('users').doc(userCredential.user!.uid).set({
+            'fullName': userCredential.user!.displayName ?? '',
+            'email': userCredential.user!.email ?? _emailController.text.trim(),
+            'phoneNumber': '',
+            'address': '',
+            'passportNumber': '',
+            'passportExpiration': '',
+            'visaNumber': '',
+            'insuranceProvider': '',
+            'emergencyContact': '',
+            'preferredAirport': '',
+            'preferredLanguages': '',
+            'twoFactorEnabled': false,
+            'dataProcessingConsent': false,
+            'profileImageUrl': null,
+            'createdAt': FieldValue.serverTimestamp(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+      }
 
       _showSnackBar('Login successful!');
       if (mounted) {
@@ -348,10 +382,12 @@ class _UserLoginPageState extends State<UserLoginPage> {
         message = 'Incorrect password.';
       } else if (e.code == 'invalid-email') {
         message = 'Invalid email address.';
+      } else if (e.code == 'invalid-credential') {
+        message = 'Invalid email or password.';
       }
       _showSnackBar(message);
     } catch (e) {
-      _showSnackBar('An unexpected error occurred.');
+      _showSnackBar('An unexpected error occurred: ${e.toString()}');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

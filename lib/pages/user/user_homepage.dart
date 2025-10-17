@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'user_travel_requirments.dart';
 import '../../dev/template_with_menu.dart';
+import '../splash_screen.dart';
   
 class UserHomePage extends StatelessWidget {
   final String? username;
@@ -10,6 +11,32 @@ class UserHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check if user is still logged in
+    final currentUser = FirebaseAuth.instance.currentUser;
+    
+    if (currentUser == null) {
+      // User is not logged in, redirect to splash screen
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const SplashScreen()),
+          (route) => false,
+        );
+      });
+      
+      // Return a loading screen while navigating
+      return Scaffold(
+        body: Container(
+          color: const Color(0xFFD9D9D9),
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: Color(0xFF348AA7),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       drawer: const TravelEaseDrawer(),
       appBar: PreferredSize(

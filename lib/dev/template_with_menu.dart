@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../pages/user/user_homepage.dart';
 import '../pages/splash_screen.dart';
 import '../pages/user/user_travel_requirments.dart';
+import '../pages/user/user_profile.dart';
 
 class TemplateWithMenuPage extends StatelessWidget {
   const TemplateWithMenuPage({super.key});
@@ -187,7 +188,10 @@ class TravelEaseDrawer extends StatelessWidget {
                     Icons.person_outline,
                     () {
                       Navigator.pop(context);
-                      // TODO: Navigate to profile
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const UserProfilePage()),
+                      );
                     },
                     badgeCount: 3,
                   ),

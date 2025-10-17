@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../splash_screen.dart';
 
 class FlightTicketPage extends StatefulWidget {
   const FlightTicketPage({super.key});
@@ -36,6 +38,20 @@ class _FlightTicketPageState extends State<FlightTicketPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if user is authenticated
+    if (FirebaseAuth.instance.currentUser == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const SplashScreen()),
+          (route) => false,
+        );
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     const primary = Color(0xFF125E77);
     const accent = Color(0xFF348AA7);
     const danger = Color(0xFFC63F3F);

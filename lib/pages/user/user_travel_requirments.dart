@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../dev/template_with_menu.dart';
+import '../splash_screen.dart';
 
 class UserTravelRequirementsPage extends StatefulWidget {
   const UserTravelRequirementsPage({super.key});
@@ -13,6 +15,20 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
 
   @override
   Widget build(BuildContext context) {
+    // Check if user is authenticated
+    if (FirebaseAuth.instance.currentUser == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const SplashScreen()),
+          (route) => false,
+        );
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       drawer: const TravelEaseDrawer(),
       appBar: PreferredSize(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'user_homepage.dart';
 
 class UserSignupPage extends StatefulWidget {
@@ -401,6 +402,9 @@ class _UserSignupPageState extends State<UserSignupPage> {
     setState(() => _isLoading = true);
     try {
       final auth = FirebaseAuth.instance;
+      final firestore = FirebaseFirestore.instance;
+      
+      // Create user account
       final userCredential = await auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
@@ -409,6 +413,28 @@ class _UserSignupPageState extends State<UserSignupPage> {
       // Update display name (first + last)
       final displayName = '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
       await userCredential.user?.updateDisplayName(displayName);
+
+      // Create user profile in Firestore
+      if (userCredential.user != null) {
+        await firestore.collection('users').doc(userCredential.user!.uid).set({
+          'fullName': displayName,
+          'email': _emailController.text.trim(),
+          'phoneNumber': '',
+          'address': '',
+          'passportNumber': '',
+          'passportExpiration': '',
+          'visaNumber': '',
+          'insuranceProvider': '',
+          'emergencyContact': '',
+          'preferredAirport': '',
+          'preferredLanguages': '',
+          'twoFactorEnabled': false,
+          'dataProcessingConsent': false,
+          'profileImageUrl': null,
+          'createdAt': FieldValue.serverTimestamp(),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
 
       _showSnackBar('Account created successfully!');
 
@@ -430,7 +456,7 @@ class _UserSignupPageState extends State<UserSignupPage> {
       }
       _showSnackBar(message);
     } catch (e) {
-      _showSnackBar('An unexpected error occurred.');
+      _showSnackBar('An unexpected error occurred: ${e.toString()}');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
