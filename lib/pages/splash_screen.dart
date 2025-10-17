@@ -50,21 +50,28 @@ class SplashScreen extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          // Background
+          // Background Gradient
           Container(
             width: double.infinity,
             height: double.infinity,
-            color: const Color(0xFFD9D9D9),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  const Color(0xFF125E77),
+                  const Color(0xFF348AA7),
+                  const Color(0xFFD9D9D9),
+                ],
+                stops: const [0.0, 0.5, 1.0],
+              ),
+            ),
           ),
           
-          // Background Image with opacity
-          Positioned(
-            top: 0, // Start from top since AppBar now handles the banner
-            left: 0,
-            right: 0,
-            height: 835,
+          // Background Image with opacity and blur effect
+          Positioned.fill(
             child: Opacity(
-              opacity: 0.75,
+              opacity: 0.3,
               child: Container(
                 decoration: const BoxDecoration(
                   image: DecorationImage(
@@ -75,109 +82,192 @@ class SplashScreen extends StatelessWidget {
               ),
             ),
           ),
-          
-          // Main Tagline
+
+          // Decorative circles
           Positioned(
-            top: 120, // Reduced gap - was 250 + 48, now properly positioned
-            left: 50,
-            right: 50,
+            top: 100,
+            right: -50,
             child: Container(
-              alignment: Alignment.center,
-              child: Text(
-                'Your hassle-free travel companion',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 48,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'Kumbh Sans',
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withOpacity(0.25),
-                      offset: const Offset(0, 4),
-                      blurRadius: 4,
-                    ),
-                  ],
-                ),
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.1),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 200,
+            left: -80,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.08),
               ),
             ),
           ),
           
-          // Login Button
+          // Main Tagline with enhanced styling
           Positioned(
-            top: 382, // Reduced gap - was 512 + 48, now properly positioned
+            top: 50,
+            left: 30,
+            right: 30,
+            child: Column(
+              children: [
+                // Icon
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 25,
+                        offset: const Offset(0, 12),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.flight_takeoff,
+                    color: Color(0xFF348AA7),
+                    size: 60,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                // Tagline
+                Text(
+                  'Your hassle-free\ntravel companion',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 38,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Kumbh Sans',
+                    height: 1.2,
+                    letterSpacing: 0.5,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.5),
+                        offset: const Offset(0, 3),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Subtitle - removed for cleaner look
+              ],
+            ),
+          ),
+          
+          // Login Button with modern styling
+          Positioned(
+            bottom: 220,
             left: 45,
             right: 45,
             child: Container(
-              height: 65,
+              height: 60,
               decoration: BoxDecoration(
-                color: const Color(0xFF348AA7),
-                borderRadius: BorderRadius.circular(50),
-                border: Border.all(
-                  color: Colors.black.withOpacity(0.1),
-                  width: 1,
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF348AA7),
+                    Color(0xFF125E77),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF125E77).withOpacity(0.5),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
-              child: MaterialButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const UserLoginPage()),
-                  );
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
-                ),
-                child: const Text(
-                  'Login',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Kumbh Sans',
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const UserLoginPage()),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(30),
+                  child: const Center(
+                    child: Text(
+                      'Login',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Kumbh Sans',
+                        letterSpacing: 1.2,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
           
-          // Create Account Button
+          // Create Account Button with modern styling
           Positioned(
-            top: 484, // Reduced gap - was 614 + 48, now properly positioned
+            bottom: 140,
             left: 45,
             right: 45,
             child: Container(
-              height: 65,
+              height: 60,
               decoration: BoxDecoration(
-                color: const Color(0xFF348AA7),
-                borderRadius: BorderRadius.circular(50),
-              ),
-              child: MaterialButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const UserSignupPage()),
-                  );
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30),
+                border: Border.all(
+                  color: const Color(0xFF348AA7),
+                  width: 2.5,
                 ),
-                child: const Text(
-                  'Create an Account',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Kumbh Sans',
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const UserSignupPage()),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(30),
+                  child: const Center(
+                    child: Text(
+                      'Create an Account',
+                      style: TextStyle(
+                        color: Color(0xFF125E77),
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Kumbh Sans',
+                        letterSpacing: 1.2,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
 
-          // Debug Button (Small, discrete button for development)
+          // Debug Button
           Positioned(
-            top: 10, // Position relative to AppBar content area
+            top: 10,
             right: 10,
             child: Container(
               width: 40,
@@ -203,25 +293,40 @@ class SplashScreen extends StatelessWidget {
             ),
           ),
 
-          // Bottom Links
+          // Bottom Links with enhanced styling
           Positioned(
-            bottom: 44,
-            left: 33,
-            right: 33,
+            bottom: 30,
+            left: 0,
+            right: 0,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 GestureDetector(
                   onTap: () {
                     // Handle About Us navigation
                   },
-                  child: const Text(
-                    'About Us',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 25,
-                      fontWeight: FontWeight.w300,
-                      fontFamily: 'Kumbh Sans',
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'About Us',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Kumbh Sans',
+                        letterSpacing: 0.5,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.3),
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -229,13 +334,28 @@ class SplashScreen extends StatelessWidget {
                   onTap: () {
                     // Handle Mission & Vision navigation
                   },
-                  child: const Text(
-                    'Mission & Vision',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 25,
-                      fontWeight: FontWeight.w300,
-                      fontFamily: 'Kumbh Sans',
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Mission & Vision',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Kumbh Sans',
+                        letterSpacing: 0.5,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withOpacity(0.3),
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
