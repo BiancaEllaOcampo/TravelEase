@@ -11,6 +11,7 @@ import '../pages/admin/admin_dashboard.dart';
 import '../pages/admin/admin_user_management.dart';
 import '../pages/user/user_travel_requirments.dart';
 import '../pages/user/user_fticket.dart';
+import '../pages/user/user_documents_checklist.dart';
 import '../pages/admin/admin_announcement.dart';
 import '../pages/admin/admin_requirement_configuration.dart';
 import '../pages/admin/admin_document_veification.dart';
@@ -171,6 +172,19 @@ class DebugPage extends StatelessWidget {
               () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const UserTravelRequirementsPage()),
+              ),
+            ),
+
+            _buildDebugButton(
+              context,
+              'Document Checklist (Japan)',
+              'View document checklist for Japan',
+              Icons.checklist,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const UserDocumentsChecklistPage(country: 'Japan'),
+                ),
               ),
             ),
 

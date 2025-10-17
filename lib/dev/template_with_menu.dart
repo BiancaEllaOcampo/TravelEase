@@ -4,6 +4,7 @@ import '../pages/user/user_homepage.dart';
 import '../pages/splash_screen.dart';
 import '../pages/user/user_travel_requirments.dart';
 import '../pages/user/user_profile.dart';
+import '../utils/checklist_helper.dart';
 
 class TemplateWithMenuPage extends StatelessWidget {
   const TemplateWithMenuPage({super.key});
@@ -209,11 +210,11 @@ class TravelEaseDrawer extends StatelessWidget {
                   ),
                   _buildMenuItem(
                     context,
-                    'View My Documents',
-                    Icons.folder_open_outlined,
+                    'Documents Checklist',
+                    Icons.checklist_rtl,
                     () {
                       Navigator.pop(context);
-                      // TODO: Navigate to documents
+                      ChecklistHelper.navigateToChecklist(context);
                     },
                   ),
                   _buildMenuItem(

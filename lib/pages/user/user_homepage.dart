@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'user_travel_requirments.dart';
+import 'user_profile.dart' as user_profile;
 import '../../dev/template_with_menu.dart';
+import '../../utils/checklist_helper.dart';
 import '../splash_screen.dart';
   
 class UserHomePage extends StatelessWidget {
@@ -95,249 +97,231 @@ class UserHomePage extends StatelessWidget {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height + 200, // Extra height for scrolling
-          child: Stack(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: const Color(0xFFD9D9D9),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 34, vertical: 31),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Background
-              Container(
-                width: double.infinity,
-                height: double.infinity,
-                color: const Color(0xFFD9D9D9),
-              ),
-          
-          // Welcome Message
-          Positioned(
-            top: 31,
-            left: 36,
-            child: Builder(builder: (context) {
-              // Determine display name: constructor -> Firebase displayName -> email prefix -> fallback
-              final user = FirebaseAuth.instance.currentUser;
-              String displayName = username ?? user?.displayName ?? (user?.email != null ? user!.email!.split('@').first : 'Traveler');
-              if (displayName.trim().isEmpty) displayName = 'Traveler';
+              // Welcome Message
+              Builder(builder: (context) {
+                // Determine display name: constructor -> Firebase displayName -> email prefix -> fallback
+                final user = FirebaseAuth.instance.currentUser;
+                String displayName = username ?? user?.displayName ?? (user?.email != null ? user!.email!.split('@').first : 'Traveler');
+                if (displayName.trim().isEmpty) displayName = 'Traveler';
 
-              return RichText(
-                text: TextSpan(
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontFamily: 'Kumbh Sans',
-                    color: Colors.black,
-                  ),
-                  children: [
-                    const TextSpan(
-                      text: 'Welcome back, ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.normal,
-                      ),
-                    ),
-                    TextSpan(
-                      text: '$displayName!',
+                return Padding(
+                  padding: const EdgeInsets.only(left: 2),
+                  child: RichText(
+                    text: TextSpan(
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        fontFamily: 'Kumbh Sans',
+                        color: Colors.black,
                       ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-          ),
-          
-          // User Alert Card
-          Positioned(
-            top: 76,
-            left: 34,
-            right: 34,
-            child: Container(
-              height: 232,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: const Color(0xFF348AA7),
-                  width: 2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
                       children: [
-                        const SizedBox(height: 8),
-                        // Alert Title
-                        const Text(
-                          'Ready to start your checklist?',
+                        const TextSpan(
+                          text: 'Welcome back, ',
                           style: TextStyle(
-                            color: Color(0xFF125E77),
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Kumbh Sans',
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        
-                        const SizedBox(height: 8),
-                        
-                        // Alert Description
-                        const Text(
-                          'Before you start, please complete your profile information and upload your required documents to get real-time verification.',
-                          style: TextStyle(
-                            color: Color(0xFF125E77),
-                            fontSize: 16,
                             fontWeight: FontWeight.normal,
-                            fontFamily: 'Kumbh Sans',
                           ),
-                          textAlign: TextAlign.left,
+                        ),
+                        TextSpan(
+                          text: '$displayName!',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
-                    
-                    // Go to Profile Button
-                    SizedBox(
-                      width: 255,
-                      height: 49,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Handle go to profile
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFA54547),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                        ),
-                        child: const Text(
-                          'Go to Profile',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Kumbh Sans',
-                          ),
-                        ),
-                      ),
+                  ),
+                );
+              }),
+              
+              const SizedBox(height: 20),
+              
+              // User Alert Card
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: const Color(0xFF348AA7),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        children: [
+                          const SizedBox(height: 8),
+                          // Alert Title
+                          const Text(
+                            'Ready to start your checklist?',
+                            style: TextStyle(
+                              color: Color(0xFF125E77),
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Kumbh Sans',
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          
+                          const SizedBox(height: 8),
+                          
+                          // Alert Description
+                          const Text(
+                            'Before you start, please complete your profile information and upload your required documents to get real-time verification.',
+                            style: TextStyle(
+                              color: Color(0xFF125E77),
+                              fontSize: 16,
+                              fontWeight: FontWeight.normal,
+                              fontFamily: 'Kumbh Sans',
+                            ),
+                            textAlign: TextAlign.left,
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Go to Profile Button
+                      SizedBox(
+                        width: 255,
+                        height: 49,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const user_profile.UserProfilePage()),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFA54547),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                          ),
+                          child: const Text(
+                            'Go to Profile',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Kumbh Sans',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-          
-          // Travel Requirements Button
-          Positioned(
-            top: 329,
-            left: 34,
-            right: 34,
-            child: _buildFeatureButton(
-              context,
-              'Travel Requirements',
-              'Check requirements for your destination',
-              Icons.flight_takeoff,
-              () => Navigator.push(
+              
+              const SizedBox(height: 20),
+              
+              // Travel Requirements Button
+              _buildFeatureButton(
                 context,
-                MaterialPageRoute(builder: (context) => const UserTravelRequirementsPage()),
+                'Travel Requirements',
+                'Check requirements for your destination',
+                Icons.flight_takeoff,
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const UserTravelRequirementsPage()),
+                ),
               ),
-            ),
-          ),
-          
-          // Documents Checklist Button
-          Positioned(
-            top: 445,
-            left: 34,
-            right: 34,
-            child: _buildFeatureButton(
-              context,
-              'Documents Checklist',
-              'Create and manage your travel document checklist',
-              Icons.checklist_rtl,
-              () {
-                // Handle documents checklist navigation
-              },
-            ),
-          ),
-          
-          // View My Documents Button
-          Positioned(
-            top: 561,
-            left: 34,
-            right: 34,
-            child: _buildFeatureButton(
-              context,
-              'View My Documents',
-              'Access your uploaded documents and verification status',
-              Icons.folder_open,
-              () {
-                // Handle view documents navigation
-              },
-            ),
-          ),
-          
-          // View AI Feedback Button
-          Positioned(
-            top: 677,
-            left: 34,
-            right: 34,
-            child: _buildFeatureButton(
-              context,
-              'View AI Feedback',
-              'Get AI-powered insights on your documents',
-              Icons.psychology,
-              () {
-                // Handle AI feedback navigation
-              },
-            ),
-          ),
-          
-          // Bottom Links
-          Positioned(
-            bottom: 52,
-            left: 33,
-            right: 33,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    // Handle About Us navigation
-                  },
-                  child: const Text(
-                    'About Us',
-                    style: TextStyle(
-                      color: Color(0xFF348AA7),
-                      fontSize: 25,
-                      fontWeight: FontWeight.w300,
-                      fontFamily: 'Kumbh Sans',
+              
+              const SizedBox(height: 6),
+              
+              // Documents Checklist Button
+              _buildFeatureButton(
+                context,
+                'Documents Checklist',
+                'Create and manage your travel document checklist',
+                Icons.checklist_rtl,
+                () => ChecklistHelper.navigateToChecklist(context),
+              ),
+              
+              const SizedBox(height: 6),
+
+              // View AI Feedback Button
+              _buildFeatureButton(
+                context,
+                'View AI Feedback',
+                'Get AI-powered insights on your documents',
+                Icons.psychology,
+                () {
+                  // Handle AI feedback navigation
+                },
+              ),
+
+              const SizedBox(height: 6),
+
+              // View Announcements Button
+              _buildFeatureButton(
+                context,
+                'View Announcements',
+                'Stay updated with travel alerts and important notices',
+                Icons.campaign,
+                () {
+                  // TODO: Handle announcements navigation
+                },
+              ),
+              
+              const SizedBox(height: 32),
+              
+              // Bottom Links
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      // Handle About Us navigation
+                    },
+                    child: const Text(
+                      'About Us',
+                      style: TextStyle(
+                        color: Color(0xFF348AA7),
+                        fontSize: 25,
+                        fontWeight: FontWeight.w300,
+                        fontFamily: 'Kumbh Sans',
+                      ),
                     ),
                   ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    // Handle Feedback navigation
-                  },
-                  child: const Text(
-                    'Feedback',
-                    style: TextStyle(
-                      color: Color(0xFF348AA7),
-                      fontSize: 25,
-                      fontWeight: FontWeight.w300,
-                      fontFamily: 'Kumbh Sans',
+                  GestureDetector(
+                    onTap: () {
+                      // Handle Feedback navigation
+                    },
+                    child: const Text(
+                      'Feedback',
+                      style: TextStyle(
+                        color: Color(0xFF348AA7),
+                        fontSize: 25,
+                        fontWeight: FontWeight.w300,
+                        fontFamily: 'Kumbh Sans',
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+              
+              const SizedBox(height: 32),
+            ],
           ),
-        ],
-      ),
         ),
       ),
     );
