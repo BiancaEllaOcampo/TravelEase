@@ -57,6 +57,7 @@ Four states in Firestore (`users/{uid}/checklists/{country}/{docName}/status`):
 ```
 users/{userId}/
   fullName, email, phoneNumber, address, passport*, visa*, insurance*
+  profileImageUrl: string  // Firebase Storage download URL
   checklists/
     {country}:  // Only ONE country per user (enforced)
       {documentName}: {
@@ -64,6 +65,18 @@ users/{userId}/
         url: string,
         updatedAt: timestamp
       }
+```
+
+### Firebase Storage Structure
+```
+storage/
+├── user_profiles/
+│   └── {userId}/
+│       └── profile_{userId}_{timestamp}.jpg  // User profile pictures (max 5MB)
+└── user_documents/  // For future document uploads
+    └── {userId}/
+        └── {docType}/
+            └── {fileName}  // Travel documents (max 10MB)
 ```
 
 ### Authentication Pattern
@@ -144,8 +157,9 @@ flutter build apk            # Build APK
 
 ## Key Files Reference
 - `lib/main.dart` - Entry point, Firebase init, auth state routing
-- `lib/pages/splash_screen.dart` - Landing page with login/signup
+- `lib/pages/splash_screen.dart` - Landing page with login/signup (modern gradient UI)
 - `lib/pages/user/user_homepage.dart` - User dashboard (responsive layout)
+- `lib/pages/user/user_profile.dart` - User profile management with profile picture upload
 - `lib/pages/user/user_travel_requirments.dart` - Destination selector, checklist creator
 - `lib/pages/user/user_documents_checklist.dart` - Document upload/status tracking
 - `lib/utils/user_app_drawer.dart` - **User navigation drawer** (use for all user pages)
@@ -153,6 +167,7 @@ flutter build apk            # Build APK
 - `lib/dev/template.dart` - Page template with back button
 - `lib/dev/template_with_menu.dart` - Page template with drawer menu (imports user_app_drawer)
 - `lib/dev/debug_page.dart` - Dev navigation hub (**remove for prod**)
+- `firebase/storage.rules` - Firebase Storage security rules (profile pictures, documents)
 
 ## Recurring Code Patterns
 
@@ -196,17 +211,37 @@ Container(
 ## Known Limitations
 - **No tests** - `test/` directory unused
 - **iOS untested** - Android only
-- **File upload TODO** - Document upload UI exists, needs Firebase Storage backend
 - **AI analysis TODO** - Report view placeholder only
 - **Admin workflows incomplete** - Admin/Master role pages partially implemented
 - Typography: 'Kumbh Sans' set globally in `main.dart` but also specified locally in widgets
 
+## Recently Implemented Features
+- ✅ **Modern Splash Screen UI** - Enhanced landing page with gradient backgrounds, decorative circles, and polished button designs
+  - LinearGradient background (teal to gray)
+  - Reduced background image opacity for better text contrast
+  - Gradient buttons with shadows
+  - Enhanced typography with letter spacing
+  
+- ✅ **Profile Picture Upload** - Users can upload/change profile pictures via camera or gallery
+  - Uses Firebase Storage (`user_profiles/{userId}/` path)
+  - Image picker with camera and gallery options
+  - Automatic image optimization (800×800, 85% quality)
+  - Security rules limit uploads to 5MB, images only
+  - Real-time UI updates with loading states
+  - Proper error handling with user feedback
+  - See `PROFILE_PICTURE_IMPLEMENTATION.md` for full technical details
+  - See `DEPLOYMENT_GUIDE.md` for testing instructions
+
 ## Before Production Checklist
 - [ ] Remove `lib/dev/debug_page.dart` and all imports
-- [ ] Remove debug button from `splash_screen.dart`
-- [ ] Implement Firebase Storage for document uploads
+- [ ] Remove debug button from `splash_screen.dart` and `user_homepage.dart`
+- [x] ~~Deploy Firebase Storage security rules~~ (manually deployed in Console)
+- [ ] Implement Firebase Storage for document uploads (checklist documents)
 - [ ] Add comprehensive form validation
 - [ ] Replace SnackBar error handling with proper UI
 - [ ] Test on physical Android devices
 - [ ] Complete admin review workflow
 - [ ] Implement AI document verification backend
+- [ ] Add iOS permissions to Info.plist for camera/photo library
+- [ ] Implement cleanup Cloud Function for old profile pictures
+- [ ] Remove old profile pictures when new ones are uploaded
