@@ -244,9 +244,7 @@ class _MasterLoginPageState extends State<MasterLoginPage> {
                       width: 235,
                       height: 52,
                       child: ElevatedButton(
-                        onPressed: _isLoading ? null : () {
-                          _handleLogin();
-                        },
+                        onPressed: _isLoading ? null : _handleLogin,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF348AA7),
                           shape: RoundedRectangleBorder(
