@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'master_admin&user_management.dart';
 import 'master_document_veification.dart';
 import 'master_announcement.dart';
+import '../../utils/master_app_drawer.dart';
 
-class MasterDashboardPage extends StatelessWidget {
+class MasterDashboardPage extends StatefulWidget {
   const MasterDashboardPage({super.key});
+
+  @override
+  State<MasterDashboardPage> createState() => _MasterDashboardPageState();
+}
+
+class _MasterDashboardPageState extends State<MasterDashboardPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const MasterAppDrawer(),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(130),
         child: Container(
@@ -19,13 +31,20 @@ class MasterDashboardPage extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.menu,
-                    color: Color(0xFFF3F3F3),
-                    size: 24,
-                  ),
+                // Menu Button (opens drawer)
+                Builder(
+                  builder: (BuildContext context) {
+                    return IconButton(
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                      icon: const Icon(
+                        Icons.menu,
+                        color: Color(0xFFF3F3F3),
+                        size: 50,
+                      ),
+                    );
+                  },
                 ),
                 const Text(
                   'TravelEase',
@@ -65,35 +84,22 @@ class MasterDashboardPage extends StatelessWidget {
 
           // Stats Cards
           Positioned(
-            top: 20, // Reduced gap - was 150 - 48, now properly positioned after AppBar
+            top: 20,
             left: 0,
             right: 0,
             child: Column(
               children: [
-                _MasterStatCard(
-                  label: 'Users:',
-                  value: '',
-                ),
-                _MasterStatCard(
-                  label: 'Pending Documents:',
-                  value: '',
-                ),
-                _MasterStatCard(
-                  label: 'Announcements:',
-                  value: '',
-                ),
-                _MasterStatCard(
-                  label: 'Tickets:',
-                  value: '',
-                  isLast: true,
-                ),
+                _MasterStatCard(label: 'Users:', value: ''),
+                _MasterStatCard(label: 'Pending Documents:', value: ''),
+                _MasterStatCard(label: 'Announcements:', value: ''),
+                _MasterStatCard(label: 'Tickets:', value: '', isLast: true),
               ],
             ),
           ),
 
           // Admin Action Buttons
           Positioned(
-            top: 320, // Reduced gap - was 450 - 48, now properly positioned
+            top: 320,
             left: 0,
             right: 0,
             child: Column(
@@ -102,8 +108,10 @@ class MasterDashboardPage extends StatelessWidget {
                   text: 'Admin and User Management',
                   onPressed: () {
                     Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const MasterAdminUserManagement()),
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MasterAdminUserManagement(),
+                      ),
                     );
                   },
                 ),
@@ -132,12 +140,7 @@ class MasterDashboardPage extends StatelessWidget {
                 _MasterActionButton(
                   text: 'System Settings',
                   onPressed: () {
-                    /*Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const MasterDocumentVerificationPage(),
-                      ),
-                    );*/
+                    // TODO: Handle System Settings navigation
                   },
                 ),
               ],
@@ -163,7 +166,6 @@ class _MasterStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      // Remove left/right margin, set width to full
       margin: EdgeInsets.only(
         left: 0,
         right: 0,
@@ -172,9 +174,9 @@ class _MasterStatCard extends StatelessWidget {
       ),
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF348AA7),
-        borderRadius: BorderRadius.zero, // No border radius for full width
+      decoration: const BoxDecoration(
+        color: Color(0xFF348AA7),
+        borderRadius: BorderRadius.zero,
       ),
       child: Row(
         children: [
@@ -202,7 +204,6 @@ class _MasterStatCard extends StatelessWidget {
     );
   }
 }
-//Stats
 
 class _MasterActionButton extends StatelessWidget {
   final String text;

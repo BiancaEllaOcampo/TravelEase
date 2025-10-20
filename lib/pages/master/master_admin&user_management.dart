@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/master_app_drawer.dart';
 
 class MasterAdminUserManagement extends StatefulWidget {
   const MasterAdminUserManagement({super.key});
@@ -11,6 +12,7 @@ class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const MasterAppDrawer(),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(130),
         child: Container(
@@ -21,16 +23,20 @@ class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Menu Button
-                IconButton(
-                  onPressed: () {
-                    // Handle menu tap
+                // Menu Button (opens drawer)
+                Builder(
+                  builder: (BuildContext context) {
+                    return IconButton(
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                      icon: const Icon(
+                        Icons.menu,
+                        color: Color(0xFFF3F3F3),
+                        size: 50,
+                      ),
+                    );
                   },
-                  icon: const Icon(
-                    Icons.menu,
-                    color: Color(0xFFF3F3F3),
-                    size: 24,
-                  ),
                 ),
                 // Title
                 const Text(
@@ -69,9 +75,9 @@ class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
             height: double.infinity,
             color: const Color(0xFFD9D9D9),
           ),
-          // Lists (Empty for now)
+          // Lists
           Positioned(
-            top: 20, // Reduced gap - was 150 - 48, now properly positioned after AppBar
+            top: 20,
             left: 28,
             right: 28,
             child: Column(
@@ -107,14 +113,11 @@ class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
                           ),
                         ],
                       ),
-                      // Empty lists
                       const SizedBox(height: 80),
                     ],
                   ),
                 ),
-
-                SizedBox(height: 20),
-
+                const SizedBox(height: 20),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
@@ -145,21 +148,16 @@ class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
                           ),
                         ],
                       ),
-                      // Empty lists
                       const SizedBox(height: 80),
                     ],
                   ),
                 ),
-
-                // Button 
-                SizedBox(height: 18),
+                const SizedBox(height: 18),
                 SizedBox(
                   width: double.infinity,
                   height: 60,
                   child: ElevatedButton(
-                    onPressed: () {
-                      _handleAddUser();
-                    },
+                    onPressed: _handleAddUser,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 70, 220, 15),
                       shape: RoundedRectangleBorder(
@@ -178,15 +176,12 @@ class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
                     ),
                   ),
                 ),
-
-                SizedBox(height: 18),
+                const SizedBox(height: 18),
                 SizedBox(
                   width: double.infinity,
                   height: 60,
                   child: ElevatedButton(
-                    onPressed: () {
-                      _handleDeleteUser();
-                    },
+                    onPressed: _handleDeleteUser,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(217, 241, 5, 5),
                       shape: RoundedRectangleBorder(
@@ -213,11 +208,11 @@ class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
     );
   }
 
-  void _handleAddUser(){
-    //Does nothing for now
+  void _handleAddUser() {
+    // Does nothing for now
   }
 
-  void _handleDeleteUser(){
-    //Does nothing for now
+  void _handleDeleteUser() {
+    // Does nothing for now
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/master_app_drawer.dart';
 
 class MasterDocumentVerificationPage extends StatefulWidget {
 	const MasterDocumentVerificationPage({Key? key}) : super(key: key);
@@ -83,6 +84,7 @@ class _MasterDocumentVerificationPageState extends State<MasterDocumentVerificat
 	@override
 	Widget build(BuildContext context) {
 		return Scaffold(
+			drawer: const MasterAppDrawer(),
 			backgroundColor: const Color(0xFFD9D9D9),
 			body: Stack(
 				children: [
@@ -99,9 +101,15 @@ class _MasterDocumentVerificationPageState extends State<MasterDocumentVerificat
 								child: Row(
 									mainAxisAlignment: MainAxisAlignment.spaceBetween,
 									children: [
-										IconButton(
-											onPressed: () {},
-											icon: const Icon(Icons.menu, color: Colors.white, size: 24),
+										Builder(
+											builder: (BuildContext context) {
+												return IconButton(
+													onPressed: () {
+														Scaffold.of(context).openDrawer();
+													},
+													icon: const Icon(Icons.menu, color: Colors.white, size: 50),
+												);
+											},
 										),
 										const Text(
 											'Documents Verification\nQueue',
