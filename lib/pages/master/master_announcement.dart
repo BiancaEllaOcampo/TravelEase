@@ -43,9 +43,9 @@ class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
             _isMaster = isMaster;
           });
         }
-        print('Master status check - User Email: ${user.email}, Is Master: $isMaster');
+        debugPrint('Master status check - User Email: ${user.email}, Is Master: $isMaster');
       } catch (e) {
-        print('Error checking master status: $e');
+        debugPrint('Error checking master status: $e');
         if (mounted) {
           setState(() {
             _isMaster = false;
