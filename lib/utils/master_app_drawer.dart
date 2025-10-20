@@ -6,10 +6,10 @@ import '../pages/master/master_dashboard.dart';
 import '../pages/master/master_document_veification.dart';
 import '../pages/splash_screen.dart';
 
-/// TravelEase User Navigation Drawer
+/// TravelEase Master Navigation Drawer
 /// 
-/// A reusable side navigation menu for regular users in the TravelEase app.
-/// This drawer provides quick access to all main user features.
+/// A reusable side navigation menu for master users (administrators) in the TravelEase app.
+/// This drawer provides quick access to all main master user features.
 /// 
 /// Usage:
 /// ```dart
