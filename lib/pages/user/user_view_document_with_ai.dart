@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:io';
 import '../../utils/user_app_drawer.dart';
 import '../splash_screen.dart';
 
@@ -23,11 +27,14 @@ class _UserViewDocumentWithAIPageState
     extends State<UserViewDocumentWithAIPage> {
   late FirebaseAuth _auth;
   late FirebaseFirestore _firestore;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final ImagePicker _imagePicker = ImagePicker();
 
   String documentStatus = 'pending';
   String documentUrl = '';
   Map<String, dynamic> extractedData = {};
   String aiFeedback = '';
+  bool _isUploading = false;
 
   @override
   void initState() {
@@ -65,19 +72,175 @@ class _UserViewDocumentWithAIPageState
     }
   }
 
-  void _handleReupload() {
-    // TODO: Implement file upload to Firebase Storage
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-          content: Text('Re-upload functionality for ${widget.documentName} coming soon!')),
-    );
+  void _handleReupload() async {
+    try {
+      // Show dialog to choose between camera or gallery
+      final ImageSource? source = await showDialog<ImageSource>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              'Re-upload ${widget.documentName}',
+              style: const TextStyle(fontFamily: 'Kumbh Sans'),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.photo_library, color: Color(0xFF348AA7)),
+                  title: const Text('Choose from Gallery'),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.camera_alt, color: Color(0xFF348AA7)),
+                  title: const Text('Take a Photo'),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (source == null) return;
+
+      // Pick image
+      final XFile? pickedFile = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 85,
+      );
+
+      if (pickedFile == null) return;
+
+      // Show loading
+      setState(() {
+        _isUploading = true;
+      });
+
+      final User? currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('No user logged in');
+      }
+
+      // Create a reference to the storage location
+      final String sanitizedDocName = widget.documentName.replaceAll(' ', '_').toLowerCase();
+      final String sanitizedCountry = widget.country.replaceAll(' ', '_').toLowerCase();
+      final String fileName = '${sanitizedDocName}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      
+      final Reference storageRef = _storage
+          .ref()
+          .child('user_documents')
+          .child(currentUser.uid)
+          .child(sanitizedCountry)
+          .child(sanitizedDocName)
+          .child(fileName);
+
+      // Upload file
+      final File file = File(pickedFile.path);
+      final UploadTask uploadTask = storageRef.putFile(
+        file,
+        SettableMetadata(
+          contentType: 'image/jpeg',
+          customMetadata: {
+            'userId': currentUser.uid,
+            'country': widget.country,
+            'documentType': widget.documentName,
+            'uploadedAt': DateTime.now().toIso8601String(),
+          },
+        ),
+      );
+
+      // Wait for upload to complete
+      final TaskSnapshot snapshot = await uploadTask;
+
+      // Get download URL
+      final String downloadUrl = await snapshot.ref.getDownloadURL();
+
+      // Update Firestore with new document URL and status
+      await _firestore.collection('users').doc(currentUser.uid).update({
+        'checklists.${widget.country}.${widget.documentName}': {
+          'status': 'verifying',  // Change status to verifying after upload
+          'url': downloadUrl,
+          'updatedAt': FieldValue.serverTimestamp(),
+        },
+      });
+
+      // Update local state and reload data
+      await _loadDocumentData();
+      
+      setState(() {
+        _isUploading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${widget.documentName} uploaded successfully'),
+            backgroundColor: const Color(0xFF34C759),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isUploading = false;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error uploading document: ${e.toString()}'),
+            backgroundColor: const Color(0xFFA54547),
+          ),
+        );
+      }
+    }
   }
 
-  void _handleViewOriginal() {
-    // TODO: Implement viewing original document
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('View original document coming soon!')),
-    );
+  Future<void> _handleViewOriginal() async {
+    if (documentUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No document uploaded yet')),
+      );
+      return;
+    }
+    
+    try {
+      final Uri url = Uri.parse(documentUrl);
+      
+      // Check if URL can be launched
+      if (await canLaunchUrl(url)) {
+        await launchUrl(
+          url,
+          mode: LaunchMode.externalApplication, // Opens in browser
+        );
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open document'),
+              backgroundColor: Color(0xFFA54547),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error opening document: ${e.toString()}'),
+            backgroundColor: const Color(0xFFA54547),
+          ),
+        );
+      }
+    }
   }
 
   Color _getStatusColor(String status) {
@@ -319,12 +482,42 @@ class _UserViewDocumentWithAIPageState
                                   ),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.image_outlined,
-                                    size: 60,
-                                    color: Color(0xFF125E77),
-                                  ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(6),
+                                  child: documentUrl.isNotEmpty
+                                      ? Image.network(
+                                          documentUrl,
+                                          fit: BoxFit.cover,
+                                          loadingBuilder: (context, child, loadingProgress) {
+                                            if (loadingProgress == null) return child;
+                                            return Center(
+                                              child: CircularProgressIndicator(
+                                                value: loadingProgress.expectedTotalBytes != null
+                                                    ? loadingProgress.cumulativeBytesLoaded /
+                                                        loadingProgress.expectedTotalBytes!
+                                                    : null,
+                                                color: const Color(0xFF348AA7),
+                                                strokeWidth: 2,
+                                              ),
+                                            );
+                                          },
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return const Center(
+                                              child: Icon(
+                                                Icons.broken_image_outlined,
+                                                size: 60,
+                                                color: Color(0xFFA54547),
+                                              ),
+                                            );
+                                          },
+                                        )
+                                      : const Center(
+                                          child: Icon(
+                                            Icons.image_outlined,
+                                            size: 60,
+                                            color: Color(0xFF125E77),
+                                          ),
+                                        ),
                                 ),
                               ),
                               // Status badge
@@ -510,6 +703,42 @@ class _UserViewDocumentWithAIPageState
               ],
             ),
           ),
+
+          // Loading overlay
+          if (_isUploading)
+            Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: Colors.black.withOpacity(0.5),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const CircularProgressIndicator(
+                      color: Color(0xFF348AA7),
+                      strokeWidth: 4,
+                    ),
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Text(
+                        'Uploading document...',
+                        style: TextStyle(
+                          color: Color(0xFF125E77),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Kumbh Sans',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
     );

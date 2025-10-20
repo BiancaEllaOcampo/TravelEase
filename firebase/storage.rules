@@ -16,8 +16,8 @@ service firebase.storage {
                    && request.resource.contentType.matches('image/.*');  // Only images
     }
     
-    // Document uploads (for future use)
-    match /user_documents/{userId}/{docType}/{fileName} {
+    // Travel document uploads
+    match /user_documents/{userId}/{country}/{documentType}/{fileName} {
       // Allow users to read only their own documents
       allow read: if request.auth != null 
                   && request.auth.uid == userId;
@@ -25,7 +25,8 @@ service firebase.storage {
       // Allow users to upload/update/delete only their own documents
       allow write: if request.auth != null 
                    && request.auth.uid == userId
-                   && request.resource.size < 10 * 1024 * 1024;  // Max 10MB
+                   && request.resource.size < 10 * 1024 * 1024  // Max 10MB
+                   && request.resource.contentType.matches('image/.*');  // Only images
     }
     
     // Admin access (for future admin features)

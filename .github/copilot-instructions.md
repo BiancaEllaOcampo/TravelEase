@@ -232,16 +232,30 @@ Container(
   - See `PROFILE_PICTURE_IMPLEMENTATION.md` for full technical details
   - See `DEPLOYMENT_GUIDE.md` for testing instructions
 
+- ✅ **Travel Documents Upload** - Users can upload travel documents (passport, visa, flight tickets, etc.)
+  - Uses Firebase Storage (`user_documents/{userId}/{country}/{docType}/` path)
+  - Camera and gallery options via image picker
+  - Automatic image optimization (1920×1920, 85% quality)
+  - Security rules limit uploads to 10MB, images only
+  - Auto-status change to 'verifying' after upload
+  - Re-upload functionality on document view page
+  - Loading overlays during upload
+  - Success/error notifications
+  - See `TRAVEL_DOCUMENTS_UPLOAD.md` for full technical details
+  - See `UPLOAD_FEATURE_COMPLETE.md` for quick reference
+
 ## Before Production Checklist
 - [ ] Remove `lib/dev/debug_page.dart` and all imports
 - [ ] Remove debug button from `splash_screen.dart` and `user_homepage.dart`
 - [x] ~~Deploy Firebase Storage security rules~~ (manually deployed in Console)
-- [ ] Implement Firebase Storage for document uploads (checklist documents)
+- [x] ~~Implement Firebase Storage for document uploads~~ (COMPLETE)
 - [ ] Add comprehensive form validation
 - [ ] Replace SnackBar error handling with proper UI
 - [ ] Test on physical Android devices
 - [ ] Complete admin review workflow
-- [ ] Implement AI document verification backend
+- [ ] Implement AI document verification backend (OCR, data extraction)
 - [ ] Add iOS permissions to Info.plist for camera/photo library
 - [ ] Implement cleanup Cloud Function for old profile pictures
-- [ ] Remove old profile pictures when new ones are uploaded
+- [ ] Implement cleanup Cloud Function for old travel documents
+- [ ] Add document viewer with zoom/pan functionality
+- [ ] Implement "View Original Document" feature
