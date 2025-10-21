@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import '../../utils/master_app_drawer.dart';
+import '../splash_screen.dart';
 
 class MasterAnnouncementPage extends StatefulWidget {
   const MasterAnnouncementPage({Key? key}) : super(key: key);
@@ -16,43 +17,43 @@ class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
   final TextEditingController contentController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  bool _isMaster = false;
 
   @override
   void initState() {
     super.initState();
-    _checkMasterStatus();
+    _checkAuthStatus();
   }
 
-  // Check if current user is a master by checking if email exists in master collection
-  Future<void> _checkMasterStatus() async {
-    final user = _auth.currentUser;
-    if (user != null) {
-      try {
-        // Query master collection to find a document with matching email
-        final masterQuery = await _firestore
-            .collection('master')
-            .where('email', isEqualTo: user.email)
-            .limit(1)
-            .get();
-        
-        bool isMaster = masterQuery.docs.isNotEmpty;
-        
+  // Check if user is logged in, similar to user_homepage.dart
+  void _checkAuthStatus() {
+    final currentUser = _auth.currentUser;
+    
+    if (currentUser == null) {
+      // User is not logged in, redirect to splash screen
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          setState(() {
-            _isMaster = isMaster;
-          });
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const SplashScreen()),
+            (route) => false,
+          );
         }
-        debugPrint('Master status check - User Email: ${user.email}, Is Master: $isMaster');
-      } catch (e) {
-        debugPrint('Error checking master status: $e');
-        if (mounted) {
-          setState(() {
-            _isMaster = false;
-          });
-        }
-      }
+      });
     }
+  }
+
+  // Validation method to check if title and content are not empty
+  bool _validateFields(String title, String content) {
+    if (title.trim().isEmpty || content.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in both title and content'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+    return true;
   }
 
   // Post a new announcement to Firebase (only 4 fields: id, title, content, date)
@@ -63,15 +64,6 @@ class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('You must be logged in to post announcements')),
-          );
-        }
-        return;
-      }
-
-      if (!_isMaster) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('You do not have permission to post announcements')),
           );
         }
         return;
@@ -232,12 +224,13 @@ class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
       builder: (context) => Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
-          constraints: const BoxConstraints(maxWidth: 500),
+          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
           padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               // Header
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -301,7 +294,7 @@ class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
               const SizedBox(height: 6),
               TextField(
                 controller: editContentController,
-                maxLines: 5,
+                maxLines: 4,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -348,8 +341,7 @@ class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
                   // Save button
                   ElevatedButton(
                     onPressed: () {
-                      if (editTitleController.text.trim().isNotEmpty && 
-                          editContentController.text.trim().isNotEmpty) {
+                      if (_validateFields(editTitleController.text, editContentController.text)) {
                         _updateAnnouncement(
                           announcement['id'],
                           editTitleController.text.trim(),
@@ -379,6 +371,7 @@ class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -477,6 +470,32 @@ class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if user is still logged in
+    final currentUser = _auth.currentUser;
+    
+    if (currentUser == null) {
+      // User is not logged in, redirect to splash screen
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const SplashScreen()),
+          (route) => false,
+        );
+      });
+      
+      // Return a loading screen while navigating
+      return Scaffold(
+        body: Container(
+          color: const Color(0xFFD9D9D9),
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: Color(0xFF348AA7),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       drawer: const MasterAppDrawer(),
       backgroundColor: const Color(0xFFD9D9D9),
@@ -605,8 +624,7 @@ class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
                       height: 38,
                       child: ElevatedButton(
                         onPressed: () {
-                          if (titleController.text.trim().isNotEmpty && 
-                              contentController.text.trim().isNotEmpty) {
+                          if (_validateFields(titleController.text, contentController.text)) {
                             postAnnouncement(
                               titleController.text.trim(), 
                               contentController.text.trim(),

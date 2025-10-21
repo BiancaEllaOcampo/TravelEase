@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../pages/master/master_announcement.dart';
 import '../pages/master/master_admin&user_management.dart';
 import '../pages/master/master_dashboard.dart';
-import '../pages/master/master_document_veification.dart';
+import '../pages/master/master_document_verification.dart';
 import '../pages/splash_screen.dart';
 
 /// TravelEase Master Navigation Drawer

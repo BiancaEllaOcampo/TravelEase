@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'master_admin&user_management.dart';
-import 'master_document_veification.dart';
+import 'master_document_verification.dart';
 import 'master_announcement.dart';
 import '../../utils/master_app_drawer.dart';
+import '../splash_screen.dart';
 
 class MasterDashboardPage extends StatefulWidget {
   const MasterDashboardPage({super.key});
@@ -18,7 +19,57 @@ class _MasterDashboardPageState extends State<MasterDashboardPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
+  void initState() {
+    super.initState();
+    _checkAuthStatus();
+  }
+
+  // Check if user is logged in, similar to user_homepage.dart
+  void _checkAuthStatus() {
+    final currentUser = _auth.currentUser;
+    
+    if (currentUser == null) {
+      // User is not logged in, redirect to splash screen
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const SplashScreen()),
+            (route) => false,
+          );
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Check if user is still logged in
+    final currentUser = _auth.currentUser;
+    
+    if (currentUser == null) {
+      // User is not logged in, redirect to splash screen
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const SplashScreen()),
+          (route) => false,
+        );
+      });
+      
+      // Return a loading screen while navigating
+      return Scaffold(
+        body: Container(
+          color: const Color(0xFFD9D9D9),
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: Color(0xFF348AA7),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       drawer: const MasterAppDrawer(),
       appBar: PreferredSize(
