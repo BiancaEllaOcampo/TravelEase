@@ -19,7 +19,7 @@ import '../pages/admin/admin_document_veification.dart';
 import '../pages/master/master_login.dart';
 import '../pages/master/master_dashboard.dart';
 import '../pages/master/master_admin&user_management.dart';
-import '../pages/master/master_document_veification.dart';
+import '../pages/master/master_document_verification.dart';
 import '../pages/master/master_announcement.dart';
 
 class DebugPage extends StatelessWidget {

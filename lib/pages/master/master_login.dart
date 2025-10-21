@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'master_dashboard.dart';
 import '../admin/admin_login.dart';
 
@@ -12,7 +14,10 @@ class MasterLoginPage extends StatefulWidget {
 class _MasterLoginPageState extends State<MasterLoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -74,7 +79,7 @@ class _MasterLoginPageState extends State<MasterLoginPage> {
           
           // Transparent overlay
           Positioned(
-            top: 0, // Start from top since AppBar handles the banner
+            top: 0,
             left: 6,
             right: 6,
             bottom: 0,
@@ -85,34 +90,34 @@ class _MasterLoginPageState extends State<MasterLoginPage> {
             ),
           ),
 
-            // Back Button
-            Positioned(
-            top: 50, // Reduced gap - was 180 - 48, now properly positioned
+          // Back Button
+          Positioned(
+            top: 50,
             left: 30,
             child: Container(
               width: 60,
               height: 60,
               decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(8),
+                color: Colors.white,
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(8),
               ),
               child: IconButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              icon: const Icon(
-                Icons.arrow_back,
-                color: Colors.black,
-                size: 24,
-              ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.black,
+                  size: 24,
+                ),
               ),
             ),
-            ),
+          ),
           
           // Main Login Card
           Positioned(
-            top: 125, // Reduced gap - was 255 - 48, now properly positioned
+            top: 125,
             left: 30,
             right: 30,
             child: Container(
@@ -239,9 +244,7 @@ class _MasterLoginPageState extends State<MasterLoginPage> {
                       width: 235,
                       height: 52,
                       child: ElevatedButton(
-                        onPressed: () {
-                          _handleLogin();
-                        },
+                        onPressed: _isLoading ? null : _handleLogin,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF348AA7),
                           shape: RoundedRectangleBorder(
@@ -249,15 +252,24 @@ class _MasterLoginPageState extends State<MasterLoginPage> {
                           ),
                           elevation: 2,
                         ),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Kumbh Sans',
-                          ),
-                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Login',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Kumbh Sans',
+                                ),
+                              ),
                       ),
                     ),
                     
@@ -265,7 +277,6 @@ class _MasterLoginPageState extends State<MasterLoginPage> {
 
                     TextButton(
                       onPressed: () {
-                        // Handle master login
                         _handleAdminLogin();
                       },
                       child: const Text(
@@ -279,14 +290,11 @@ class _MasterLoginPageState extends State<MasterLoginPage> {
                         ),
                       ),
                     ),
-                    
                   ],
                 ),
               ),
             ),
           ),
-          
-          
         ],
       ),
     );
@@ -316,22 +324,72 @@ class _MasterLoginPageState extends State<MasterLoginPage> {
       return;
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const MasterDashboardPage()),
-    );
+    _performLogin();
+  }
 
-    
-    // TODO: Implement actual login logic here
-    // For now, just show a success message
-    _showSnackBar('Login successful!');
-    
-    // Navigate to homepage or next screen
-    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserHomePage()));
+  Future<void> _performLogin() async {
+    setState(() => _isLoading = true);
+
+    try {
+      // Sign in with Firebase Authentication
+      await _auth.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      // Check if user exists in 'master' collection
+      final user = _auth.currentUser;
+      if (user != null) {
+        final masterDoc = await FirebaseFirestore.instance.collection('master').doc(user.uid).get();
+        if (masterDoc.exists) {
+          _showSnackBar('Login successful!');
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const MasterDashboardPage()),
+            );
+          }
+        } else {
+          _showSnackBar('You do not have master access.');
+          await _auth.signOut();
+        }
+      } else {
+        _showSnackBar('Unable to verify user.');
+      }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = 'An error occurred';
+      
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'No user found with this email';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Incorrect password';
+          break;
+        case 'invalid-email':
+          errorMessage = 'Invalid email address';
+          break;
+        case 'user-disabled':
+          errorMessage = 'This account has been disabled';
+          break;
+        case 'too-many-requests':
+          errorMessage = 'Too many login attempts. Please try again later';
+          break;
+        default:
+          errorMessage = 'Invalid email or password';
+      }
+      
+      _showSnackBar(errorMessage);
+    } catch (e) {
+      _showSnackBar('An unexpected error occurred: ${e.toString()}');
+    }
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   void _handleAdminLogin() {
-    // TODO: Navigate to master login page
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const AdminLoginPage()),
