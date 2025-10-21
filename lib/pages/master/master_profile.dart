@@ -154,22 +154,6 @@ class _MasterProfilePageState extends State<MasterProfilePage> {
     }
   }
 
-  Future<void> _createMasterProfile(User user) async {
-    // This method is no longer needed with the new search logic
-    // Keeping it for compatibility but it won't be called
-    try {
-      setState(() {
-        _emailController.text = user.email ?? '';
-        _userIdController.text = user.uid;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
   @override
   void dispose() {
     _firstNameController.dispose();
