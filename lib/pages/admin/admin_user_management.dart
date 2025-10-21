@@ -73,116 +73,186 @@ class _AdminUserManagementState extends State<AdminUserManagement> {
           ),
         ),
       ),
-      body: Stack(
-        children: [
-          // Background
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: const Color(0xFFD9D9D9),
-          ),
-          // Lists (Empty for now)
-          Positioned(
-            top: 20, // Reduced gap - was 150 - 48, now properly positioned after AppBar
-            left: 28,
-            right: 28,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: const Color(0xFFD9D9D9),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // User List Section
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
+                      Row(
                         children: [
-                          Text(
-                            'User List',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Kumbh Sans',
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF125E77).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.people,
                               color: Color(0xFF125E77),
+                              size: 24,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'User List',
+                            style: TextStyle(
+                              color: Color(0xFF125E77),
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Kumbh Sans',
+                            ),
+                          ),
+                          const Spacer(),
                           Container(
-                            width: double.infinity,
-                            height: 2,
-                            color: Colors.grey.shade200,
-                            margin: const EdgeInsets.only(bottom: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF348AA7).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              '0 users',
+                              style: TextStyle(
+                                color: Color(0xFF348AA7),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Kumbh Sans',
+                              ),
+                            ),
                           ),
                         ],
                       ),
-                      // Empty lists
-                      const SizedBox(height: 80),
+                      const SizedBox(height: 20),
+                      // Empty state
+                      Container(
+                        padding: const EdgeInsets.all(40),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8F9FA),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFF348AA7).withOpacity(0.2),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.person_outline,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No users found',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey[600],
+                                fontFamily: 'Kumbh Sans',
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Users will appear here once registered',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[500],
+                                fontFamily: 'Kumbh Sans',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
-
-                // Button 
-                SizedBox(height: 18),
-                SizedBox(
-                  width: double.infinity,
-                  height: 60,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _handleAddUser();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 70, 220, 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
+                
+                const SizedBox(height: 24),
+                
+                // Action Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 56,
+                        child: ElevatedButton.icon(
+                          onPressed: _handleAddUser,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF34C759),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 2,
+                          ),
+                          icon: const Icon(Icons.person_add, size: 22),
+                          label: const Text(
+                            'Add User',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Kumbh Sans',
+                            ),
+                          ),
+                        ),
                       ),
-                      elevation: 0,
                     ),
-                    child: const Text(
-                      'Add User',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Kumbh Sans',
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: SizedBox(
+                        height: 56,
+                        child: ElevatedButton.icon(
+                          onPressed: _handleDeleteUser,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFA54547),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 2,
+                          ),
+                          icon: const Icon(Icons.person_remove, size: 22),
+                          label: const Text(
+                            'Delete User',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Kumbh Sans',
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-
-                SizedBox(height: 18),
-                SizedBox(
-                  width: double.infinity,
-                  height: 60,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _handleDeleteUser();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(217, 241, 5, 5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'Delete User',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Kumbh Sans',
-                      ),
-                    ),
-                  ),
-                ),
+                
+                const SizedBox(height: 30),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
