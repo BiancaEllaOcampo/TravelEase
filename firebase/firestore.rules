@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to get user role from database
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'admin';
+    }
+    
+    // Helper function to check if user is master
+    function isMaster() {
+      return isAuthenticated() && getUserRole() == 'master';
+    }
+    
+    // Helper function to check if user is accessing their own document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Users can read/write their own data
+      // Admins can read user data (for user management)
+      // Masters can read all user and admin data (for admin & user management)
+      allow read: if isOwner(userId) || isAdmin() || isMaster();
+      
+      // Users can create their own profile during signup
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Users can update their own data
+      // Masters can update any user/admin data (for role changes, profile updates)
+      allow update: if isOwner(userId) || isMaster();
+      
+      // Only masters can delete accounts
+      allow delete: if isMaster();
+      
+      // Subcollection: checklists
+      match /checklists/{country}/{document=**} {
+        // Users can read/write their own checklists
+        // Admins can read user checklists (for document verification)
+        // Masters can read all checklists
+        allow read: if isOwner(userId) || isAdmin() || isMaster();
+        allow write: if isOwner(userId);
+      }
+    }
+
+    // Master collection - only authenticated users can read to verify master status
+    match /master/{masterId} {
+      allow read: if request.auth != null;
+      allow write: if false; // Only allow writes through Firebase Console
+    }
+
+    // Announcements collection
+    match /announcements/{announcementId} {
+      // Everyone authenticated can read announcements
+      allow read: if request.auth != null;
+      
+      // Only admins and masters can create, update, delete announcements
+      allow create, update, delete: if isAdmin() || isMaster();
+    }
+    
+    // Requirements collection (for future requirement configuration feature)
+    match /requirements/{country}/{document=**} {
+      // Everyone can read requirements
+      allow read: if true;
+      
+      // Only masters can create/update/delete requirements
+      allow write: if isMaster();
+    }
+  }
+}

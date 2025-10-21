@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/master_app_drawer.dart';
 
 class MasterAdminUserManagement extends StatefulWidget {
@@ -9,6 +10,16 @@ class MasterAdminUserManagement extends StatefulWidget {
 }
 
 class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _selectedTab = 'users'; // 'users' or 'admins'
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,10 +88,9 @@ class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // User List Section
+                // Tab Selector
                 Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
+                  margin: const EdgeInsets.only(bottom: 24),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -92,103 +102,105 @@ class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
                       ),
                     ],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF125E77).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.people,
-                              color: Color(0xFF125E77),
-                              size: 24,
-                            ),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => setState(() => _selectedTab = 'users'),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            bottomLeft: Radius.circular(12),
                           ),
-                          const SizedBox(width: 12),
-                          const Text(
-                            'User List',
-                            style: TextStyle(
-                              color: Color(0xFF125E77),
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Kumbh Sans',
-                            ),
-                          ),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF348AA7).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Text(
-                              '0 users',
-                              style: TextStyle(
-                                color: Color(0xFF348AA7),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: 'Kumbh Sans',
+                              color: _selectedTab == 'users'
+                                  ? const Color(0xFF348AA7)
+                                  : Colors.transparent,
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(12),
+                                bottomLeft: Radius.circular(12),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      // Empty state
-                      Container(
-                        padding: const EdgeInsets.all(40),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8F9FA),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: const Color(0xFF348AA7).withOpacity(0.2),
-                            width: 1.5,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.people,
+                                  color: _selectedTab == 'users'
+                                      ? Colors.white
+                                      : const Color(0xFF348AA7),
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Users',
+                                  style: TextStyle(
+                                    color: _selectedTab == 'users'
+                                        ? Colors.white
+                                        : const Color(0xFF348AA7),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Kumbh Sans',
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.person_outline,
-                              size: 64,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No users found',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey[600],
-                                fontFamily: 'Kumbh Sans',
+                      ),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () => setState(() => _selectedTab = 'admins'),
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(12),
+                            bottomRight: Radius.circular(12),
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            decoration: BoxDecoration(
+                              color: _selectedTab == 'admins'
+                                  ? const Color(0xFF348AA7)
+                                  : Colors.transparent,
+                              borderRadius: const BorderRadius.only(
+                                topRight: Radius.circular(12),
+                                bottomRight: Radius.circular(12),
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Users will appear here once registered',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                                fontFamily: 'Kumbh Sans',
-                              ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.admin_panel_settings,
+                                  color: _selectedTab == 'admins'
+                                      ? Colors.white
+                                      : const Color(0xFF348AA7),
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Admins',
+                                  style: TextStyle(
+                                    color: _selectedTab == 'admins'
+                                        ? Colors.white
+                                        : const Color(0xFF348AA7),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Kumbh Sans',
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                
-                const SizedBox(height: 24),
-                
-                // Admin List Section
+
+                // Search Bar
                 Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20),
+                  margin: const EdgeInsets.only(bottom: 24),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
@@ -200,155 +212,49 @@ class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
                       ),
                     ],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF125E77).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.admin_panel_settings,
-                              color: Color(0xFF125E77),
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Text(
-                            'Admin List',
-                            style: TextStyle(
-                              color: Color(0xFF125E77),
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Kumbh Sans',
-                            ),
-                          ),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF348AA7).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Text(
-                              '0 admins',
-                              style: TextStyle(
-                                color: Color(0xFF348AA7),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: 'Kumbh Sans',
-                              ),
-                            ),
-                          ),
-                        ],
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value.toLowerCase();
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: _selectedTab == 'users'
+                          ? 'Search users by name or email...'
+                          : 'Search admins by name or email...',
+                      hintStyle: TextStyle(
+                        color: Colors.grey[400],
+                        fontFamily: 'Kumbh Sans',
                       ),
-                      const SizedBox(height: 20),
-                      // Empty state
-                      Container(
-                        padding: const EdgeInsets.all(40),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8F9FA),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: const Color(0xFF348AA7).withOpacity(0.2),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.admin_panel_settings_outlined,
-                              size: 64,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No admins found',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey[600],
-                                fontFamily: 'Kumbh Sans',
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Admins will appear here once created',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                                fontFamily: 'Kumbh Sans',
-                              ),
-                            ),
-                          ],
-                        ),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Color(0xFF348AA7),
                       ),
-                    ],
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, color: Color(0xFF348AA7)),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() {
+                                  _searchQuery = '';
+                                });
+                              },
+                            )
+                          : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                    ),
                   ),
                 ),
-                
-                const SizedBox(height: 24),
-                
-                // Action Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 56,
-                        child: ElevatedButton.icon(
-                          onPressed: _handleAddUser,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF34C759),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            elevation: 2,
-                          ),
-                          icon: const Icon(Icons.person_add, size: 22),
-                          label: const Text(
-                            'Add User',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Kumbh Sans',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: SizedBox(
-                        height: 56,
-                        child: ElevatedButton.icon(
-                          onPressed: _handleDeleteUser,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFA54547),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            elevation: 2,
-                          ),
-                          icon: const Icon(Icons.person_remove, size: 22),
-                          label: const Text(
-                            'Delete User',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Kumbh Sans',
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+
+                // Display selected tab content
+                if (_selectedTab == 'users') _buildUsersList() else _buildAdminsList(),
                 
                 const SizedBox(height: 30),
               ],
@@ -359,11 +265,483 @@ class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
     );
   }
 
-  void _handleAddUser() {
-    // Does nothing for now
+  Widget _buildUsersList() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .where('role', isEqualTo: 'user')
+          .orderBy('fullName')
+          .snapshots(),
+      builder: (context, snapshot) {
+        return _buildList(
+          snapshot: snapshot,
+          title: 'User List',
+          icon: Icons.people,
+          emptyMessage: 'No users found',
+          emptySubMessage: 'Users will appear here once registered',
+          role: 'user',
+        );
+      },
+    );
   }
 
-  void _handleDeleteUser() {
-    // Does nothing for now
+  Widget _buildAdminsList() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .where('role', isEqualTo: 'admin')
+          .orderBy('fullName')
+          .snapshots(),
+      builder: (context, snapshot) {
+        return _buildList(
+          snapshot: snapshot,
+          title: 'Admin List',
+          icon: Icons.admin_panel_settings,
+          emptyMessage: 'No admins found',
+          emptySubMessage: 'Admins will appear here once created',
+          role: 'admin',
+        );
+      },
+    );
+  }
+
+  Widget _buildList({
+    required AsyncSnapshot<QuerySnapshot> snapshot,
+    required String title,
+    required IconData icon,
+    required String emptyMessage,
+    required String emptySubMessage,
+    required String role,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF125E77).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  color: const Color(0xFF125E77),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Color(0xFF125E77),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Kumbh Sans',
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF348AA7).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '${snapshot.hasData ? snapshot.data!.docs.length : 0} ${role == 'user' ? (snapshot.hasData && snapshot.data!.docs.length == 1 ? 'user' : 'users') : (snapshot.hasData && snapshot.data!.docs.length == 1 ? 'admin' : 'admins')}',
+                  style: const TextStyle(
+                    color: Color(0xFF348AA7),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Kumbh Sans',
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          // List content
+          Builder(
+            builder: (context) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(40),
+                    child: CircularProgressIndicator(
+                      color: Color(0xFF348AA7),
+                    ),
+                  ),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return Container(
+                  padding: const EdgeInsets.all(40),
+                  child: Column(
+                    children: [
+                      Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Error loading $role${role == 'user' ? 's' : 's'}',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
+                          fontFamily: 'Kumbh Sans',
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return Container(
+                  padding: const EdgeInsets.all(40),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8F9FA),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFF348AA7).withOpacity(0.2),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        role == 'user' ? Icons.person_outline : Icons.admin_panel_settings_outlined,
+                        size: 64,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        emptyMessage,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
+                          fontFamily: 'Kumbh Sans',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        emptySubMessage,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[500],
+                          fontFamily: 'Kumbh Sans',
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              // Filter based on search query
+              final filteredDocs = snapshot.data!.docs.where((doc) {
+                if (_searchQuery.isEmpty) return true;
+                final data = doc.data() as Map<String, dynamic>;
+                final name = (data['fullName'] ?? '').toString().toLowerCase();
+                final email = (data['email'] ?? '').toString().toLowerCase();
+                return name.contains(_searchQuery) || email.contains(_searchQuery);
+              }).toList();
+
+              if (filteredDocs.isEmpty) {
+                return Container(
+                  padding: const EdgeInsets.all(40),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8F9FA),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: const Color(0xFF348AA7).withOpacity(0.2),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.search_off,
+                        size: 64,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No ${role}s match your search',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey[600],
+                          fontFamily: 'Kumbh Sans',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Try a different search term',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[500],
+                          fontFamily: 'Kumbh Sans',
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return Column(
+                children: filteredDocs.map((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  final userId = doc.id;
+                  final name = data['fullName'] ?? 'Unknown ${role.capitalize()}';
+                  final email = data['email'] ?? 'No email';
+                  final profileImageUrl = data['profileImageUrl'];
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8F9FA),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: const Color(0xFF348AA7).withOpacity(0.2),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        // Profile Image
+                        Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: profileImageUrl == null
+                                ? const LinearGradient(
+                                    colors: [Color(0xFF348AA7), Color(0xFF125E77)],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  )
+                                : null,
+                            image: profileImageUrl != null
+                                ? DecorationImage(
+                                    image: NetworkImage(profileImageUrl),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
+                          ),
+                          child: profileImageUrl == null
+                              ? Center(
+                                  child: Text(
+                                    name.isNotEmpty ? name[0].toUpperCase() : role[0].toUpperCase(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Kumbh Sans',
+                                    ),
+                                  ),
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 16),
+                        // User/Admin Info
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      name,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Kumbh Sans',
+                                        color: Color(0xFF125E77),
+                                      ),
+                                    ),
+                                  ),
+                                  if (role == 'admin')
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFFFA500).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: const Text(
+                                        'ADMIN',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFFFFA500),
+                                          fontFamily: 'Kumbh Sans',
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.email_outlined,
+                                    size: 14,
+                                    color: Color(0xFF348AA7),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Expanded(
+                                    child: Text(
+                                      email,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey[600],
+                                        fontFamily: 'Kumbh Sans',
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Delete Button
+                        IconButton(
+                          onPressed: () => _showDeleteDialog(userId, name, role),
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Color(0xFFA54547),
+                            size: 24,
+                          ),
+                          tooltip: 'Delete ${role}',
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteDialog(String userId, String userName, String role) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Delete ${role.capitalize()}',
+          style: const TextStyle(
+            fontFamily: 'Kumbh Sans',
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF125E77),
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to delete "$userName"? This action cannot be undone.',
+          style: const TextStyle(
+            fontFamily: 'Kumbh Sans',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(
+                fontFamily: 'Kumbh Sans',
+                color: Color(0xFF348AA7),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _deleteAccount(userId, userName, role);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFA54547),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text(
+              'Delete',
+              style: TextStyle(
+                fontFamily: 'Kumbh Sans',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteAccount(String userId, String userName, String role) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: Color(0xFF348AA7)),
+        ),
+      );
+
+      // Delete user/admin document from Firestore
+      await FirebaseFirestore.instance.collection('users').doc(userId).delete();
+
+      // Note: Firebase Auth account deletion requires admin SDK (Cloud Functions)
+      // For now, we only delete the Firestore document
+      // TODO: Implement Cloud Function to also delete Firebase Auth account
+
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${role.capitalize()} "$userName" deleted successfully',
+              style: const TextStyle(fontFamily: 'Kumbh Sans'),
+            ),
+            backgroundColor: const Color(0xFF34C759),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error deleting ${role}: $e',
+              style: const TextStyle(fontFamily: 'Kumbh Sans'),
+            ),
+            backgroundColor: const Color(0xFFA54547),
+          ),
+        );
+      }
+    }
+  }
+}
+
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${substring(1)}";
   }
 }
