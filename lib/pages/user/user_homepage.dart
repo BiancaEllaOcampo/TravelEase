@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'user_travel_requirments.dart';
 import 'user_profile.dart' as user_profile;
+import 'user_announcements.dart';
 import '../../utils/user_app_drawer.dart';
 import '../../utils/checklist_helper.dart';
 import '../splash_screen.dart';
@@ -269,7 +270,10 @@ class UserHomePage extends StatelessWidget {
                 'Stay updated with travel alerts and important notices',
                 Icons.campaign,
                 () {
-                  // TODO: Handle announcements navigation
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const UserAnnouncementsPage()),
+                  );
                 },
               ),
               

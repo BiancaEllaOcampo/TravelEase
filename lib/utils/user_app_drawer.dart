@@ -4,6 +4,7 @@ import '../pages/user/user_homepage.dart';
 import '../pages/splash_screen.dart';
 import '../pages/user/user_travel_requirments.dart';
 import '../pages/user/user_profile.dart';
+import '../pages/user/user_announcements.dart';
 import 'checklist_helper.dart';
 
 /// TravelEase User Navigation Drawer
@@ -125,7 +126,10 @@ class UserAppDrawer extends StatelessWidget {
                     Icons.campaign_outlined,
                     () {
                       Navigator.pop(context);
-                      // TODO: Navigate to announcements
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const UserAnnouncementsPage()),
+                      );
                     },
                   ),
                   _buildMenuItem(
