@@ -127,41 +127,6 @@ class _UserDocumentsChecklistPageState extends State<UserDocumentsChecklistPage>
     }
   }
 
-  Future<void> _saveProgress() async {
-    final user = _auth.currentUser;
-    if (user == null) return;
-
-    try {
-      final requirements = requirementsByCountry[widget.country] ?? [];
-      final updateMap = <String, dynamic>{};
-
-      // Update each document individually to preserve AI data
-      for (final req in requirements) {
-        final docKey = req.toLowerCase().replaceAll(' ', '_');
-        updateMap['checklists.${widget.country}.$docKey.status'] = documentStatus[req];
-        updateMap['checklists.${widget.country}.$docKey.url'] = documentUrls[req];
-        updateMap['checklists.${widget.country}.$docKey.updatedAt'] = FieldValue.serverTimestamp();
-      }
-
-      await _firestore.collection('users').doc(user.uid).update(updateMap);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Progress saved successfully!'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving progress: $e')),
-        );
-      }
-    }
-  }
-
   void _handleUpload(String documentName) async {
     try {
       // Show dialog to choose between camera or gallery
@@ -294,13 +259,6 @@ class _UserDocumentsChecklistPageState extends State<UserDocumentsChecklistPage>
     }
   }
 
-  void _handleViewAIReport() {
-    // TODO: Implement AI report view
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('AI Report functionality coming soon!')),
-    );
-  }
-
   Color _getStatusColor(String status) {
     switch (status) {
       case 'verified':
@@ -349,7 +307,7 @@ class _UserDocumentsChecklistPageState extends State<UserDocumentsChecklistPage>
 
     // Reserve vertical space for the bottom bar + system navigation inset so
     // the scrollable content isn't clipped underneath the bottom controls.
-    final double bottomBarHeight = 160.0; // height of buttons area (approx)
+    final double bottomBarHeight = 60.0; // height of help links area (approx)
     final double bottomInset = MediaQuery.of(context).padding.bottom + bottomBarHeight;
 
     return Scaffold(
@@ -428,45 +386,50 @@ class _UserDocumentsChecklistPageState extends State<UserDocumentsChecklistPage>
             left: 28,
             right: 28,
             bottom: bottomInset.toDouble(),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  // Destination header
-                  Row(
-                    children: [
-                      const Text(
-                        'Destination: ',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w400,
-                          fontFamily: 'Kumbh Sans',
-                          color: Colors.black,
+            child: RefreshIndicator(
+              color: const Color(0xFF348AA7),
+              onRefresh: _loadChecklistData,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    // Destination header
+                    Row(
+                      children: [
+                        const Text(
+                          'Destination: ',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: 'Kumbh Sans',
+                            color: Colors.black,
+                          ),
                         ),
-                      ),
-                      Text(
-                        _getCountryDisplayName(),
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Kumbh Sans',
-                          color: Color(0xFF125E77),
+                        Text(
+                          _getCountryDisplayName(),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Kumbh Sans',
+                            color: Color(0xFF125E77),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 18),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
 
-                  // Documents list
-                  for (int i = 0; i < requirements.length; i++)
-                    _buildDocumentCard(requirements[i]),
-                ],
+                    // Documents list
+                    for (int i = 0; i < requirements.length; i++)
+                      _buildDocumentCard(requirements[i]),
+                  ],
+                ),
               ),
             ),
           ),
 
-          // Bottom buttons section
+          // Bottom help links section
           Positioned(
             bottom: 0,
             left: 0,
@@ -474,95 +437,38 @@ class _UserDocumentsChecklistPageState extends State<UserDocumentsChecklistPage>
             child: Container(
               color: const Color(0xFFD9D9D9),
               padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
-              child: Column(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Save Progress button (Green)
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _saveProgress,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF34C759),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 2,
-                      ),
-                      child: const Text(
-                        'Save Progress',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Kumbh Sans',
-                        ),
+                  GestureDetector(
+                    onTap: () {
+                      // Handle Need Help navigation
+                    },
+                    child: const Text(
+                      'Need Help?',
+                      style: TextStyle(
+                        color: Color(0xFF348AA7),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Kumbh Sans',
+                        decoration: TextDecoration.underline,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-
-                  // View AI Report button (Dark teal)
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: _handleViewAIReport,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF125E77),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 2,
-                      ),
-                      child: const Text(
-                        'View AI Report',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Kumbh Sans',
-                        ),
+                  GestureDetector(
+                    onTap: () {
+                      // Handle Send a Ticket navigation
+                    },
+                    child: const Text(
+                      'Send a Ticket',
+                      style: TextStyle(
+                        color: Color(0xFF348AA7),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Kumbh Sans',
+                        decoration: TextDecoration.underline,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Help links
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          // Handle Need Help navigation
-                        },
-                        child: const Text(
-                          'Need Help?',
-                          style: TextStyle(
-                            color: Color(0xFF348AA7),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Kumbh Sans',
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          // Handle Send a Ticket navigation
-                        },
-                        child: const Text(
-                          'Send a Ticket',
-                          style: TextStyle(
-                            color: Color(0xFF348AA7),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Kumbh Sans',
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),

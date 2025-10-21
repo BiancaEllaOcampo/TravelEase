@@ -368,44 +368,55 @@ class _UserViewDocumentWithAIPageState
 
           // Main content
           Positioned(
-            top: 35,
-            left: 28,
-            right: 28,
-            bottom: 100,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            top: 30,
+            left: 24,
+            right: 24,
+            bottom: 90,
+            child: RefreshIndicator(
+              color: const Color(0xFF348AA7),
+              onRefresh: _loadDocumentData,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   // Check if document exists
                   if (documentUrl.isEmpty && extractedData.isEmpty)
-                    // No document uploaded message
+                    // No document uploaded message - Enhanced UI
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(5),
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 15,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(40),
+                        padding: const EdgeInsets.all(48),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.cloud_upload_outlined,
-                              size: 80,
-                              color: Colors.grey.shade400,
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF348AA7).withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.cloud_upload_outlined,
+                                size: 64,
+                                color: const Color(0xFF348AA7),
+                              ),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 28),
                             const Text(
                               'No Document Uploaded',
                               style: TextStyle(
-                                fontSize: 20,
+                                fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: 'Kumbh Sans',
                                 color: Color(0xFF125E77),
@@ -414,35 +425,43 @@ class _UserViewDocumentWithAIPageState
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'You haven\'t uploaded a ${widget.documentName} yet.',
+                              'Upload your ${widget.documentName} to get started with AI verification.',
                               style: TextStyle(
-                                fontSize: 14,
+                                fontSize: 15,
                                 fontFamily: 'Kumbh Sans',
                                 color: Colors.grey.shade600,
+                                height: 1.5,
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: 30),
+                            const SizedBox(height: 36),
                             SizedBox(
                               width: double.infinity,
-                              height: 50,
+                              height: 56,
                               child: ElevatedButton(
                                 onPressed: _handleReupload,
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF125E77),
+                                  backgroundColor: const Color(0xFF348AA7),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(5),
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                  elevation: 0,
+                                  elevation: 2,
                                 ),
-                                child: const Text(
-                                  'Upload Document',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: 'Kumbh Sans',
-                                  ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    Icon(Icons.upload_file, size: 22),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'Upload Document',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Kumbh Sans',
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -451,94 +470,51 @@ class _UserViewDocumentWithAIPageState
                       ),
                     )
                   else
-                    // Main white card with document details
+                    // Main white card with document details - Enhanced UI
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(5),
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                            color: Colors.black.withOpacity(0.08),
+                            blurRadius: 15,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(24),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                          // Image placeholder and status badge row
+                          // Status badge header
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Document image placeholder
-                              Container(
-                                width: 140,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border.all(
-                                    color: Colors.black,
-                                    width: 2,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(6),
-                                  child: documentUrl.isNotEmpty
-                                      ? Image.network(
-                                          documentUrl,
-                                          fit: BoxFit.cover,
-                                          loadingBuilder: (context, child, loadingProgress) {
-                                            if (loadingProgress == null) return child;
-                                            return Center(
-                                              child: CircularProgressIndicator(
-                                                value: loadingProgress.expectedTotalBytes != null
-                                                    ? loadingProgress.cumulativeBytesLoaded /
-                                                        loadingProgress.expectedTotalBytes!
-                                                    : null,
-                                                color: const Color(0xFF348AA7),
-                                                strokeWidth: 2,
-                                              ),
-                                            );
-                                          },
-                                          errorBuilder: (context, error, stackTrace) {
-                                            return const Center(
-                                              child: Icon(
-                                                Icons.broken_image_outlined,
-                                                size: 60,
-                                                color: Color(0xFFA54547),
-                                              ),
-                                            );
-                                          },
-                                        )
-                                      : const Center(
-                                          child: Icon(
-                                            Icons.image_outlined,
-                                            size: 60,
-                                            color: Color(0xFF125E77),
-                                          ),
-                                        ),
+                              const Text(
+                                'Document Status',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Kumbh Sans',
+                                  color: Color(0xFF125E77),
                                 ),
                               ),
-                              // Status badge
                               Container(
                                 decoration: BoxDecoration(
                                   color: statusColor,
-                                  borderRadius: BorderRadius.circular(5),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 16,
-                                  vertical: 12,
+                                  vertical: 8,
                                 ),
                                 child: Text(
                                   statusLabel,
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 15,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.bold,
                                     fontFamily: 'Kumbh Sans',
                                   ),
@@ -547,59 +523,208 @@ class _UserViewDocumentWithAIPageState
                             ],
                           ),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 20),
 
-                          // Extracted Data section
-                          const Text(
-                            'Extracted Data',
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Kumbh Sans',
-                              color: Colors.black,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Extracted data fields - customize based on document type
-                          _buildExtractedDataFields(),
-
-                          // Divider line
-                          Container(
-                            margin: const EdgeInsets.symmetric(vertical: 16),
-                            height: 1,
-                            color: Colors.grey.shade400,
-                          ),
-
-                          // AI Feedback
-                          if (aiFeedback.isNotEmpty)
-                            RichText(
-                              text: TextSpan(
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontFamily: 'Kumbh Sans',
-                                  color: Colors.black,
+                          // Document image preview
+                          Center(
+                            child: Container(
+                              width: double.infinity,
+                              height: 200,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                border: Border.all(
+                                  color: const Color(0xFF348AA7).withOpacity(0.3),
+                                  width: 2,
                                 ),
-                                children: [
-                                  const TextSpan(
-                                    text: 'AI Feedback: ',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  TextSpan(text: aiFeedback),
-                                ],
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            )
-                          else
-                            const Text(
-                              'AI Feedback: No issues detected',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontFamily: 'Kumbh Sans',
-                                color: Colors.black,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: documentUrl.isNotEmpty
+                                    ? Image.network(
+                                        documentUrl,
+                                        fit: BoxFit.contain,
+                                        loadingBuilder: (context, child, loadingProgress) {
+                                          if (loadingProgress == null) return child;
+                                          return Center(
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                CircularProgressIndicator(
+                                                  value: loadingProgress.expectedTotalBytes != null
+                                                      ? loadingProgress.cumulativeBytesLoaded /
+                                                          loadingProgress.expectedTotalBytes!
+                                                      : null,
+                                                  color: const Color(0xFF348AA7),
+                                                  strokeWidth: 3,
+                                                ),
+                                                const SizedBox(height: 12),
+                                                const Text(
+                                                  'Loading...',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Kumbh Sans',
+                                                    color: Color(0xFF348AA7),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Center(
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: const [
+                                                Icon(
+                                                  Icons.broken_image_outlined,
+                                                  size: 48,
+                                                  color: Color(0xFFA54547),
+                                                ),
+                                                SizedBox(height: 8),
+                                                Text(
+                                                  'Failed to load image',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Kumbh Sans',
+                                                    color: Color(0xFFA54547),
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      )
+                                    : Center(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: const [
+                                            Icon(
+                                              Icons.image_outlined,
+                                              size: 64,
+                                              color: Color(0xFF348AA7),
+                                            ),
+                                            SizedBox(height: 8),
+                                            Text(
+                                              'No preview available',
+                                              style: TextStyle(
+                                                fontFamily: 'Kumbh Sans',
+                                                color: Color(0xFF348AA7),
+                                                fontSize: 13,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                               ),
                             ),
+                          ),
+
+                          const SizedBox(height: 28),
+
+                          // Extracted Data section with card-style
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF348AA7).withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: const Color(0xFF348AA7).withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: const [
+                                    Icon(
+                                      Icons.text_snippet_outlined,
+                                      color: Color(0xFF348AA7),
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      'Extracted Data',
+                                      style: TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Kumbh Sans',
+                                        color: Color(0xFF125E77),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 12),
+                                // Extracted data fields - customize based on document type
+                                _buildExtractedDataFields(),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: aiFeedback.isNotEmpty && documentStatus == 'needs_correction'
+                                  ? const Color(0xFFFFF3CD).withOpacity(0.5)
+                                  : const Color(0xFF34C759).withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: aiFeedback.isNotEmpty && documentStatus == 'needs_correction'
+                                    ? const Color(0xFFFFD700).withOpacity(0.5)
+                                    : const Color(0xFF34C759).withOpacity(0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  aiFeedback.isNotEmpty && documentStatus == 'needs_correction'
+                                      ? Icons.info_outline
+                                      : Icons.check_circle_outline,
+                                  color: aiFeedback.isNotEmpty && documentStatus == 'needs_correction'
+                                      ? const Color(0xFFB8860B)
+                                      : const Color(0xFF34C759),
+                                  size: 22,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: aiFeedback.isNotEmpty
+                                      ? RichText(
+                                          text: TextSpan(
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              fontFamily: 'Kumbh Sans',
+                                              color: Colors.black87,
+                                              height: 1.5,
+                                            ),
+                                            children: [
+                                              const TextSpan(
+                                                text: 'AI Feedback: ',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFF125E77),
+                                                ),
+                                              ),
+                                              TextSpan(text: aiFeedback),
+                                            ],
+                                          ),
+                                        )
+                                      : const Text(
+                                          'AI Feedback: No issues detected. Your document looks good!',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontFamily: 'Kumbh Sans',
+                                            color: Colors.black87,
+                                            height: 1.5,
+                                          ),
+                                        ),
+                                ),
+                              ],
+                            ),
+                          ),
 
                           // AI Limitation Notice (if document contains sensitive info)
                           if (documentStatus == 'needs_correction' && 
@@ -636,61 +761,66 @@ class _UserViewDocumentWithAIPageState
                               ),
                             ),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 24),
 
-                          // Re-upload button
-                          SizedBox(
-                            width: double.infinity,
-                            height: 45,
-                            child: ElevatedButton(
-                              onPressed: _handleReupload,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF125E77),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: const Text(
-                                'Re-upload Ticket',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: 'Kumbh Sans',
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          // View original document button
-                          SizedBox(
-                            width: double.infinity,
-                            height: 45,
-                            child: OutlinedButton(
-                              onPressed: _handleViewOriginal,
-                              style: OutlinedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                side: const BorderSide(
-                                  color: Color(0xFF125E77),
-                                  width: 2,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
+                          // Action buttons with improved design
+                          Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton.icon(
+                                  onPressed: _handleReupload,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF348AA7),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    elevation: 2,
+                                  ),
+                                  icon: const Icon(Icons.upload_file, size: 20, color: Colors.white),
+                                  label: const Text(
+                                    'Re-upload',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Kumbh Sans',
+                                    ),
+                                  ),
                                 ),
                               ),
-                              child: const Text(
-                                'View Original Document',
-                                style: TextStyle(
-                                  color: Color(0xFF125E77),
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: 'Kumbh Sans',
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: _handleViewOriginal,
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    side: const BorderSide(
+                                      color: Color(0xFF348AA7),
+                                      width: 2,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  icon: const Icon(
+                                    Icons.open_in_new,
+                                    color: Color(0xFF348AA7),
+                                    size: 20,
+                                  ),
+                                  label: const Text(
+                                    'View Full',
+                                    style: TextStyle(
+                                      color: Color(0xFF348AA7),
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Kumbh Sans',
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
                         ],
                       ),
@@ -699,6 +829,7 @@ class _UserViewDocumentWithAIPageState
                 ],
               ),
             ),
+          ),
           ),
 
           // Bottom help links
@@ -786,13 +917,33 @@ class _UserViewDocumentWithAIPageState
   Widget _buildExtractedDataFields() {
     // If no extracted data exists, show placeholder text
     if (extractedData.isEmpty) {
-      return const Text(
-        'No data extracted yet. Upload your document to see extracted information.',
-        style: TextStyle(
-          fontSize: 11,
-          fontFamily: 'Kumbh Sans',
-          color: Colors.grey,
-          fontStyle: FontStyle.italic,
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.hourglass_empty,
+              color: Colors.grey.shade400,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Waiting for AI analysis...\nData will appear here once processed.',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontFamily: 'Kumbh Sans',
+                  color: Colors.grey.shade600,
+                  fontStyle: FontStyle.italic,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ],
         ),
       );
     }
@@ -860,15 +1011,46 @@ class _UserViewDocumentWithAIPageState
   }
 
   Widget _buildDataField(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        '$label: $value',
-        style: const TextStyle(
-          fontSize: 11,
-          fontFamily: 'Kumbh Sans',
-          color: Colors.black,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1,
         ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Kumbh Sans',
+                color: Color(0xFF125E77),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 12,
+                fontFamily: 'Kumbh Sans',
+                color: Colors.grey.shade800,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
