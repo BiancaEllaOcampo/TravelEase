@@ -45,5 +45,3 @@ Languages present in the repository (high level):
    ```bash
    flutter run -d <device-id>
    ```
-
-   Omsim
