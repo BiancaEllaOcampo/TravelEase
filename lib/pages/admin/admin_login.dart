@@ -331,11 +331,12 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
     
     // Navigate to homepage or next screen
     // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserHomePage()));
+  
   }
 
 
   void _handleMasterLogin() {
-    // TODO: Navigate to master login page
+    //Navigates to Master Login Page
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const MasterLoginPage()),
