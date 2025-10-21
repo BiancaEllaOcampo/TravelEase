@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../pages/splash_screen.dart';
 import '../pages/user/user_login.dart';
 import '../pages/user/user_signup.dart';
@@ -23,6 +24,94 @@ import '../pages/master/master_announcement.dart';
 
 class DebugPage extends StatelessWidget {
   const DebugPage({super.key});
+
+  // Helper method to auto-login as admin
+  Future<void> _autoLoginAdmin(BuildContext context) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: Color(0xFF348AA7)),
+        ),
+      );
+
+      // Sign in with Firebase Auth
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: 'admin@example.com',
+        password: '123456',
+      );
+
+      // Close loading indicator
+      if (context.mounted) Navigator.pop(context);
+
+      // Navigate to admin dashboard
+      if (context.mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
+        );
+      }
+    } catch (e) {
+      // Close loading indicator
+      if (context.mounted) Navigator.pop(context);
+      
+      // Show error
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Auto-login failed: ${e.toString()}'),
+            backgroundColor: const Color(0xFFA54547),
+          ),
+        );
+      }
+    }
+  }
+
+  // Helper method to auto-login as master
+  Future<void> _autoLoginMaster(BuildContext context) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: Color(0xFF348AA7)),
+        ),
+      );
+
+      // Sign in with Firebase Auth
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: 'master@example.com',
+        password: '123456',
+      );
+
+      // Close loading indicator
+      if (context.mounted) Navigator.pop(context);
+
+      // Navigate to master dashboard
+      if (context.mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MasterDashboardPage()),
+        );
+      }
+    } catch (e) {
+      // Close loading indicator
+      if (context.mounted) Navigator.pop(context);
+      
+      // Show error
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Auto-login failed: ${e.toString()}'),
+            backgroundColor: const Color(0xFFA54547),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -182,56 +271,73 @@ class DebugPage extends StatelessWidget {
             _buildDebugButton(
               context,
               'Admin Dashboard',
-              'Administrator overview and actions',
+              'Administrator overview and actions (auto-login: admin@example.com)',
               Icons.dashboard_customize,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
-              ),
+              () => _autoLoginAdmin(context),
             ),
 
             _buildDebugButton(
               context,
               'Admin User Management',
-              'Manage users (add/delete)',
+              'Manage users (add/delete) - auto-login',
               Icons.group,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AdminUserManagement()),
-              ),
+              () async {
+                await _autoLoginAdmin(context);
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AdminUserManagement()),
+                  );
+                }
+              },
             ),
 
             _buildDebugButton(
               context,
               'Admin Document Verification',
-              'Review and verify user documents',
+              'Review and verify user documents - auto-login',
               Icons.verified_user,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AdminDocumentVerificationPage()),
-              ),
+              () async {
+                await _autoLoginAdmin(context);
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AdminDocumentVerificationPage()),
+                  );
+                }
+              },
             ),
 
             _buildDebugButton(
               context,
               'Admin Requirement Configuration',
-              'Configure travel document requirements',
+              'Configure travel document requirements - auto-login',
               Icons.settings,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AdminReqConfigPage()),
-              ),
+              () async {
+                await _autoLoginAdmin(context);
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AdminReqConfigPage()),
+                  );
+                }
+              },
             ),
 
             _buildDebugButton(
               context,
               'Admin Announcements',
-              'Manage system announcements',
+              'Manage system announcements - auto-login',
               Icons.campaign,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AdminAnnouncementPage()),
-              ),
+              () async {
+                await _autoLoginAdmin(context);
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AdminAnnouncementPage()),
+                  );
+                }
+              },
             ),
 
             const SizedBox(height: 20),
@@ -255,45 +361,57 @@ class DebugPage extends StatelessWidget {
             _buildDebugButton(
               context,
               'Master Dashboard',
-              'Master admin overview and system controls',
+              'Master admin overview and system controls (auto-login: master@example.com)',
               Icons.dashboard,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const MasterDashboardPage()),
-              ),
+              () => _autoLoginMaster(context),
             ),
 
             _buildDebugButton(
               context,
               'Master Admin & User Management',
-              'Manage all admins and users',
+              'Manage all admins and users - auto-login',
               Icons.supervisor_account,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const MasterAdminUserManagement()),
-              ),
+              () async {
+                await _autoLoginMaster(context);
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MasterAdminUserManagement()),
+                  );
+                }
+              },
             ),
 
             _buildDebugButton(
               context,
               'Master Document Verification Queue',
-              'Oversee all document verification processes',
+              'Oversee all document verification processes - auto-login',
               Icons.fact_check,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const MasterDocumentVerificationPage()),
-              ),
+              () async {
+                await _autoLoginMaster(context);
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MasterDocumentVerificationPage()),
+                  );
+                }
+              },
             ),
 
             _buildDebugButton(
               context,
               'Master Announcements',
-              'Manage system-wide announcements',
+              'Manage system-wide announcements - auto-login',
               Icons.announcement,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const MasterAnnouncementPage()),
-              ),
+              () async {
+                await _autoLoginMaster(context);
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MasterAnnouncementPage()),
+                  );
+                }
+              },
             ),
 
             const SizedBox(height: 20),

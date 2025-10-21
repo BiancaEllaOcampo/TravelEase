@@ -168,7 +168,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                           child: TextField(
                             controller: _emailController,
                             decoration: const InputDecoration(
-                              hintText: 'Enter your email',
+                              hintText: '',
                               hintStyle: TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
@@ -210,7 +210,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                             controller: _passwordController,
                             obscureText: _obscurePassword,
                             decoration: InputDecoration(
-                              hintText: 'Enter your password',
+                              hintText: '',
                               hintStyle: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
@@ -305,6 +305,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
   void _handleLogin() {
     // Validate input
     if (_emailController.text.isEmpty) {
+      _showSnackBar('Please enter your email address');
       return;
     }
     
@@ -325,20 +326,77 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
       return;
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
-    );
+    _performFirebaseLogin();
+  }
 
-    
-    
-    // TODO: Implement actual login logic here
-    // For now, just show a success message
-    _showSnackBar('Login successful!');
-    
-    // Navigate to homepage or next screen
-    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserHomePage()));
-  
+  Future<void> _performFirebaseLogin() async {
+    setState(() => _isLoading = true);
+    try {
+      final auth = FirebaseAuth.instance;
+      final firestore = FirebaseFirestore.instance;
+      
+      // Sign in with Firebase Authentication
+      final userCredential = await auth.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      // Check user role in Firestore
+      if (userCredential.user != null) {
+        final userDoc = await firestore
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .get();
+
+        if (!userDoc.exists) {
+          // User doesn't have a profile - sign them out
+          await auth.signOut();
+          _showSnackBar('Account not found. Please contact an administrator.');
+          if (mounted) setState(() => _isLoading = false);
+          return;
+        }
+
+        final userData = userDoc.data();
+        final userRole = userData?['role'] ?? 'user';
+
+        // Verify user is an admin
+        if (userRole != 'admin') {
+          await auth.signOut();
+          _showSnackBar('Access denied. This account is not an admin.');
+          if (mounted) setState(() => _isLoading = false);
+          return;
+        }
+
+        // Success - user is authenticated and is an admin
+        _showSnackBar('Login successful!');
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminDashboardPage()),
+          );
+        }
+      }
+    } on FirebaseAuthException catch (e) {
+      var message = 'Login failed. Please try again.';
+      if (e.code == 'user-not-found') {
+        message = 'No user found for that email.';
+      } else if (e.code == 'wrong-password') {
+        message = 'Incorrect password.';
+      } else if (e.code == 'invalid-email') {
+        message = 'Invalid email address.';
+      } else if (e.code == 'invalid-credential') {
+        message = 'Invalid email or password.';
+      } else if (e.code == 'user-disabled') {
+        message = 'This account has been disabled.';
+      } else if (e.code == 'too-many-requests') {
+        message = 'Too many login attempts. Please try again later.';
+      }
+      _showSnackBar(message);
+    } catch (e) {
+      _showSnackBar('An unexpected error occurred: ${e.toString()}');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
 

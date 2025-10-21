@@ -170,7 +170,7 @@ class _MasterLoginPageState extends State<MasterLoginPage> {
                           child: TextField(
                             controller: _emailController,
                             decoration: const InputDecoration(
-                              hintText: 'Enter your email',
+                              hintText: '',
                               hintStyle: TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
@@ -212,7 +212,7 @@ class _MasterLoginPageState extends State<MasterLoginPage> {
                             controller: _passwordController,
                             obscureText: _obscurePassword,
                             decoration: InputDecoration(
-                              hintText: 'Enter your password',
+                              hintText: '',
                               hintStyle: const TextStyle(
                                 color: Colors.black,
                                 fontSize: 16,
@@ -332,18 +332,45 @@ class _MasterLoginPageState extends State<MasterLoginPage> {
 
     try {
       // Sign in with Firebase Authentication
-      await _auth.signInWithEmailAndPassword(
+      final userCredential = await _auth.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
-      // Success - navigate to dashboard
-      _showSnackBar('Login successful!');
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MasterDashboardPage()),
-        );
+      // Check user role in Firestore
+      if (userCredential.user != null) {
+        final userDoc = await _firestore
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .get();
+
+        if (!userDoc.exists) {
+          // User doesn't have a profile - sign them out
+          await _auth.signOut();
+          _showSnackBar('Account not found. Please contact an administrator.');
+          if (mounted) setState(() => _isLoading = false);
+          return;
+        }
+
+        final userData = userDoc.data();
+        final userRole = userData?['role'] ?? 'user';
+
+        // Verify user is a master
+        if (userRole != 'master') {
+          await _auth.signOut();
+          _showSnackBar('Access denied. This account is not a master user.');
+          if (mounted) setState(() => _isLoading = false);
+          return;
+        }
+
+        // Success - user is authenticated and is a master
+        _showSnackBar('Login successful!');
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const MasterDashboardPage()),
+          );
+        }
       }
     } on FirebaseAuthException catch (e) {
       String errorMessage = 'An error occurred';
@@ -357,6 +384,9 @@ class _MasterLoginPageState extends State<MasterLoginPage> {
           break;
         case 'invalid-email':
           errorMessage = 'Invalid email address';
+          break;
+        case 'invalid-credential':
+          errorMessage = 'Invalid email or password';
           break;
         case 'user-disabled':
           errorMessage = 'This account has been disabled';

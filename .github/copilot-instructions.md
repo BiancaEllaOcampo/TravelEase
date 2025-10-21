@@ -3,6 +3,40 @@
 ## Architecture Overview
 Flutter mobile app for Philippine travel document verification with AI-assisted checklists. **Android-first** development (iOS structure exists but not the focus). Three-tier role system: **User** (travelers), **Admin** (document reviewers), and **Master** (super admins).
 
+## Authentication & Role-Based Access Control
+
+### Unified Authentication System
+**All roles use Firebase Auth + Firestore profiles** - NO separate admin/master databases:
+- **Firebase Authentication** - Stores ALL user credentials (email/password) securely
+- **Firestore `users` collection** - Stores user profiles with `role` field
+- **NEVER store passwords in Firestore** - they stay encrypted in Firebase Auth
+
+### User Roles
+```dart
+users/{userId}
+  ├── email: string
+  ├── fullName: string
+  ├── role: "user" | "admin" | "master"  // Role-based access control
+  ├── ... other profile data
+  └── NO PASSWORD (passwords only in Firebase Auth!)
+```
+
+**Role Types:**
+- `user` (default) - Regular travelers who upload documents
+- `admin` - Document reviewers, can verify/reject user documents
+- `master` - Super admins with full system access
+
+**Login Flow:**
+1. Sign in with Firebase Auth (email/password)
+2. Fetch user profile from Firestore
+3. Check `role` field for authorization
+4. Navigate to appropriate dashboard or deny access
+
+**Creating Admin/Master Accounts:**
+- See `ADMIN_MASTER_SETUP.md` for detailed instructions
+- Manual creation via Firebase Console (Auth + Firestore)
+- Never allow self-promotion to admin/master in app
+
 ## Critical Design Decisions
 
 ### Stack-Based Layout Architecture
@@ -57,6 +91,7 @@ Four states in Firestore (`users/{uid}/checklists/{country}/{docName}/status`):
 ```
 users/{userId}/
   fullName, email, phoneNumber, address, passport*, visa*, insurance*
+  role: "user" | "admin" | "master"  // Role-based access control
   profileImageUrl: string  // Firebase Storage download URL
   checklists/
     {country}:  // Only ONE country per user (enforced), lowercase_with_underscores format
@@ -84,7 +119,7 @@ storage/
 ```
 
 ### Authentication Pattern
-All protected pages check auth state in build():
+All protected pages check auth state AND role in build():
 ```dart
 final user = FirebaseAuth.instance.currentUser;
 if (user == null) {
@@ -96,6 +131,12 @@ if (user == null) {
     );
   });
   return Scaffold(body: Center(child: CircularProgressIndicator()));
+}
+
+// For admin/master pages, also verify role:
+final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+if (userDoc.data()?['role'] != 'admin') {
+  // Access denied - redirect
 }
 ```
 
@@ -162,19 +203,26 @@ flutter build apk            # Build APK
 ## Key Files Reference
 - `lib/main.dart` - Entry point, Firebase init, auth state routing
 - `lib/pages/splash_screen.dart` - Landing page with login/signup (modern gradient UI)
+- `lib/pages/user/user_login.dart` - User authentication with Firebase Auth
+- `lib/pages/user/user_signup.dart` - User registration with role='user'
 - `lib/pages/user/user_homepage.dart` - User dashboard (responsive layout)
 - `lib/pages/user/user_profile.dart` - User profile management with profile picture upload
 - `lib/pages/user/user_travel_requirments.dart` - Destination selector, checklist creator
 - `lib/pages/user/user_documents_checklist.dart` - Document upload/status tracking
 - `lib/pages/user/user_view_document_with_ai.dart` - Document viewer with AI analysis results
+- `lib/pages/admin/admin_login.dart` - Admin authentication with role verification
+- `lib/pages/admin/admin_dashboard.dart` - Admin dashboard with quick actions
+- `lib/pages/master/master_login.dart` - Master authentication with role verification
 - `lib/utils/user_app_drawer.dart` - **User navigation drawer** (use for all user pages)
+- `lib/utils/admin_app_drawer.dart` - **Admin navigation drawer** (use for all admin pages)
 - `lib/utils/checklist_helper.dart` - Shared checklist navigation logic
 - `lib/dev/template.dart` - Page template with back button
-- `lib/dev/template_with_menu.dart` - Page template with drawer menu (imports user_app_drawer)
+- `lib/dev/template_with_menu.dart` - Page template with drawer menu
 - `lib/dev/debug_page.dart` - Dev navigation hub (**remove for prod**)
 - `firebase/storage.rules` - Firebase Storage security rules (profile pictures, documents)
 - `functions/index.js` - Cloud Function for AI document analysis (OpenAI GPT-4 Vision)
 - `functions/SECRETS_SETUP.md` - Instructions for configuring OpenAI API key securely
+- `ADMIN_MASTER_SETUP.md` - Guide for creating admin/master accounts securely
 
 ## Recurring Code Patterns
 
@@ -223,6 +271,14 @@ Container(
 - Typography: 'Kumbh Sans' set globally in `main.dart` but also specified locally in widgets
 
 ## Recently Implemented Features
+- ✅ **Role-Based Authentication System** - Unified auth with Firebase Auth + Firestore role field
+  - All users (regular/admin/master) use same Firebase Auth system
+  - Role stored in Firestore `users` collection: 'user', 'admin', or 'master'
+  - Login flows verify role and route to appropriate dashboard
+  - Admin/master accounts created manually via Firebase Console
+  - NO passwords stored in Firestore (security best practice)
+  - See `ADMIN_MASTER_SETUP.md` for admin/master account creation guide
+  
 - ✅ **Modern Splash Screen UI** - Enhanced landing page with gradient backgrounds, decorative circles, and polished button designs
   - LinearGradient background (teal to gray)
   - Reduced background image opacity for better text contrast

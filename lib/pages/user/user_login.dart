@@ -352,6 +352,7 @@ class _UserLoginPageState extends State<UserLoginPage> {
           await firestore.collection('users').doc(userCredential.user!.uid).set({
             'fullName': userCredential.user!.displayName ?? '',
             'email': userCredential.user!.email ?? _emailController.text.trim(),
+            'role': 'user', // Default role for regular users
             'phoneNumber': '',
             'address': '',
             'passportNumber': '',

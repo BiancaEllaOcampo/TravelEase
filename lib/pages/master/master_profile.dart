@@ -75,68 +75,80 @@ class _MasterProfilePageState extends State<MasterProfilePage> {
       debugPrint('Current User UID: ${currentUser.uid}');
       debugPrint('Current User Email: ${currentUser.email}');
 
-      // Try to find master document by Auth UID first
-      DocumentSnapshot masterDoc = await _firestore
-          .collection('master')
+      // Get user document from unified users collection
+      DocumentSnapshot userDoc = await _firestore
+          .collection('users')
           .doc(currentUser.uid)
           .get();
 
-      debugPrint('Master doc by UID exists: ${masterDoc.exists}');
+      debugPrint('User doc exists: ${userDoc.exists}');
 
-      // If not found by UID, search by email
-      if (!masterDoc.exists) {
-        debugPrint('Searching master by email...');
-        final querySnapshot = await _firestore
-            .collection('master')
-            .where('email', isEqualTo: currentUser.email)
-            .limit(1)
-            .get();
-
-        if (querySnapshot.docs.isNotEmpty) {
-          masterDoc = querySnapshot.docs.first;
-          debugPrint('Found master doc by email: ${masterDoc.id}');
-        } else {
-          debugPrint('No master document found for this user');
-          // Not a master account, redirect to splash screen
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Master account not found. Please contact administrator.'),
-                backgroundColor: Color(0xFFA54547),
-              ),
-            );
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const SplashScreen()),
-              (route) => false,
-            );
-          }
-          return;
+      if (!userDoc.exists) {
+        debugPrint('No user document found for this user');
+        // Not a registered account, redirect to splash screen
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('User account not found. Please contact an administrator.'),
+              backgroundColor: Color(0xFFA54547),
+            ),
+          );
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const SplashScreen()),
+            (route) => false,
+          );
         }
+        return;
       }
 
-      if (masterDoc.exists) {
-        final data = masterDoc.data() as Map<String, dynamic>;
-        
-        debugPrint('Master data: $data');
-        
-        setState(() {
-          // Basic information
-          _firstNameController.text = data['first_name'] ?? '';
-          _lastNameController.text = data['last_name'] ?? '';
-          _emailController.text = data['email'] ?? currentUser.email ?? '';
-          _userIdController.text = currentUser.uid;
-          
-          // Security settings
-          _twoFactorEnabled = data['twoFactorEnabled'] ?? false;
-          _consentToDataProcessing = data['dataProcessingConsent'] ?? false;
-          
-          // Profile image
-          _profileImageUrl = data['profileImageUrl'];
-          
-          _isLoading = false;
-        });
+      final data = userDoc.data() as Map<String, dynamic>;
+      final userRole = data['role'] ?? 'user';
+
+      debugPrint('User data: $data');
+      debugPrint('User role: $userRole');
+
+      // Verify user is a master
+      if (userRole != 'master') {
+        // Not authorized as master
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Access denied. This account is not a master user.'),
+              backgroundColor: Color(0xFFA54547),
+            ),
+          );
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const SplashScreen()),
+            (route) => false,
+          );
+        }
+        return;
       }
+
+      // Parse full name into first and last name
+      final fullName = data['fullName'] ?? '';
+      final nameParts = fullName.split(' ');
+      final firstName = nameParts.isNotEmpty ? nameParts[0] : '';
+      final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+
+      setState(() {
+        // Basic information
+        _firstNameController.text = firstName;
+        _lastNameController.text = lastName;
+        _emailController.text = data['email'] ?? currentUser.email ?? '';
+        _userIdController.text = currentUser.uid;
+        
+        // Security settings
+        _twoFactorEnabled = data['twoFactorEnabled'] ?? false;
+        _consentToDataProcessing = data['dataProcessingConsent'] ?? false;
+        
+        // Profile image
+        _profileImageUrl = data['profileImageUrl'];
+        
+        _isLoading = false;
+      });
     } catch (e) {
       debugPrint('Error loading profile: $e');
       setState(() {
@@ -182,10 +194,12 @@ class _MasterProfilePageState extends State<MasterProfilePage> {
         _isLoading = true;
       });
 
-      // Update master document in Firestore
-      await _firestore.collection('master').doc(currentUser.uid).update({
-        'first_name': _firstNameController.text.trim(),
-        'last_name': _lastNameController.text.trim(),
+      // Combine first and last name into fullName
+      final fullName = '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}'.trim();
+
+      // Update user document in Firestore (unified users collection)
+      await _firestore.collection('users').doc(currentUser.uid).update({
+        'fullName': fullName,
         'email': _emailController.text.trim(),
         'twoFactorEnabled': _twoFactorEnabled,
         'dataProcessingConsent': _consentToDataProcessing,
@@ -265,8 +279,8 @@ class _MasterProfilePageState extends State<MasterProfilePage> {
                   _isLoading = true;
                 });
 
-                // Delete master data from Firestore first
-                await _firestore.collection('master').doc(currentUser.uid).delete();
+                // Delete user data from Firestore first (unified users collection)
+                await _firestore.collection('users').doc(currentUser.uid).delete();
                 
                 // Delete the Firebase Auth account (this automatically logs out)
                 await currentUser.delete();
@@ -401,7 +415,7 @@ class _MasterProfilePageState extends State<MasterProfilePage> {
       final String fileName = 'profile_${currentUser.uid}_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final Reference storageRef = _storage
           .ref()
-          .child('master_profiles')
+          .child('user_profiles')
           .child(currentUser.uid)
           .child(fileName);
 
@@ -424,8 +438,8 @@ class _MasterProfilePageState extends State<MasterProfilePage> {
       // Get download URL
       final String downloadUrl = await snapshot.ref.getDownloadURL();
 
-      // Update Firestore with new profile image URL
-      await _firestore.collection('master').doc(currentUser.uid).update({
+      // Update Firestore with new profile image URL (unified users collection)
+      await _firestore.collection('users').doc(currentUser.uid).update({
         'profileImageUrl': downloadUrl,
         'updatedAt': FieldValue.serverTimestamp(),
       });
