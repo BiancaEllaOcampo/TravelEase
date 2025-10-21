@@ -14,13 +14,13 @@ import '../pages/user/user_travel_requirments.dart';
 import '../pages/user/user_documents_checklist.dart';
 import '../pages/user/user_view_document_with_ai.dart';
 import '../pages/admin/admin_announcement.dart';
-import '../pages/admin/admin_requirement_configuration.dart';
 import '../pages/admin/admin_document_verification.dart';
 import '../pages/master/master_login.dart';
 import '../pages/master/master_dashboard.dart';
 import '../pages/master/master_admin&user_management.dart';
 import '../pages/master/master_document_verification.dart';
 import '../pages/master/master_announcement.dart';
+import '../pages/master/master_requirement_configuration.dart';
 
 class DebugPage extends StatelessWidget {
   const DebugPage({super.key});
@@ -310,22 +310,6 @@ class DebugPage extends StatelessWidget {
 
             _buildDebugButton(
               context,
-              'Admin Requirement Configuration',
-              'Configure travel document requirements - auto-login',
-              Icons.settings,
-              () async {
-                await _autoLoginAdmin(context);
-                if (context.mounted) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const AdminReqConfigPage()),
-                  );
-                }
-              },
-            ),
-
-            _buildDebugButton(
-              context,
               'Admin Announcements',
               'Manage system announcements - auto-login',
               Icons.campaign,
@@ -409,6 +393,22 @@ class DebugPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const MasterAnnouncementPage()),
+                  );
+                }
+              },
+            ),
+
+            _buildDebugButton(
+              context,
+              'Master Requirement Configuration',
+              'Configure travel requirements per country - auto-login',
+              Icons.settings,
+              () async {
+                await _autoLoginMaster(context);
+                if (context.mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MasterReqConfigPage()),
                   );
                 }
               },

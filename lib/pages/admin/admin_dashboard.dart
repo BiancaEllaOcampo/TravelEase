@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'admin_user_management.dart';
-import 'admin_requirement_configuration.dart';
 import 'admin_document_verification.dart';
 import 'admin_announcement.dart';
 import '../../utils/admin_app_drawer.dart';
@@ -217,18 +216,6 @@ class AdminDashboardPage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(builder: (context) => const AdminUserManagement()),
-                        );
-                      },
-                    ),
-                    _AdminActionButton(
-                      text: 'Travel Requirements Configuration',
-                      icon: Icons.settings,
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AdminReqConfigPage(),
-                          ),
                         );
                       },
                     ),

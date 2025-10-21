@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'master_admin&user_management.dart';
 import 'master_document_verification.dart';
 import 'master_announcement.dart';
+import 'master_requirement_configuration.dart';
 import '../../utils/master_app_drawer.dart';
 import '../splash_screen.dart';
 
@@ -327,10 +328,15 @@ class _MasterDashboardPageState extends State<MasterDashboardPage> {
                       },
                     ),
                     _MasterActionButton(
-                      text: 'System Settings',
+                      text: 'Requirement Configuration',
                       icon: Icons.settings,
                       onPressed: () {
-                        // TODO: Handle System Settings navigation
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MasterReqConfigPage(),
+                          ),
+                        );
                       },
                     ),
                   ],
