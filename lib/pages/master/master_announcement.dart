@@ -6,7 +6,7 @@ import '../../utils/master_app_drawer.dart';
 import '../splash_screen.dart';
 
 class MasterAnnouncementPage extends StatefulWidget {
-  const MasterAnnouncementPage({Key? key}) : super(key: key);
+  const MasterAnnouncementPage({super.key});
 
   @override
   State<MasterAnnouncementPage> createState() => _MasterAnnouncementPageState();
@@ -501,166 +501,279 @@ class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
     return Scaffold(
       drawer: const MasterAppDrawer(),
       backgroundColor: const Color(0xFFD9D9D9),
-      body: Stack(
-        children: [
-          // Header
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 110,
-            child: Container(
-              color: const Color(0xFF125E77),
-              child: Padding(
-                padding: const EdgeInsets.only(top: 48, left: 24, right: 24),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Builder(
-                      builder: (BuildContext context) {
-                        return IconButton(
-                          onPressed: () {
-                            Scaffold.of(context).openDrawer();
-                          },
-                          icon: const Icon(Icons.menu, color: Colors.white, size: 50),
-                        );
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(130),
+        child: Container(
+          height: 130,
+          color: const Color(0xFF125E77),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 48, left: 22, right: 22),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Builder(
+                  builder: (BuildContext context) {
+                    return IconButton(
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
                       },
-                    ),
-                    const Text(
-                      'Announcements',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Kumbh Sans',
-                        height: 1.2,
+                      icon: const Icon(
+                        Icons.menu,
+                        color: Color(0xFFF3F3F3),
+                        size: 50,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    Container(
-                      width: 54,
-                      height: 54,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFF348AA7),
-                      ),
-                      child: const Icon(
-                        Icons.flight,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
-              ),
+                const Flexible(
+                  child: Text(
+                    'Announcements',
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                    maxLines: 2,
+                    overflow: TextOverflow.visible,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Kumbh Sans',
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 67,
+                  height: 58,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFF348AA7),
+                  ),
+                  child: const Icon(
+                    Icons.airplanemode_active,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ],
             ),
           ),
-          // Main content
-          Positioned(
-            top: 120,
-            left: 20,
-            right: 20,
-            bottom: 0,
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title field
-                  const Text(
-                    'Title',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: 'Kumbh Sans',
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey),
-                    ),
-                    child: TextField(
-                      controller: titleController,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+        ),
+      ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: const Color(0xFFD9D9D9),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Create New Announcement Card
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  // Content field
-                  const Text(
-                    'Content',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      fontFamily: 'Kumbh Sans',
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    height: 90,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey),
-                    ),
-                    child: TextField(
-                      controller: contentController,
-                      maxLines: null,
-                      expands: true,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF125E77).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.add_circle_outline,
+                              color: Color(0xFF125E77),
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Create New Announcement',
+                            style: TextStyle(
+                              color: Color(0xFF125E77),
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Kumbh Sans',
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: SizedBox(
-                      width: 85,
-                      height: 38,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (_validateFields(titleController.text, contentController.text)) {
-                            postAnnouncement(
-                              titleController.text.trim(), 
-                              contentController.text.trim(),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF348AA7),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
+                      const SizedBox(height: 20),
+                      // Title field
+                      const Text(
+                        'Title',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Kumbh Sans',
+                          color: Color(0xFF125E77),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8F9FA),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFF348AA7).withOpacity(0.3)),
+                        ),
+                        child: TextField(
+                          controller: titleController,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Kumbh Sans',
+                          ),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            hintText: 'Enter announcement title...',
+                            hintStyle: TextStyle(color: Colors.grey),
                           ),
                         ),
-                        child: const Text(
-                          'Post',
+                      ),
+                      const SizedBox(height: 16),
+                      // Content field
+                      const Text(
+                        'Content',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Kumbh Sans',
+                          color: Color(0xFF125E77),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        height: 110,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8F9FA),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFF348AA7).withOpacity(0.3)),
+                        ),
+                        child: TextField(
+                          controller: contentController,
+                          maxLines: null,
+                          expands: true,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontFamily: 'Kumbh Sans',
+                          ),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            hintText: 'Enter announcement content...',
+                            hintStyle: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: SizedBox(
+                          height: 44,
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              if (_validateFields(titleController.text, contentController.text)) {
+                                postAnnouncement(
+                                  titleController.text.trim(), 
+                                  contentController.text.trim(),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF348AA7),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              elevation: 2,
+                              padding: const EdgeInsets.symmetric(horizontal: 24),
+                            ),
+                            icon: const Icon(Icons.send, size: 18),
+                            label: const Text(
+                              'Post Announcement',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Kumbh Sans',
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 32),
+                
+                // Announcements List Header (with StreamBuilder count)
+                StreamBuilder<QuerySnapshot>(
+                  stream: _firestore
+                      .collection('announcements')
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    final count = snapshot.hasData ? snapshot.data!.docs.length : 0;
+                    return Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF125E77).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.campaign,
+                            color: Color(0xFF125E77),
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'All Announcements',
                           style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
+                            color: Color(0xFF125E77),
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                             fontFamily: 'Kumbh Sans',
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  const Text(
-                    'Announcements',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Kumbh Sans',
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF348AA7).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '$count ${count == 1 ? 'item' : 'items'}',
+                            style: const TextStyle(
+                              color: Color(0xFF348AA7),
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Kumbh Sans',
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+                
+                const SizedBox(height: 16),
                   // StreamBuilder to display announcements from Firebase
                   StreamBuilder<QuerySnapshot>(
                     stream: _firestore
@@ -681,17 +794,43 @@ class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
                       }
 
                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                        return const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(24.0),
-                            child: Text(
-                              'No announcements yet',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                                fontFamily: 'Kumbh Sans',
-                              ),
+                        return Container(
+                          padding: const EdgeInsets.all(40),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: const Color(0xFF348AA7).withOpacity(0.2),
+                              width: 1.5,
                             ),
+                          ),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.campaign,
+                                size: 64,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No announcements yet',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey[600],
+                                  fontFamily: 'Kumbh Sans',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Create your first announcement above',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[500],
+                                  fontFamily: 'Kumbh Sans',
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       }
@@ -699,97 +838,125 @@ class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
                       return Column(
                         children: snapshot.data!.docs.map((doc) {
                           final data = doc.data() as Map<String, dynamic>;
+                          final title = data['title'] ?? 'Untitled';
+                          final content = data['content'] ?? '';
+                          final announcementId = data['id'] ?? doc.id;
                           final date = data['date'] as Timestamp?;
                           final dateStr = date != null 
                               ? DateFormat('MMM dd, yyyy').format(date.toDate())
-                              : 'No date';
+                              : 'Just now';
 
                           return Padding(
-                            padding: const EdgeInsets.only(bottom: 14),
+                            padding: const EdgeInsets.only(bottom: 12),
                             child: Container(
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: const Color(0xFF348AA7).withOpacity(0.2),
+                                  width: 1.5,
+                                ),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.05),
-                                    blurRadius: 4,
+                                    blurRadius: 6,
                                     offset: const Offset(0, 2),
                                   ),
                                 ],
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: Row(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Container(
-                                      width: 48,
-                                      height: 48,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFD9D9D9),
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: Colors.grey.shade400),
-                                      ),
-                                      child: const Icon(Icons.image, size: 32, color: Colors.grey),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            data['title'] ?? '',
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              fontFamily: 'Kumbh Sans',
-                                              color: Color(0xFF125E77),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            data['content'] ?? '',
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              fontSize: 13,
-                                              fontFamily: 'Kumbh Sans',
-                                              color: Colors.black87,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            dateStr,
-                                            style: const TextStyle(
-                                              fontSize: 11,
-                                              fontFamily: 'Kumbh Sans',
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Column(
+                                    Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        SizedBox(
-                                          width: 60,
-                                          height: 32,
-                                          child: ElevatedButton(
-                                            onPressed: () => viewAnnouncement(data),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: const Color(0xFF348AA7),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(6),
-                                              ),
-                                              padding: EdgeInsets.zero,
+                                        Container(
+                                          width: 56,
+                                          height: 56,
+                                          decoration: BoxDecoration(
+                                            gradient: const LinearGradient(
+                                              colors: [Color(0xFF348AA7), Color(0xFF125E77)],
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
                                             ),
-                                            child: const Text(
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: const Icon(
+                                            Icons.campaign,
+                                            size: 32,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                title,
+                                                style: const TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontFamily: 'Kumbh Sans',
+                                                  color: Color(0xFF125E77),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                'ID: $announcementId',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontFamily: 'Kumbh Sans',
+                                                  color: Colors.grey[500],
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                dateStr,
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  fontFamily: 'Kumbh Sans',
+                                                  color: Colors.grey[500],
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                content,
+                                                maxLines: 3,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontFamily: 'Kumbh Sans',
+                                                  color: Colors.grey[700],
+                                                  height: 1.4,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: OutlinedButton.icon(
+                                            onPressed: () => viewAnnouncement(data),
+                                            style: OutlinedButton.styleFrom(
+                                              foregroundColor: const Color(0xFF348AA7),
+                                              side: const BorderSide(color: Color(0xFF348AA7), width: 1.5),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              padding: const EdgeInsets.symmetric(vertical: 12),
+                                            ),
+                                            icon: const Icon(Icons.visibility, size: 18),
+                                            label: const Text(
                                               'View',
                                               style: TextStyle(
-                                                color: Colors.white,
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.bold,
                                                 fontFamily: 'Kumbh Sans',
@@ -797,23 +964,23 @@ class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
                                             ),
                                           ),
                                         ),
-                                        const SizedBox(height: 12),
-                                        SizedBox(
-                                          width: 60,
-                                          height: 32,
-                                          child: ElevatedButton(
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: ElevatedButton.icon(
                                             onPressed: () => editAnnouncement(data),
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: const Color(0xFF348AA7),
+                                              foregroundColor: Colors.white,
                                               shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(6),
+                                                borderRadius: BorderRadius.circular(8),
                                               ),
-                                              padding: EdgeInsets.zero,
+                                              padding: const EdgeInsets.symmetric(vertical: 12),
+                                              elevation: 0,
                                             ),
-                                            child: const Text(
+                                            icon: const Icon(Icons.edit, size: 18),
+                                            label: const Text(
                                               'Edit',
                                               style: TextStyle(
-                                                color: Colors.white,
                                                 fontSize: 14,
                                                 fontWeight: FontWeight.bold,
                                                 fontFamily: 'Kumbh Sans',
@@ -831,13 +998,12 @@ class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
                         }).toList(),
                       );
                     },
-                  ),
-                  const SizedBox(height: 30),
-                ],
-              ),
+                ),
+                const SizedBox(height: 30),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
