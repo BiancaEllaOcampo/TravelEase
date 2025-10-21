@@ -337,24 +337,13 @@ class _MasterLoginPageState extends State<MasterLoginPage> {
         password: _passwordController.text,
       );
 
-      // Check if user exists in 'master' collection
-      final user = _auth.currentUser;
-      if (user != null) {
-        final masterDoc = await FirebaseFirestore.instance.collection('master').doc(user.uid).get();
-        if (masterDoc.exists) {
-          _showSnackBar('Login successful!');
-          if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const MasterDashboardPage()),
-            );
-          }
-        } else {
-          _showSnackBar('You do not have master access.');
-          await _auth.signOut();
-        }
-      } else {
-        _showSnackBar('Unable to verify user.');
+      // Success - navigate to dashboard
+      _showSnackBar('Login successful!');
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MasterDashboardPage()),
+        );
       }
     } on FirebaseAuthException catch (e) {
       String errorMessage = 'An error occurred';
