@@ -231,6 +231,54 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
                   // Requirements list
                   ..._buildRequirementsList(selectedCountry),
 
+                  // AI Verification Notice
+                  Container(
+                    margin: const EdgeInsets.only(top: 20, bottom: 8),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE3F2FD),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFF348AA7), width: 1.5),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          color: Color(0xFF125E77),
+                          size: 22,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'AI Document Verification',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Kumbh Sans',
+                                  color: Color(0xFF125E77),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              const Text(
+                                'Our AI may not be able to analyze sensitive documents like passports due to privacy policies. Don\'t worry - our admin team will manually review and verify these documents for you.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontFamily: 'Kumbh Sans',
+                                  color: Color(0xFF125E77),
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                   // Disclaimer for countries with embassy links
                   if (embassyLinks.containsKey(selectedCountry))
                     _buildDisclaimer(selectedCountry),
@@ -385,7 +433,9 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
 
       // Initialize each document with pending status
       for (final req in requirements) {
-        checklistData[req['title']] = {
+        // Convert display name to lowercase_with_underscores format
+        final docKey = (req['title'] as String).toLowerCase().replaceAll(' ', '_');
+        checklistData[docKey] = {
           'status': 'pending',
           'url': '',
           'updatedAt': FieldValue.serverTimestamp(),
@@ -393,6 +443,9 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
       }
 
       // Save to Firestore under users/{userId}/checklists
+      // Use lowercase country name to match AI function format
+      final countryKey = selectedCountry.toLowerCase().replaceAll(' ', '_');
+      
       // This REPLACES the entire checklists map, ensuring only one destination at a time
       try {
         await FirebaseFirestore.instance
@@ -400,7 +453,7 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
             .doc(user.uid)
             .update({
           'checklists': {
-            selectedCountry: checklistData,
+            countryKey: checklistData,
           }
         });
       } catch (e) {
@@ -410,7 +463,7 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
             .doc(user.uid)
             .set({
           'checklists': {
-            selectedCountry: checklistData,
+            countryKey: checklistData,
           }
         }, SetOptions(merge: true));
       }
@@ -421,7 +474,7 @@ class _UserTravelRequirementsPageState extends State<UserTravelRequirementsPage>
           context,
           MaterialPageRoute(
             builder: (context) => UserDocumentsChecklistPage(
-              country: selectedCountry,
+              country: countryKey,  // Pass lowercase country
             ),
           ),
         );

@@ -59,11 +59,14 @@ users/{userId}/
   fullName, email, phoneNumber, address, passport*, visa*, insurance*
   profileImageUrl: string  // Firebase Storage download URL
   checklists/
-    {country}:  // Only ONE country per user (enforced)
-      {documentName}: {
+    {country}:  // Only ONE country per user (enforced), lowercase_with_underscores format
+      {documentName}: {  // lowercase_with_underscores format (e.g., flight_ticket, valid_passport)
         status: string,
         url: string,
-        updatedAt: timestamp
+        updatedAt: timestamp,
+        extractedData: map,  // AI-extracted document data
+        aiFeedback: string,  // AI analysis feedback
+        analyzedAt: timestamp  // When AI last analyzed
       }
 ```
 
@@ -73,10 +76,11 @@ storage/
 ├── user_profiles/
 │   └── {userId}/
 │       └── profile_{userId}_{timestamp}.jpg  // User profile pictures (max 5MB)
-└── user_documents/  // For future document uploads
+└── user_documents/  // Travel documents with AI analysis
     └── {userId}/
-        └── {docType}/
-            └── {fileName}  // Travel documents (max 10MB)
+        └── {country}/  // lowercase_with_underscores (e.g., hong_kong)
+            └── {docType}/  // lowercase_with_underscores (e.g., flight_ticket)
+                └── {fileName}  // Travel documents (max 10MB, images only)
 ```
 
 ### Authentication Pattern
@@ -162,12 +166,15 @@ flutter build apk            # Build APK
 - `lib/pages/user/user_profile.dart` - User profile management with profile picture upload
 - `lib/pages/user/user_travel_requirments.dart` - Destination selector, checklist creator
 - `lib/pages/user/user_documents_checklist.dart` - Document upload/status tracking
+- `lib/pages/user/user_view_document_with_ai.dart` - Document viewer with AI analysis results
 - `lib/utils/user_app_drawer.dart` - **User navigation drawer** (use for all user pages)
 - `lib/utils/checklist_helper.dart` - Shared checklist navigation logic
 - `lib/dev/template.dart` - Page template with back button
 - `lib/dev/template_with_menu.dart` - Page template with drawer menu (imports user_app_drawer)
 - `lib/dev/debug_page.dart` - Dev navigation hub (**remove for prod**)
 - `firebase/storage.rules` - Firebase Storage security rules (profile pictures, documents)
+- `functions/index.js` - Cloud Function for AI document analysis (OpenAI GPT-4 Vision)
+- `functions/SECRETS_SETUP.md` - Instructions for configuring OpenAI API key securely
 
 ## Recurring Code Patterns
 
@@ -211,7 +218,7 @@ Container(
 ## Known Limitations
 - **No tests** - `test/` directory unused
 - **iOS untested** - Android only
-- **AI analysis TODO** - Report view placeholder only
+- **AI cannot analyze passports** - OpenAI blocks sensitive PII documents; admins must manually review
 - **Admin workflows incomplete** - Admin/Master role pages partially implemented
 - Typography: 'Kumbh Sans' set globally in `main.dart` but also specified locally in widgets
 
@@ -244,18 +251,42 @@ Container(
   - See `TRAVEL_DOCUMENTS_UPLOAD.md` for full technical details
   - See `UPLOAD_FEATURE_COMPLETE.md` for quick reference
 
+- ✅ **AI Document Verification** - Automated document analysis using OpenAI GPT-4 Vision
+  - Cloud Function triggers on document upload to Firebase Storage
+  - Analyzes flight tickets, visas, and accommodation proofs
+  - Extracts structured data (passenger names, flight numbers, dates, etc.)
+  - Provides validation feedback (missing info, expiry warnings)
+  - Updates Firestore with analysis results in real-time
+  - **Limitation**: Cannot analyze passports due to OpenAI PII restrictions
+  - API key stored securely in Firebase Secrets (Google Secret Manager)
+  - Public Storage URLs for AI access (see `firebase/storage.rules`)
+  - Document-specific prompts for each travel document type
+  - Auto-status updates: `pending` → `verifying` → `verified`/`needs_correction`
+  - See `functions/SECRETS_SETUP.md` for Cloud Function configuration
+  - See `functions/index.js` for implementation details
+
+- ✅ **Firestore Key Format Consistency** - All keys use `lowercase_with_underscores`
+  - Countries: `japan`, `hong_kong`, `singapore`, `south_korea`, `china`
+  - Documents: `flight_ticket`, `valid_passport`, `visa`, `proof_of_accommodation`
+  - Prevents data mismatch between app, Cloud Functions, and Firebase Storage
+  - User-facing display names converted to Firestore keys automatically
+
 ## Before Production Checklist
 - [ ] Remove `lib/dev/debug_page.dart` and all imports
 - [ ] Remove debug button from `splash_screen.dart` and `user_homepage.dart`
-- [x] ~~Deploy Firebase Storage security rules~~ (manually deployed in Console)
+- [x] ~~Deploy Firebase Storage security rules~~ (COMPLETE - public read for AI)
 - [x] ~~Implement Firebase Storage for document uploads~~ (COMPLETE)
+- [x] ~~Implement AI document verification backend~~ (COMPLETE - Cloud Function with OpenAI)
+- [ ] Configure OpenAI API key in production (see `functions/SECRETS_SETUP.md`)
 - [ ] Add comprehensive form validation
 - [ ] Replace SnackBar error handling with proper UI
 - [ ] Test on physical Android devices
-- [ ] Complete admin review workflow
-- [ ] Implement AI document verification backend (OCR, data extraction)
+- [ ] Complete admin review workflow for manual document verification
 - [ ] Add iOS permissions to Info.plist for camera/photo library
 - [ ] Implement cleanup Cloud Function for old profile pictures
 - [ ] Implement cleanup Cloud Function for old travel documents
 - [ ] Add document viewer with zoom/pan functionality
-- [ ] Implement "View Original Document" feature
+- [ ] Monitor OpenAI API usage and set billing alerts
+- [ ] Add real-time Firestore listeners for status updates (optional)
+- [ ] Implement confidence scoring for AI results (optional)
+- [ ] Add retry logic for OpenAI API failures (optional)

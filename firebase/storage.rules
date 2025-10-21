@@ -18,9 +18,9 @@ service firebase.storage {
     
     // Travel document uploads
     match /user_documents/{userId}/{country}/{documentType}/{fileName} {
-      // Allow users to read only their own documents
-      allow read: if request.auth != null 
-                  && request.auth.uid == userId;
+      // Allow public read access so AI can analyze documents
+      // (OpenAI needs to download the images)
+      allow read: if true;
       
       // Allow users to upload/update/delete only their own documents
       allow write: if request.auth != null 
