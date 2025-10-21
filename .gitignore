@@ -15,6 +15,10 @@ migrate_working_dir/
 # Local env
 .env
 
+# Firebase config files (contains API keys)
+google-services.json
+GoogleService-Info.plist
+
 # IntelliJ related
 *.iml
 *.ipr

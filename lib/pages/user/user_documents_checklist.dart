@@ -25,34 +25,34 @@ class _UserDocumentsChecklistPageState extends State<UserDocumentsChecklistPage>
   late FirebaseAuth _auth;
   late FirebaseFirestore _firestore;
   final Map<String, List<String>> requirementsByCountry = {
-    'Japan': [
+    'japan': [
       'Flight Ticket',
       'Valid Passport',
       'Proof of Accommodation',
       'eTravel Registration (App)',
       'Visa',
     ],
-    'Hong Kong': [
+    'hong_kong': [
       'Flight Ticket',
       'Valid Passport',
       'Proof of Accommodation',
       'eTravel Registration (App)',
     ],
-    'South Korea': [
+    'south_korea': [
       'Flight Ticket',
       'Valid Passport',
       'Proof of Accommodation',
       'eTravel Registration (App)',
       'Visa',
     ],
-    'Singapore': [
+    'singapore': [
       'Flight Ticket',
       'Valid Passport',
       'Proof of Accommodation',
       'eTravel Registration (App)',
       'Singapore Arrival Card (SGAC)',
     ],
-    'China': [
+    'china': [
       'Flight Ticket',
       'Valid Passport',
       'Proof of Accommodation',
@@ -75,6 +75,15 @@ class _UserDocumentsChecklistPageState extends State<UserDocumentsChecklistPage>
     _firestore = FirebaseFirestore.instance;
     _initializeDocumentStatus();
     _loadChecklistData();
+  }
+
+  /// Convert Firestore country key to display name
+  /// Example: "hong_kong" -> "Hong Kong"
+  String _getCountryDisplayName() {
+    return widget.country
+        .split('_')
+        .map((word) => word.isEmpty ? '' : word[0].toUpperCase() + word.substring(1))
+        .join(' ');
   }
 
   void _initializeDocumentStatus() {
@@ -103,8 +112,9 @@ class _UserDocumentsChecklistPageState extends State<UserDocumentsChecklistPage>
           documentUrls.clear();
           final requirements = requirementsByCountry[widget.country] ?? [];
           for (final req in requirements) {
-            documentStatus[req] = countryChecklist[req]?['status'] ?? 'pending';
-            documentUrls[req] = countryChecklist[req]?['url'] ?? '';
+            final docKey = req.toLowerCase().replaceAll(' ', '_');
+            documentStatus[req] = countryChecklist[docKey]?['status'] ?? 'pending';
+            documentUrls[req] = countryChecklist[docKey]?['url'] ?? '';
           }
         });
       }
@@ -123,19 +133,17 @@ class _UserDocumentsChecklistPageState extends State<UserDocumentsChecklistPage>
 
     try {
       final requirements = requirementsByCountry[widget.country] ?? [];
-      final checklistData = <String, dynamic>{};
+      final updateMap = <String, dynamic>{};
 
+      // Update each document individually to preserve AI data
       for (final req in requirements) {
-        checklistData[req] = {
-          'status': documentStatus[req],
-          'url': documentUrls[req],
-          'updatedAt': FieldValue.serverTimestamp(),
-        };
+        final docKey = req.toLowerCase().replaceAll(' ', '_');
+        updateMap['checklists.${widget.country}.$docKey.status'] = documentStatus[req];
+        updateMap['checklists.${widget.country}.$docKey.url'] = documentUrls[req];
+        updateMap['checklists.${widget.country}.$docKey.updatedAt'] = FieldValue.serverTimestamp();
       }
 
-      await _firestore.collection('users').doc(user.uid).update({
-        'checklists.${widget.country}': checklistData,
-      });
+      await _firestore.collection('users').doc(user.uid).update(updateMap);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -248,12 +256,11 @@ class _UserDocumentsChecklistPageState extends State<UserDocumentsChecklistPage>
       final String downloadUrl = await snapshot.ref.getDownloadURL();
 
       // Update Firestore with new document URL and status
+      // Use sanitized key format (lowercase_with_underscores)
       await _firestore.collection('users').doc(currentUser.uid).update({
-        'checklists.${widget.country}.$documentName': {
-          'status': 'verifying',  // Change status to verifying after upload
-          'url': downloadUrl,
-          'updatedAt': FieldValue.serverTimestamp(),
-        },
+        'checklists.${sanitizedCountry}.$sanitizedDocName.status': 'verifying',
+        'checklists.${sanitizedCountry}.$sanitizedDocName.url': downloadUrl,
+        'checklists.${sanitizedCountry}.$sanitizedDocName.updatedAt': FieldValue.serverTimestamp(),
       });
 
       // Update local state
@@ -439,7 +446,7 @@ class _UserDocumentsChecklistPageState extends State<UserDocumentsChecklistPage>
                         ),
                       ),
                       Text(
-                        widget.country,
+                        _getCountryDisplayName(),
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

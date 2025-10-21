@@ -53,8 +53,13 @@ class _UserViewDocumentWithAIPageState
       if (doc.exists) {
         final data = doc.data();
         final checklists = data?['checklists'] ?? {};
-        final countryChecklist = checklists[widget.country] ?? {};
-        final documentData = countryChecklist[widget.documentName] ?? {};
+        
+        // Use sanitized keys (lowercase_with_underscores)
+        final sanitizedCountry = widget.country.toLowerCase().replaceAll(' ', '_');
+        final sanitizedDocName = widget.documentName.toLowerCase().replaceAll(' ', '_');
+        
+        final countryChecklist = checklists[sanitizedCountry] ?? {};
+        final documentData = countryChecklist[sanitizedDocName] ?? {};
 
         setState(() {
           documentStatus = documentData['status'] ?? 'pending';
@@ -165,12 +170,11 @@ class _UserViewDocumentWithAIPageState
       final String downloadUrl = await snapshot.ref.getDownloadURL();
 
       // Update Firestore with new document URL and status
+      // Use sanitized key format (lowercase_with_underscores)
       await _firestore.collection('users').doc(currentUser.uid).update({
-        'checklists.${widget.country}.${widget.documentName}': {
-          'status': 'verifying',  // Change status to verifying after upload
-          'url': downloadUrl,
-          'updatedAt': FieldValue.serverTimestamp(),
-        },
+        'checklists.$sanitizedCountry.$sanitizedDocName.status': 'verifying',
+        'checklists.$sanitizedCountry.$sanitizedDocName.url': downloadUrl,
+        'checklists.$sanitizedCountry.$sanitizedDocName.updatedAt': FieldValue.serverTimestamp(),
       });
 
       // Update local state and reload data
@@ -594,6 +598,41 @@ class _UserViewDocumentWithAIPageState
                                 fontSize: 11,
                                 fontFamily: 'Kumbh Sans',
                                 color: Colors.black,
+                              ),
+                            ),
+
+                          // AI Limitation Notice (if document contains sensitive info)
+                          if (documentStatus == 'needs_correction' && 
+                              aiFeedback.toLowerCase().contains('sorry'))
+                            Container(
+                              margin: const EdgeInsets.only(top: 16),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFFF3CD),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: const Color(0xFFFFD700), width: 1),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Icon(
+                                    Icons.security,
+                                    color: Color(0xFFB8860B),
+                                    size: 18,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: const Text(
+                                      'This document contains sensitive personal information. Our AI couldn\'t analyze it due to privacy policies, but don\'t worry - our admin team will manually review and verify it for you.',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontFamily: 'Kumbh Sans',
+                                        color: Color(0xFF333333),
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
 
