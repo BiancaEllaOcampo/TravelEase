@@ -383,47 +383,134 @@ class _UserDocumentsChecklistPageState extends State<UserDocumentsChecklistPage>
           // Main content
           Positioned(
             top: 0,
-            left: 28,
-            right: 28,
+            left: 0,
+            right: 0,
             bottom: bottomInset.toDouble(),
             child: RefreshIndicator(
               color: const Color(0xFF348AA7),
               onRefresh: _loadChecklistData,
               child: SingleChildScrollView(
                 physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 20),
-                    // Destination header
-                    Row(
-                      children: [
-                        const Text(
-                          'Destination: ',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w400,
-                            fontFamily: 'Kumbh Sans',
-                            color: Colors.black,
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Destination header card
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFF348AA7),
+                              const Color(0xFF348AA7).withOpacity(0.8),
+                            ],
                           ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF348AA7).withOpacity(0.3),
+                              blurRadius: 12,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
                         ),
-                        Text(
-                          _getCountryDisplayName(),
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Kumbh Sans',
-                            color: Color(0xFF125E77),
-                          ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.flight_takeoff,
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Destination',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Kumbh Sans',
+                                      color: Colors.white70,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    _getCountryDisplayName(),
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Kumbh Sans',
+                                      color: Colors.white,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 18),
+                      ),
+                      const SizedBox(height: 24),
 
-                    // Documents list
-                    for (int i = 0; i < requirements.length; i++)
-                      _buildDocumentCard(requirements[i]),
-                  ],
+                      // Documents list header
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Required Documents',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Kumbh Sans',
+                              color: Color(0xFF125E77),
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF348AA7).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: const Color(0xFF348AA7).withOpacity(0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              '${requirements.length} items',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'Kumbh Sans',
+                                color: Color(0xFF348AA7),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Documents list
+                      for (int i = 0; i < requirements.length; i++)
+                        _buildDocumentCard(requirements[i]),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -519,6 +606,8 @@ class _UserDocumentsChecklistPageState extends State<UserDocumentsChecklistPage>
     final status = documentStatus[documentName] ?? 'pending';
     final statusColor = _getStatusColor(status);
     final statusLabel = _getStatusLabel(status);
+    final documentUrl = documentUrls[documentName] ?? '';
+    final hasDocument = documentUrl.isNotEmpty;
 
     return GestureDetector(
       onTap: () {
@@ -534,93 +623,157 @@ class _UserDocumentsChecklistPageState extends State<UserDocumentsChecklistPage>
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 14),
+        margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.all(16),
+          child: Row(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Document name
-                  Expanded(
-                    child: Text(
+              // Document preview or placeholder
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: hasDocument ? Colors.grey.shade100 : const Color(0xFF348AA7).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: hasDocument 
+                        ? const Color(0xFF348AA7).withOpacity(0.2)
+                        : const Color(0xFF348AA7).withOpacity(0.3),
+                    width: 2,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: hasDocument
+                      ? Image.network(
+                          documentUrl,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                                strokeWidth: 2,
+                                color: const Color(0xFF348AA7),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(
+                              Icons.broken_image_outlined,
+                              color: Color(0xFFA54547),
+                              size: 32,
+                            );
+                          },
+                        )
+                      : const Icon(
+                          Icons.insert_drive_file_outlined,
+                          color: Color(0xFF348AA7),
+                          size: 36,
+                        ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              
+              // Document info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Document name
+                    Text(
                       documentName,
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Kumbh Sans',
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              // Upload button and Status badge
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Upload button
-                  ElevatedButton(
-                    onPressed: () => _handleUpload(documentName),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF125E77),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 8,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'Upload',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Kumbh Sans',
-                      ),
-                    ),
-                  ),
-
-                  // Status badge
-                  Container(
-                    decoration: BoxDecoration(
-                      color: statusColor,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
-                    child: Text(
-                      statusLabel,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Kumbh Sans',
+                        color: Color(0xFF125E77),
+                        letterSpacing: 0.2,
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    
+                    // Status badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusColor,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: statusColor.withOpacity(0.3),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        statusLabel,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Kumbh Sans',
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    
+                    // Upload button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _handleUpload(documentName),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: hasDocument 
+                              ? const Color(0xFF348AA7)
+                              : const Color(0xFF125E77),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 0,
+                        ),
+                        icon: Icon(
+                          hasDocument ? Icons.refresh : Icons.upload_file,
+                          size: 18,
+                          color: Colors.white,
+                        ),
+                        label: Text(
+                          hasDocument ? 'Replace' : 'Upload',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Kumbh Sans',
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
