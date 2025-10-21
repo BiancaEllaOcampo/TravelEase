@@ -148,15 +148,6 @@ class UserAppDrawer extends StatelessWidget {
                   ),
                   _buildMenuItem(
                     context,
-                    'Settings',
-                    Icons.settings_outlined,
-                    () {
-                      Navigator.pop(context);
-                      // TODO: Navigate to settings
-                    },
-                  ),
-                  _buildMenuItem(
-                    context,
                     'Privacy Policy',
                     Icons.privacy_tip_outlined,
                     () {

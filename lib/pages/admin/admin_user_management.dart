@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/admin_app_drawer.dart';
 
 class AdminUserManagement extends StatefulWidget {
   const AdminUserManagement({super.key});
@@ -11,6 +12,7 @@ class _AdminUserManagementState extends State<AdminUserManagement> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const AdminAppDrawer(),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(130),
         child: Container(
@@ -22,24 +24,34 @@ class _AdminUserManagementState extends State<AdminUserManagement> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Menu Button
-                IconButton(
-                  onPressed: () {
-                    // Handle menu tap
+                Builder(
+                  builder: (BuildContext context) {
+                    return IconButton(
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                      icon: const Icon(
+                        Icons.menu,
+                        color: Color(0xFFF3F3F3),
+                        size: 50,
+                      ),
+                    );
                   },
-                  icon: const Icon(
-                    Icons.menu,
-                    color: Color(0xFFF3F3F3),
-                    size: 24,
-                  ),
                 ),
                 // Title
-                const Text(
-                  'User Management',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Kumbh Sans',
+                const Flexible(
+                  child: Text(
+                    'User Management',
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                    maxLines: 2,
+                    overflow: TextOverflow.visible,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Kumbh Sans',
+                    ),
                   ),
                 ),
                 // Logo

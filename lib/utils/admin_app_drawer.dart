@@ -121,23 +121,40 @@ class AdminAppDrawer extends StatelessWidget {
                       );
                     },
                   ),
-                  const Divider(color: Colors.white24),
-                  _buildMenuItem(
-                    context,
-                    'Logout',
-                    Icons.logout,
-                    () async {
-                      await FirebaseAuth.instance.signOut();
-                      if (context.mounted) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SplashScreen()),
-                          (route) => false,
-                        );
-                      }
-                    },
-                  ),
                 ],
+              ),
+            ),
+            
+            // Log Out Button at bottom
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    await FirebaseAuth.instance.signOut();
+                    if (context.mounted) {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SplashScreen()),
+                        (route) => false,
+                      );
+                    }
+                  },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: const Text(
+                    'Log Out',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Kumbh Sans',
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -157,36 +174,45 @@ class AdminAppDrawer extends StatelessWidget {
       leading: Icon(
         icon,
         color: Colors.white,
-        size: 24,
+        size: 35,
       ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontFamily: 'Kumbh Sans',
-        ),
-      ),
-      trailing: badgeCount != null
-          ? Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.red,
-                borderRadius: BorderRadius.circular(12),
+      title: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              softWrap: true,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontFamily: 'Kumbh Sans',
+              ),
+            ),
+          ),
+          if (badgeCount != null) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: const BoxDecoration(
+                color: Color(0xFFE53935),
+                shape: BoxShape.circle,
               ),
               child: Text(
                 badgeCount.toString(),
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 12,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'Kumbh Sans',
                 ),
               ),
-            )
-          : null,
+            ),
+          ],
+        ],
+      ),
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      dense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
     );
   }
 }

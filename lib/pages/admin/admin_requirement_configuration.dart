@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/admin_app_drawer.dart';
 
 class AdminReqConfigPage extends StatefulWidget {
   const AdminReqConfigPage({Key? key}) : super(key: key);
@@ -20,58 +21,70 @@ class _AdminReqConfigPageState extends State<AdminReqConfigPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(color: const Color(0xFFD9D9D9)),
-          // Header
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 110,
-            child: Container(
-              color: const Color(0xFF125E77),
-              child: Padding(
-                padding: const EdgeInsets.only(top: 48, left: 24, right: 24),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.menu, color: Colors.white, size: 24),
-                    ),
-                    const Text(
-                      'Travel Requirements\nConfiguration',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Kumbh Sans',
-                        height: 1.2,
+      drawer: const AdminAppDrawer(),
+      backgroundColor: const Color(0xFFD9D9D9),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(130),
+        child: Container(
+          height: 130,
+          color: const Color(0xFF125E77),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 48, left: 22, right: 22),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Builder(
+                  builder: (BuildContext context) {
+                    return IconButton(
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                      icon: const Icon(
+                        Icons.menu,
+                        color: Color(0xFFF3F3F3),
+                        size: 50,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    Container(
-                      width: 54,
-                      height: 54,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFF348AA7),
-                      ),
-                      child: const Icon(
-                        Icons.airplanemode_active,
-                        color: Colors.white,
-                        size: 28,
-                      ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
-              ),
+                const Flexible(
+                  child: Text(
+                    'Travel Requirements\nConfiguration',
+                    textAlign: TextAlign.center,
+                    softWrap: true,
+                    maxLines: 2,
+                    overflow: TextOverflow.visible,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 21,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Kumbh Sans',
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 67,
+                  height: 58,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFF348AA7),
+                  ),
+                  child: const Icon(
+                    Icons.airplanemode_active,
+                    color: Colors.white,
+                    size: 30,
+                  ),
+                ),
+              ],
             ),
           ),
+        ),
+      ),
+      body: Stack(
+        children: [
           // Main content
           Positioned(
-            top: 120,
+            top: 20,
             left: 20,
             right: 20,
             bottom: 0,

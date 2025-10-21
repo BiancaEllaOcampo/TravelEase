@@ -259,19 +259,6 @@ class UserHomePage extends StatelessWidget {
                 Icons.checklist_rtl,
                 () => ChecklistHelper.navigateToChecklist(context),
               ),
-              
-              const SizedBox(height: 6),
-
-              // View AI Feedback Button
-              _buildFeatureButton(
-                context,
-                'View AI Feedback',
-                'Get AI-powered insights on your documents',
-                Icons.psychology,
-                () {
-                  // Handle AI feedback navigation
-                },
-              ),
 
               const SizedBox(height: 6),
 

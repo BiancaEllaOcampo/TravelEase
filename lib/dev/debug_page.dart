@@ -10,7 +10,6 @@ import '../pages/admin/admin_login.dart';
 import '../pages/admin/admin_dashboard.dart';
 import '../pages/admin/admin_user_management.dart';
 import '../pages/user/user_travel_requirments.dart';
-import '../pages/user/user_fticket.dart';
 import '../pages/user/user_documents_checklist.dart';
 import '../pages/user/user_view_document_with_ai.dart';
 import '../pages/admin/admin_announcement.dart';
@@ -159,17 +158,6 @@ class DebugPage extends StatelessWidget {
                     country: 'Japan',
                   ),
                 ),
-              ),
-            ),
-
-            _buildDebugButton(
-              context,
-              'Flight Ticket (Example)',
-              'Example flight ticket document view',
-              Icons.confirmation_number,
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const FlightTicketPage()),
               ),
             ),
 
