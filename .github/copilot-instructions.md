@@ -1,7 +1,14 @@
 # TravelEase - AI Coding Instructions
 
-## Architecture Overview
+## Project Overview
 Flutter mobile app for Philippine travel document verification with AI-assisted checklists. **Android-first** development (iOS structure exists but not the focus). Three-tier role system: **User** (travelers), **Admin** (document reviewers), and **Master** (super admins).
+
+**Core Technology Stack:**
+- Flutter/Dart for cross-platform mobile UI
+- Firebase Auth + Firestore for unified authentication with role-based access
+- Firebase Storage for documents (max 10MB, images only) and profile pictures (max 5MB)
+- Firebase Cloud Functions + OpenAI GPT-4 Vision for AI document analysis
+- **No state management libraries** - pure StatefulWidget + TextEditingController pattern
 
 ## Authentication & Role-Based Access Control
 
@@ -168,37 +175,50 @@ Navigator.push(context, MaterialPageRoute(
 
 ## Development Workflow
 
-### Navigation Drawer (UserAppDrawer)
-**ALWAYS import from centralized location** - Never copy/paste the drawer class:
+### Essential Commands (PowerShell)
+```powershell
+# Flutter
+flutter pub get                    # Install/update dependencies
+flutter run                        # Run on default device
+flutter run -d <device-id>         # Specify device
+flutter build apk                  # Build production APK
+flutter clean                      # Clean build artifacts
+
+# Firebase Deployment
+firebase deploy --only firestore:rules    # Deploy Firestore security rules
+firebase deploy --only storage           # Deploy Storage security rules
+firebase deploy --only functions         # Deploy Cloud Functions
+firebase emulators:start                 # Start local emulators
+
+# Environment Setup
+# Create .env file with: OPENAI_API_KEY=your_key_here
+# For production: Use Google Secret Manager (see functions/SECRETS_SETUP.md)
+```
+
+### Navigation Drawer Pattern
+**ALWAYS import from centralized location** - Never copy/paste drawer classes:
 ```dart
-import '../../utils/user_app_drawer.dart';  // Adjust path as needed
+import '../../utils/user_app_drawer.dart';  // For user pages
+import '../../utils/admin_app_drawer.dart'; // For admin pages
+import '../../utils/master_app_drawer.dart'; // For master pages
 
 Scaffold(
-  drawer: const UserAppDrawer(),
+  drawer: const UserAppDrawer(),  // Role-specific drawer
   // ... rest of page
 )
 ```
-The user navigation drawer lives in `lib/utils/user_app_drawer.dart` as a single source of truth.
-Future admin and master drawers will follow the same pattern (admin_app_drawer.dart, master_app_drawer.dart).
 
 ### Creating New Pages
-1. Copy `lib/dev/template.dart` (simple back) or `template_with_menu.dart` (with drawer)
-2. Adjust `Positioned` coordinates for layout
-3. Add to `lib/dev/debug_page.dart` for testing
-4. Place in role directory: `user/`, `admin/`, or `master/`
+1. **Copy template**: `lib/dev/template.dart` (back button) or `template_with_menu.dart` (with drawer)
+2. **Adjust layout**: Modify `Positioned` coordinates (most pages use Stack-based absolute positioning)
+3. **Add auth guard**: Copy auth check pattern from existing role pages
+4. **Test via debug page**: Add route to `lib/dev/debug_page.dart`
+5. **Place in role folder**: `pages/user/`, `pages/admin/`, or `pages/master/`
 
 ### Debug System ⚠️ REMOVE BEFORE PRODUCTION
-- Red debug button in `splash_screen.dart` opens `debug_page.dart`
-- Central navigation hub for all pages
-- **Must remove** debug button and imports before release
-
-### Running the App
-```powershell
-flutter pub get              # Install deps
-flutter run                  # Run on Android device/emulator
-flutter run -d <device-id>   # Specify device if multiple connected
-flutter build apk            # Build APK
-```
+- Red debug button in `splash_screen.dart` and `user_homepage.dart` opens `debug_page.dart`
+- Central navigation hub for testing all pages
+- **Critical**: Remove debug button, imports, and entire `lib/dev/` directory before release
 
 ## Key Files Reference
 - `lib/main.dart` - Entry point, Firebase init, auth state routing
@@ -263,6 +283,53 @@ Container(
 )
 ```
 
+### Image Upload Pattern (Profile Pictures & Documents)
+```dart
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image/image.dart' as img;
+
+// 1. Pick image (camera or gallery)
+final ImagePicker picker = ImagePicker();
+final XFile? image = await picker.pickImage(
+  source: ImageSource.camera,  // or ImageSource.gallery
+  imageQuality: 85,
+);
+
+// 2. Optimize image (different sizes for profiles vs documents)
+final bytes = await image.readAsBytes();
+final decodedImage = img.decodeImage(bytes);
+final resized = img.copyResize(
+  decodedImage!,
+  width: 800,   // 800 for profiles, 1920 for documents
+  height: 800,  // 800 for profiles, 1920 for documents
+);
+final compressedBytes = img.encodeJpg(resized, quality: 85);
+
+// 3. Upload to Firebase Storage
+final storageRef = FirebaseStorage.instance.ref();
+final fileRef = storageRef.child('user_profiles/$userId/profile_${userId}_${timestamp}.jpg');
+await fileRef.putData(compressedBytes);
+final downloadUrl = await fileRef.getDownloadURL();
+
+// 4. Update Firestore with URL
+await FirebaseFirestore.instance.collection('users').doc(userId).update({
+  'profileImageUrl': downloadUrl,
+});
+```
+
+### Pull-to-Refresh Pattern
+```dart
+RefreshIndicator(
+  onRefresh: _loadData,  // Async method that fetches fresh data
+  color: const Color(0xFF348AA7),  // Teal brand color
+  child: ListView(
+    physics: const AlwaysScrollableScrollPhysics(),  // Enable pull even when content fits screen
+    children: [/* content */],
+  ),
+)
+```
+
 ## Known Limitations
 - **No tests** - `test/` directory unused
 - **iOS untested** - Android only
@@ -270,107 +337,107 @@ Container(
 - **Admin workflows incomplete** - Admin/Master role pages partially implemented
 - Typography: 'Kumbh Sans' set globally in `main.dart` but also specified locally in widgets
 
+## AI Document Verification Workflow
+
+### How It Works (Cloud Function Pipeline)
+1. **User uploads document** → Firebase Storage (`user_documents/{userId}/{country}/{docType}/`)
+2. **Cloud Function triggers** → `onObjectFinalized` event fires
+3. **Status update** → Firestore status changes to `'verifying'`
+4. **OpenAI analysis** → GPT-4 Vision analyzes public download URL
+5. **Results saved** → Firestore updated with `extractedData`, `aiFeedback`, status
+6. **User notified** → Pull-to-refresh shows updated status
+
+### Supported Documents (with Limitations)
+- ✅ **flight_ticket** - Extracts passenger, airline, flight number, dates, booking code
+- ✅ **visa** - Extracts visa type, number, validity dates, applicant info
+- ✅ **proof_of_accommodation** - Extracts hotel name, booking ref, check-in/out dates
+- ❌ **valid_passport** - OpenAI blocks PII analysis; returns error → admin manual review required
+
+### Cloud Function Configuration
+```javascript
+// functions/index.js
+// Key points:
+// - Timeout: 300 seconds (AI analysis can be slow)
+// - Memory: 1GiB (handles large images)
+// - Secret: OPENAI_API_KEY via Firebase Secret Manager
+// - Model: gpt-4o (latest with vision)
+// - Temperature: 0.2 (consistent results)
+// - Max tokens: 1500
+```
+
+### Testing AI Locally
+```powershell
+# 1. Set up OpenAI API key in functions/.env
+cd functions
+echo "OPENAI_API_KEY=sk-..." > .env
+
+# 2. Start Firebase emulators
+firebase emulators:start
+
+# 3. Upload test document via app (points to emulator)
+# OR manually trigger via Firebase Console Storage
+```
+
+### Debugging AI Failures
+- Check Cloud Functions logs: Firebase Console → Functions → Logs
+- Common issues:
+  - Missing OPENAI_API_KEY secret in production
+  - Image URL not publicly accessible (check storage.rules)
+  - OpenAI API rate limits or billing issues
+  - Invalid document type (typo in Firestore key)
+  - Image too large or corrupted
+
 ## Recently Implemented Features
-- ✅ **Role-Based Authentication System** - Unified auth with Firebase Auth + Firestore role field
-  - All users (regular/admin/master) use same Firebase Auth system
-  - Role stored in Firestore `users` collection: 'user', 'admin', or 'master'
-  - Login flows verify role and route to appropriate dashboard
-  - Admin/master accounts created manually via Firebase Console
-  - NO passwords stored in Firestore (security best practice)
-  - See `ADMIN_MASTER_SETUP.md` for admin/master account creation guide
-  
-- ✅ **Modern Splash Screen UI** - Enhanced landing page with gradient backgrounds, decorative circles, and polished button designs
-  - LinearGradient background (teal to gray)
-  - Reduced background image opacity for better text contrast
-  - Gradient buttons with shadows
-  - Enhanced typography with letter spacing
-  
-- ✅ **Profile Picture Upload** - Users can upload/change profile pictures via camera or gallery
-  - Uses Firebase Storage (`user_profiles/{userId}/` path)
-  - Image picker with camera and gallery options
-  - Automatic image optimization (800×800, 85% quality)
-  - Security rules limit uploads to 5MB, images only
-  - Real-time UI updates with loading states
-  - Proper error handling with user feedback
-  - See `PROFILE_PICTURE_IMPLEMENTATION.md` for full technical details
-  - See `DEPLOYMENT_GUIDE.md` for testing instructions
 
-- ✅ **Travel Documents Upload** - Users can upload travel documents (passport, visa, flight tickets, etc.)
-  - Uses Firebase Storage (`user_documents/{userId}/{country}/{docType}/` path)
-  - Camera and gallery options via image picker
-  - Automatic image optimization (1920×1920, 85% quality)
-  - Security rules limit uploads to 10MB, images only
-  - Auto-status change to 'verifying' after upload
-  - Re-upload functionality on document view page
-  - Loading overlays during upload
-  - Success/error notifications
-  - See `TRAVEL_DOCUMENTS_UPLOAD.md` for full technical details
-  - See `UPLOAD_FEATURE_COMPLETE.md` for quick reference
+### ✅ Role-Based Authentication System
+- Unified auth: Firebase Auth + Firestore `role` field ('user', 'admin', 'master')
+- Login flows verify role and route to appropriate dashboard
+- Admin/master accounts created manually via Firebase Console (see `ADMIN_MASTER_SETUP.md`)
+- **Security**: NO passwords stored in Firestore, only in Firebase Auth
 
-- ✅ **AI Document Verification** - Automated document analysis using OpenAI GPT-4 Vision
-  - Cloud Function triggers on document upload to Firebase Storage
-  - Analyzes flight tickets, visas, and accommodation proofs
-  - Extracts structured data (passenger names, flight numbers, dates, etc.)
-  - Provides validation feedback (missing info, expiry warnings)
-  - Updates Firestore with analysis results in real-time
-  - **Limitation**: Cannot analyze passports due to OpenAI PII restrictions
-  - API key stored securely in Firebase Secrets (Google Secret Manager)
-  - Public Storage URLs for AI access (see `firebase/storage.rules`)
-  - Document-specific prompts for each travel document type
-  - Auto-status updates: `pending` → `verifying` → `verified`/`needs_correction`
-  - See `functions/SECRETS_SETUP.md` for Cloud Function configuration
-  - See `functions/index.js` for implementation details
+### ✅ Profile Picture Upload
+- Firebase Storage path: `user_profiles/{userId}/profile_{userId}_{timestamp}.jpg`
+- Image optimization: 800×800px, 85% quality, max 5MB
+- Camera and gallery options via `image_picker`
+- See `PROFILE_PICTURE_IMPLEMENTATION.md` for details
 
-- ✅ **Announcements System** - Role-based announcements for all users
-  - **Admin Announcements** (`lib/pages/admin/admin_announcements.dart`)
-    - Full CRUD operations (create, read, update, delete)
-    - Modern card-based UI with gradient headers
-    - Real-time updates via Firestore StreamBuilder
-    - Filtered view: admins see all announcements
-    - Date/time formatting with intl package
-  - **Master Announcements** (`lib/pages/master/master_announcements.dart`)
-    - Same CRUD capabilities as admin
-    - Full system visibility and control
-  - **User Announcements** (`lib/pages/user/user_announcements.dart`)
-    - Read-only access (no create/edit/delete)
-    - Modern preview cards with "Read More" functionality
-    - Full-view dialog with gradient header
-    - Empty/loading/error states with user-friendly messages
-    - Integrated into user drawer and homepage
-  - Firestore collection: `announcements` with fields: title, content, date, createdBy
-  - Security rules enforce role-based access control
+### ✅ Travel Documents Upload
+- Firebase Storage path: `user_documents/{userId}/{country}/{docType}/{fileName}`
+- Image optimization: 1920×1920px, 85% quality, max 10MB
+- Auto-status change to `'verifying'` after upload
+- Re-upload functionality on document view page
+- See `TRAVEL_DOCUMENTS_UPLOAD.md` for details
 
-- ✅ **Enhanced Document UI** - Modern design for document viewing and management
-  - **Document View Page** (`lib/pages/user/user_view_document_with_ai.dart`)
-    - Empty state: 20px border radius, circular icon background, larger fonts
-    - Document details card: 20px border radius, full-width image preview (200×200px)
-    - Status badge in header with color-coded indicators
-    - Card-style extracted data section with white field cards
-    - Color-coded AI feedback (green for success, yellow for warnings)
-    - Side-by-side action buttons (re-upload and view full)
-    - Re-upload button with white icon (fixed purple icon bug)
-  - **Checklist Page** (`lib/pages/user/user_documents_checklist.dart`)
-    - Removed unused "Save Progress" and "View AI Report" buttons
-    - Cleaner layout with reduced bottom bar (160px → 60px)
-    - More screen space for document list
-    - Help links preserved for user support
+### ✅ AI Document Verification
+- Cloud Function (`functions/index.js`) triggers on Storage upload
+- OpenAI GPT-4 Vision analyzes documents and extracts structured data
+- **Limitation**: Cannot analyze passports due to OpenAI PII restrictions
+- API key stored in Firebase Secret Manager (production) or `.env` (local)
+- Public Storage URLs required for AI access (see `firebase/storage.rules`)
+- See `functions/SECRETS_SETUP.md` for configuration
 
-- ✅ **Pull-to-Refresh Functionality** - Real-time document status updates
-  - **RefreshIndicator** added to both document pages
-  - **Checklist Page**: Swipe down refreshes all document statuses for country
-  - **Document View Page**: Swipe down refreshes individual document data
-  - Teal color indicator (0xFF348AA7) matching app branding
-  - AlwaysScrollableScrollPhysics for consistent behavior on short content
-  - Reuses existing Firestore query methods (_loadChecklistData, _loadDocumentData)
-  - Native iOS/Android pull-down gesture support
-  - Automatic loading state and completion handling
-  - Critical for document verification workflow (status changes from AI/admin)
+### ✅ Announcements System
+- Firestore collection: `announcements` (title, content, date, createdBy)
+- **Admin/Master**: Full CRUD with card-based UI and StreamBuilder
+- **User**: Read-only with preview cards and "Read More" dialog
+- Security rules enforce role-based access control
 
-- ✅ **Firestore Key Format Consistency** - All keys use `lowercase_with_underscores`
-  - Countries: `japan`, `hong_kong`, `singapore`, `south_korea`, `china`
-  - Documents: `flight_ticket`, `valid_passport`, `visa`, `proof_of_accommodation`
-  - Prevents data mismatch between app, Cloud Functions, and Firebase Storage
-  - User-facing display names converted to Firestore keys automatically
+### ✅ Enhanced Document UI
+- Modern card designs with 20px border radius
+- Color-coded status badges and AI feedback
+- Full-width image previews (200×200px)
+- Side-by-side action buttons (re-upload, view full)
+
+### ✅ Pull-to-Refresh Functionality
+- `RefreshIndicator` on checklist and document view pages
+- Teal color (0xFF348AA7) matching app branding
+- Critical for real-time status updates from AI/admin reviews
+
+### ✅ Firestore Key Format Consistency
+- **All keys use** `lowercase_with_underscores`
+- Countries: `japan`, `hong_kong`, `singapore`, `south_korea`, `china`
+- Documents: `flight_ticket`, `valid_passport`, `visa`, `proof_of_accommodation`
+- Prevents data mismatch between app, Cloud Functions, and Storage
 
 ## Before Production Checklist
 - [ ] Remove `lib/dev/debug_page.dart` and all imports
