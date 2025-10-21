@@ -376,14 +376,16 @@ class _MasterAnnouncementPageState extends State<MasterAnnouncementPage> {
     );
   }
 
-  // Update announcement in Firebase
+  /// Updates an announcement in Firebase.
+  ///
+  /// The original creation date of the announcement is preserved and not updated on edit.
+  /// If you want to update the date to the current time on edit, modify this function accordingly.
   Future<void> _updateAnnouncement(String id, String title, String content) async {
     try {
       await _firestore.collection('announcements').doc(id).update({
         'title': title,
         'content': content,
-        // date remains unchanged unless you want to update it
-        // 'date': FieldValue.serverTimestamp(), // Uncomment to update date on edit
+        // The 'date' field is intentionally left unchanged to preserve the original creation date.
       });
 
       if (mounted) {
