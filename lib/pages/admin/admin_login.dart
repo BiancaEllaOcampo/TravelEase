@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'admin_dashboard.dart';
 import '../master/master_login.dart';
 
@@ -13,6 +15,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -239,11 +242,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                       width: 235,
                       height: 52,
                       child: ElevatedButton(
-                        onPressed: () {
-                          //Future validation for now testing
-                          // Handle login logic
-                          _handleLogin();
-                        },
+                        onPressed: _isLoading ? null : () => _handleLogin(),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF348AA7),
                           shape: RoundedRectangleBorder(
@@ -251,15 +250,24 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                           ),
                           elevation: 2,
                         ),
-                        child: const Text(
-                          'Login',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Kumbh Sans',
-                          ),
-                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Login',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Kumbh Sans',
+                                ),
+                              ),
                       ),
                     ),
                     
@@ -297,7 +305,6 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
   void _handleLogin() {
     // Validate input
     if (_emailController.text.isEmpty) {
-      _showSnackBar('Please enter your email address');
       return;
     }
     
@@ -331,11 +338,12 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
     
     // Navigate to homepage or next screen
     // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => UserHomePage()));
+  
   }
 
 
   void _handleMasterLogin() {
-    // TODO: Navigate to master login page
+    //Navigates to Master Login Page
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const MasterLoginPage()),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'admin_user_management.dart';
 import 'admin_requirement_configuration.dart';
-import 'admin_document_veification.dart';
+import 'admin_document_verification.dart';
 import 'admin_announcement.dart';
 
 class AdminDashboardPage extends StatelessWidget {

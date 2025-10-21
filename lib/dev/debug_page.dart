@@ -15,7 +15,7 @@ import '../pages/user/user_documents_checklist.dart';
 import '../pages/user/user_view_document_with_ai.dart';
 import '../pages/admin/admin_announcement.dart';
 import '../pages/admin/admin_requirement_configuration.dart';
-import '../pages/admin/admin_document_veification.dart';
+import '../pages/admin/admin_document_verification.dart';
 import '../pages/master/master_login.dart';
 import '../pages/master/master_dashboard.dart';
 import '../pages/master/master_admin&user_management.dart';
