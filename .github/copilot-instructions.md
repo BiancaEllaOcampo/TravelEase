@@ -321,6 +321,51 @@ Container(
   - See `functions/SECRETS_SETUP.md` for Cloud Function configuration
   - See `functions/index.js` for implementation details
 
+- ✅ **Announcements System** - Role-based announcements for all users
+  - **Admin Announcements** (`lib/pages/admin/admin_announcements.dart`)
+    - Full CRUD operations (create, read, update, delete)
+    - Modern card-based UI with gradient headers
+    - Real-time updates via Firestore StreamBuilder
+    - Filtered view: admins see all announcements
+    - Date/time formatting with intl package
+  - **Master Announcements** (`lib/pages/master/master_announcements.dart`)
+    - Same CRUD capabilities as admin
+    - Full system visibility and control
+  - **User Announcements** (`lib/pages/user/user_announcements.dart`)
+    - Read-only access (no create/edit/delete)
+    - Modern preview cards with "Read More" functionality
+    - Full-view dialog with gradient header
+    - Empty/loading/error states with user-friendly messages
+    - Integrated into user drawer and homepage
+  - Firestore collection: `announcements` with fields: title, content, date, createdBy
+  - Security rules enforce role-based access control
+
+- ✅ **Enhanced Document UI** - Modern design for document viewing and management
+  - **Document View Page** (`lib/pages/user/user_view_document_with_ai.dart`)
+    - Empty state: 20px border radius, circular icon background, larger fonts
+    - Document details card: 20px border radius, full-width image preview (200×200px)
+    - Status badge in header with color-coded indicators
+    - Card-style extracted data section with white field cards
+    - Color-coded AI feedback (green for success, yellow for warnings)
+    - Side-by-side action buttons (re-upload and view full)
+    - Re-upload button with white icon (fixed purple icon bug)
+  - **Checklist Page** (`lib/pages/user/user_documents_checklist.dart`)
+    - Removed unused "Save Progress" and "View AI Report" buttons
+    - Cleaner layout with reduced bottom bar (160px → 60px)
+    - More screen space for document list
+    - Help links preserved for user support
+
+- ✅ **Pull-to-Refresh Functionality** - Real-time document status updates
+  - **RefreshIndicator** added to both document pages
+  - **Checklist Page**: Swipe down refreshes all document statuses for country
+  - **Document View Page**: Swipe down refreshes individual document data
+  - Teal color indicator (0xFF348AA7) matching app branding
+  - AlwaysScrollableScrollPhysics for consistent behavior on short content
+  - Reuses existing Firestore query methods (_loadChecklistData, _loadDocumentData)
+  - Native iOS/Android pull-down gesture support
+  - Automatic loading state and completion handling
+  - Critical for document verification workflow (status changes from AI/admin)
+
 - ✅ **Firestore Key Format Consistency** - All keys use `lowercase_with_underscores`
   - Countries: `japan`, `hong_kong`, `singapore`, `south_korea`, `china`
   - Documents: `flight_ticket`, `valid_passport`, `visa`, `proof_of_accommodation`
