@@ -4,6 +4,7 @@ import '../pages/master/master_announcement.dart';
 import '../pages/master/master_admin&user_management.dart';
 import '../pages/master/master_dashboard.dart';
 import '../pages/master/master_document_verification.dart';
+import '../pages/master/master_profile.dart';
 import '../pages/splash_screen.dart';
 
 /// TravelEase Master Navigation Drawer
@@ -91,10 +92,10 @@ class MasterAppDrawer extends StatelessWidget {
                     Icons.person_outline,
                     () {
                       Navigator.pop(context);
-                      /*Navigator.push(
+                      Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const UserProfilePage()),
-                      );*/
+                        MaterialPageRoute(builder: (context) => const MasterProfilePage()),
+                      );
                     },
                     badgeCount: 3,
                   ),
