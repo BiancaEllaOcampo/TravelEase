@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'master_admin&user_management.dart';
 import 'master_document_verification.dart';
 import 'master_announcement.dart';
@@ -16,7 +15,6 @@ class MasterDashboardPage extends StatefulWidget {
 
 class _MasterDashboardPageState extends State<MasterDashboardPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -124,80 +122,225 @@ class _MasterDashboardPageState extends State<MasterDashboardPage> {
           ),
         ),
       ),
-      body: Stack(
-        children: [
-          // Background
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            color: const Color(0xFFD9D9D9),
-          ),
-
-          // Stats Cards
-          Positioned(
-            top: 20,
-            left: 0,
-            right: 0,
-            child: Column(
-              children: [
-                _MasterStatCard(label: 'Users:', value: ''),
-                _MasterStatCard(label: 'Pending Documents:', value: ''),
-                _MasterStatCard(label: 'Announcements:', value: ''),
-                _MasterStatCard(label: 'Tickets:', value: '', isLast: true),
-              ],
-            ),
-          ),
-
-          // Admin Action Buttons
-          Positioned(
-            top: 320,
-            left: 0,
-            right: 0,
-            child: Column(
-              children: [
-                _MasterActionButton(
-                  text: 'Admin and User Management',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const MasterAdminUserManagement(),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        color: const Color(0xFFD9D9D9),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 24),
+              
+              // Welcome Section
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
-                    );
-                  },
-                ),
-                _MasterActionButton(
-                  text: 'Documents Verification\nQueue',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const MasterDocumentVerificationPage(),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Master Dashboard',
+                        style: TextStyle(
+                          color: Color(0xFF125E77),
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Kumbh Sans',
+                        ),
                       ),
-                    );
-                  },
-                ),
-                _MasterActionButton(
-                  text: 'Announcements',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const MasterAnnouncementPage(),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Full system control and administration',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                          fontFamily: 'Kumbh Sans',
+                        ),
                       ),
-                    );
-                  },
+                    ],
+                  ),
                 ),
-                _MasterActionButton(
-                  text: 'System Settings',
-                  onPressed: () {
-                    // TODO: Handle System Settings navigation
-                  },
+              ),
+              
+              const SizedBox(height: 24),
+              
+              // Stats Section Header
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Overview',
+                    style: TextStyle(
+                      color: Color(0xFF125E77),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Kumbh Sans',
+                    ),
+                  ),
                 ),
-              ],
-            ),
+              ),
+              
+              const SizedBox(height: 12),
+              
+              // Stats Cards Grid (3x2 for master)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _MasterStatCard(
+                            label: 'Total Users',
+                            value: '0',
+                            icon: Icons.people,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _MasterStatCard(
+                            label: 'Admins',
+                            value: '0',
+                            icon: Icons.admin_panel_settings,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _MasterStatCard(
+                            label: 'Pending',
+                            value: '0',
+                            icon: Icons.pending_actions,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _MasterStatCard(
+                            label: 'Announcements',
+                            value: '0',
+                            icon: Icons.campaign,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _MasterStatCard(
+                            label: 'Tickets',
+                            value: '0',
+                            icon: Icons.confirmation_number,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _MasterStatCard(
+                            label: 'System Status',
+                            value: 'OK',
+                            icon: Icons.check_circle,
+                            isStatus: true,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 32),
+              
+              // Quick Actions Section Header
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Quick Actions',
+                    style: TextStyle(
+                      color: Color(0xFF125E77),
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Kumbh Sans',
+                    ),
+                  ),
+                ),
+              ),
+              
+              const SizedBox(height: 12),
+              
+              // Master Action Buttons
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    _MasterActionButton(
+                      text: 'Admin and User Management',
+                      icon: Icons.group,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MasterAdminUserManagement(),
+                          ),
+                        );
+                      },
+                    ),
+                    _MasterActionButton(
+                      text: 'Documents Verification Queue',
+                      icon: Icons.verified_user,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MasterDocumentVerificationPage(),
+                          ),
+                        );
+                      },
+                    ),
+                    _MasterActionButton(
+                      text: 'Announcements',
+                      icon: Icons.campaign,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MasterAnnouncementPage(),
+                          ),
+                        );
+                      },
+                    ),
+                    _MasterActionButton(
+                      text: 'System Settings',
+                      icon: Icons.settings,
+                      onPressed: () {
+                        // TODO: Handle System Settings navigation
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 32),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -206,48 +349,68 @@ class _MasterDashboardPageState extends State<MasterDashboardPage> {
 class _MasterStatCard extends StatelessWidget {
   final String label;
   final String value;
-  final bool isLast;
+  final IconData icon;
+  final bool isStatus;
 
   const _MasterStatCard({
     required this.label,
     required this.value,
-    this.isLast = false,
+    required this.icon,
+    this.isStatus = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(
-        left: 0,
-        right: 0,
-        top: 0,
-        bottom: isLast ? 24 : 8,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF348AA7).withOpacity(0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-      decoration: const BoxDecoration(
-        color: Color(0xFF348AA7),
-        borderRadius: BorderRadius.zero,
-      ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontFamily: 'Kumbh Sans',
-              fontWeight: FontWeight.w400,
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF348AA7).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: const Color(0xFF348AA7),
+              size: 28,
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(height: 12),
           Text(
             value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
+            style: TextStyle(
+              color: const Color(0xFF125E77),
+              fontSize: isStatus ? 20 : 28,
               fontFamily: 'Kumbh Sans',
               fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 14,
+              fontFamily: 'Kumbh Sans',
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -258,37 +421,68 @@ class _MasterStatCard extends StatelessWidget {
 
 class _MasterActionButton extends StatelessWidget {
   final String text;
+  final IconData icon;
   final VoidCallback onPressed;
 
   const _MasterActionButton({
     required this.text,
+    required this.icon,
     required this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+      margin: const EdgeInsets.only(bottom: 12),
       width: double.infinity,
-      height: 55,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF348AA7),
+          backgroundColor: Colors.white,
+          foregroundColor: const Color(0xFF125E77),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(
+              color: Color(0xFF348AA7),
+              width: 2,
+            ),
           ),
-          elevation: 0,
+          elevation: 2,
+          shadowColor: Colors.black.withOpacity(0.1),
         ),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 19,
-            fontFamily: 'Kumbh Sans',
-            fontWeight: FontWeight.bold,
-          ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF348AA7).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: const Color(0xFF348AA7),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                text,
+                style: const TextStyle(
+                  color: Color(0xFF125E77),
+                  fontSize: 16,
+                  fontFamily: 'Kumbh Sans',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Color(0xFF348AA7),
+              size: 18,
+            ),
+          ],
         ),
       ),
     );
