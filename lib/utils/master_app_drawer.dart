@@ -4,7 +4,6 @@ import '../pages/master/master_announcement.dart';
 import '../pages/master/master_admin&user_management.dart';
 import '../pages/master/master_dashboard.dart';
 import '../pages/master/master_document_verification.dart';
-import '../pages/master/master_profile.dart';
 import '../pages/master/master_requirement_configuration.dart';
 import '../pages/splash_screen.dart';
 
@@ -86,19 +85,6 @@ class MasterAppDrawer extends StatelessWidget {
                         MaterialPageRoute(builder: (context) => const MasterDashboardPage()),
                       );
                     },
-                  ),
-                  _buildMenuItem(
-                    context,
-                    'My Profile',
-                    Icons.person_outline,
-                    () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const MasterProfilePage()),
-                      );
-                    },
-                    badgeCount: 3,
                   ),
                   _buildMenuItem(
                     context,
