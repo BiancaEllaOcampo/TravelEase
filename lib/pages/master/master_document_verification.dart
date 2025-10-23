@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../../utils/master_app_drawer.dart';
 
 class MasterDocumentVerificationPage extends StatefulWidget {
@@ -9,60 +11,250 @@ class MasterDocumentVerificationPage extends StatefulWidget {
 }
 
 class _MasterDocumentVerificationPageState extends State<MasterDocumentVerificationPage> {
-	String selectedCountry = 'All Countries';
-	String selectedStatus = 'All Status';
-	String selectedDocType = 'All Types';
-	String searchQuery = '';
-	final TextEditingController searchController = TextEditingController();
+  String selectedCountry = 'All Countries';
+  String selectedStatus = 'All Status';
+  String selectedDocType = 'All Types';
+  String searchQuery = '';
+  final TextEditingController searchController = TextEditingController();
 
-	// This would be replaced by backend data in the future
-	List<Map<String, dynamic>> entries = [
-		{
-			'name': 'Ellen Joe',
-			'id': '2348',
-			'type': 'Visa',
-			'country': 'Japan',
-			'date': 'May 10, 2025',
-			'file': 'visa_ellen_joe.pdf',
-			'status': 'Pending',
-		},
-		{
-			'name': 'Vergil',
-			'id': '7653',
-			'type': 'Passport',
-			'country': 'USA',
-			'date': 'May 09, 2025',
-			'file': 'passport_vergil.pdf',
-			'status': 'Verified',
-		},
-		{
-			'name': 'Momonga',
-			'id': '3750',
-			'type': 'Flight Ticket',
-			'country': 'France',
-			'date': 'May 08, 2025',
-			'file': 'flight_momonga.pdf',
-			'status': 'Needs Correction',
-		},
-		{
-			'name': 'Ocelot',
-			'id': '4138',
-			'type': 'Accommodation',
-			'country': 'Poland',
-			'date': 'May 07, 2025',
-			'file': 'hotel_booking_ocelot.pdf',
-			'status': 'Verified',
-		},
-		{
-			'name': 'Malenia',
-			'id': '1000',
-			'type': 'Visa',
-			'country': 'Japan',
-			'date': 'May 06, 2025',
-			'file': 'visa_malenia.pdf',
-			'status': 'Pending',
-		},
-	];
+  // View document function
+  Future<void> _viewDocument(Map<String, dynamic> document) async {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 700),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'View Document',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF125E77),
+                      fontFamily: 'Kumbh Sans',
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: document['file'].toString().isNotEmpty
+                    ? InteractiveViewer(
+                        maxScale: 5.0,
+                        child: Image.network(
+                          document['file'],
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: progress.expectedTotalBytes != null
+                                    ? progress.cumulativeBytesLoaded /
+                                        progress.expectedTotalBytes!
+                                    : null,
+                                color: const Color(0xFF348AA7),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Center(
+                              child: Text(
+                                'Error loading document',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontFamily: 'Kumbh Sans',
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    : const Center(
+                        child: Text(
+                          'No document available',
+                          style: TextStyle(
+                            fontFamily: 'Kumbh Sans',
+                          ),
+                        ),
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Show status update dialog
+  Future<void> _showStatusUpdateDialog(Map<String, dynamic> document) async {
+    String newStatus = document['status'];
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text(
+          'Update Document Status',
+          style: TextStyle(
+            color: Color(0xFF125E77),
+            fontFamily: 'Kumbh Sans',
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Document: ${document['type']}',
+              style: const TextStyle(
+                fontFamily: 'Kumbh Sans',
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Text(
+              'User: ${document['name']}',
+              style: const TextStyle(
+                fontFamily: 'Kumbh Sans',
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Select new status:',
+              style: TextStyle(
+                fontFamily: 'Kumbh Sans',
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFF348AA7)),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: DropdownButtonFormField<String>(
+                value: newStatus,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'Pending', child: Text('Pending')),
+                  DropdownMenuItem(value: 'Verified', child: Text('Verified')),
+                  DropdownMenuItem(value: 'Needs Correction', child: Text('Needs Correction')),
+                ],
+                onChanged: (value) {
+                  newStatus = value!;
+                },
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(
+                color: Color(0xFF348AA7),
+                fontFamily: 'Kumbh Sans',
+              ),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF348AA7),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () async {
+              try {
+                // Update document status in Firestore
+                await FirebaseFirestore.instance
+                    .doc(document['docPath'])
+                    .update({'status': newStatus});
+                
+                if (mounted) {
+                  Navigator.pop(context);
+                  _showSnackBar('Document status updated successfully');
+                }
+              } catch (e) {
+                if (mounted) {
+                  Navigator.pop(context);
+                  _showSnackBar('Error updating status: $e');
+                }
+              }
+            },
+            child: const Text(
+              'Update',
+              style: TextStyle(
+                fontFamily: 'Kumbh Sans',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(fontFamily: 'Kumbh Sans'),
+        ),
+        duration: const Duration(seconds: 2),
+        backgroundColor: const Color(0xFF348AA7),
+      ),
+    );
+  }
+
+  // Stream of documents from Firestore
+  Stream<List<Map<String, dynamic>>> get documentStream {
+    return FirebaseFirestore.instance
+        .collectionGroup('checklists')
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        // Get the user document to fetch the user's name
+        return FirebaseFirestore.instance
+            .collection('users')
+            .doc(doc.reference.path.split('/')[1])
+            .get()
+            .then((userDoc) {
+          final userData = userDoc.data();
+          final docData = doc.data();
+          return {
+            'name': userData?['fullName'] ?? 'Unknown User',
+            'id': doc.reference.path.split('/')[1], // user ID
+            'type': doc.reference.path.split('/').last, // document type
+            'country': doc.reference.path.split('/')[3], // country
+            'date': docData['updatedAt']?.toDate().toString() ?? 'Unknown Date',
+            'file': docData['url'] ?? '',
+            'status': docData['status'] ?? 'Pending',
+            'docPath': doc.reference.path, // Store the full path for updates
+          };
+        });
+      }).toList();
+    }).asyncMap((futures) => Future.wait(futures));
+  }
+
+  // List to store the current documents
+  List<Map<String, dynamic>> entries = [];
 
 	// Placeholder for backend integration: call this to add a new entry
 	void addEntry(Map<String, dynamic> entry) {
@@ -746,9 +938,7 @@ class _MasterDocumentVerificationPageState extends State<MasterDocumentVerificat
 															children: [
 																Expanded(
 																	child: OutlinedButton.icon(
-																		onPressed: () {
-																			// TODO: View document
-																		},
+																		onPressed: () => _viewDocument(entry),
 																		style: OutlinedButton.styleFrom(
 																			foregroundColor: const Color(0xFF348AA7),
 																			side: const BorderSide(color: Color(0xFF348AA7), width: 1.5),
@@ -771,9 +961,7 @@ class _MasterDocumentVerificationPageState extends State<MasterDocumentVerificat
 																const SizedBox(width: 8),
 																Expanded(
 																	child: ElevatedButton.icon(
-																		onPressed: () {
-																			// TODO: Review/Edit document
-																		},
+																		onPressed: () => _showStatusUpdateDialog(entry),
 																		style: ElevatedButton.styleFrom(
 																			backgroundColor: const Color(0xFF348AA7),
 																			foregroundColor: Colors.white,
