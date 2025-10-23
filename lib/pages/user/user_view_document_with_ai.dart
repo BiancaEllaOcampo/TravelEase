@@ -208,6 +208,16 @@ class _UserViewDocumentWithAIPageState
     }
   }
 
+  void _handleManualReview() {
+    // TODO: Implement manual review request functionality
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Manual review request submitted'),
+        backgroundColor: Color(0xFF348AA7),
+      ),
+    );
+  }
+
   Future<void> _handleViewOriginal() async {
     if (documentUrl.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -938,7 +948,7 @@ class _UserViewDocumentWithAIPageState
                               ],
                             ),
                             child: ElevatedButton.icon(
-                              onPressed: //no function for now shhhhhhhh,
+                              onPressed: _handleManualReview, //no function for now shhhhhhhh,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF348AA7),
                                 foregroundColor: Colors.white,

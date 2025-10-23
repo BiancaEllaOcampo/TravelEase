@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'master_admin&user_management.dart';
 import 'master_document_verification.dart';
 import 'master_announcement.dart';
@@ -16,11 +17,20 @@ class MasterDashboardPage extends StatefulWidget {
 
 class _MasterDashboardPageState extends State<MasterDashboardPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  
+  // Stats variables
+  int _totalUsers = 0;
+  int _totalAdmins = 0;
+  int _pendingDocuments = 0;
+  int _totalAnnouncements = 0;
+  bool _isLoadingStats = true;
 
   @override
   void initState() {
     super.initState();
     _checkAuthStatus();
+    _loadDashboardStats();
   }
 
   // Check if user is logged in, similar to user_homepage.dart
@@ -38,6 +48,126 @@ class _MasterDashboardPageState extends State<MasterDashboardPage> {
           );
         }
       });
+    }
+  }
+
+  // Load all dashboard statistics
+  Future<void> _loadDashboardStats() async {
+    try {
+      setState(() {
+        _isLoadingStats = true;
+      });
+
+      // Fetch all stats concurrently for better performance
+      final results = await Future.wait([
+        _getUserCount(),
+        _getAdminCount(),
+        _getPendingDocumentsCount(),
+        _getAnnouncementsCount(),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _totalUsers = results[0] as int;
+          _totalAdmins = results[1] as int;
+          _pendingDocuments = results[2] as int;
+          _totalAnnouncements = results[3] as int;
+          _isLoadingStats = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading dashboard stats: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingStats = false;
+        });
+      }
+    }
+  }
+
+  // Count users with role "user"
+  Future<int> _getUserCount() async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .where('role', isEqualTo: 'user')
+          .get();
+      return querySnapshot.docs.length;
+    } catch (e) {
+      print('Error getting user count: $e');
+      return 0;
+    }
+  }
+
+  // Count users with role "admin"
+  Future<int> _getAdminCount() async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .where('role', isEqualTo: 'admin')
+          .get();
+      return querySnapshot.docs.length;
+    } catch (e) {
+      print('Error getting admin count: $e');
+      return 0;
+    }
+  }
+
+  // Count pending documents across all users and their checklists
+  Future<int> _getPendingDocumentsCount() async {
+    try {
+      int pendingCount = 0;
+      
+      // Get all users
+      final usersSnapshot = await _firestore.collection('users').get();
+      
+      // Iterate through each user's checklists
+      for (var userDoc in usersSnapshot.docs) {
+        final userData = userDoc.data();
+        
+        // Check if user has checklists
+        if (userData.containsKey('checklists') && userData['checklists'] is Map) {
+          final checklists = userData['checklists'] as Map<String, dynamic>;
+          
+          // Iterate through each country in checklists
+          for (var countryEntry in checklists.entries) {
+            if (countryEntry.value is Map) {
+              final countryData = countryEntry.value as Map<String, dynamic>;
+              
+              // Iterate through each document type in the country
+              for (var docEntry in countryData.entries) {
+                if (docEntry.value is Map) {
+                  final docData = docEntry.value as Map<String, dynamic>;
+                  
+                  // Check if document status is "pending" or "needs_correction"
+                  if (docData.containsKey('status')) {
+                    final status = docData['status'];
+                    if (status == 'pending' || status == 'needs_correction') {
+                      pendingCount++;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      return pendingCount;
+    } catch (e) {
+      print('Error getting pending documents count: $e');
+      return 0;
+    }
+  }
+
+  // Count total announcements
+  Future<int> _getAnnouncementsCount() async {
+    try {
+      final querySnapshot = await _firestore.collection('announcements').get();
+      return querySnapshot.docs.length;
+    } catch (e) {
+      print('Error getting announcements count: $e');
+      return 0;
     }
   }
 
@@ -197,73 +327,82 @@ class _MasterDashboardPageState extends State<MasterDashboardPage> {
               const SizedBox(height: 12),
               
               // Stats Cards Grid (3x2 for master)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _MasterStatCard(
-                            label: 'Total Users',
-                            value: '0',
-                            icon: Icons.people,
-                          ),
+              _isLoadingStats
+                  ? const Padding(
+                      padding: EdgeInsets.all(40),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF348AA7),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _MasterStatCard(
-                            label: 'Admins',
-                            value: '0',
-                            icon: Icons.admin_panel_settings,
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _MasterStatCard(
+                                  label: 'Total Users',
+                                  value: _totalUsers.toString(),
+                                  icon: Icons.people,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _MasterStatCard(
+                                  label: 'Admins',
+                                  value: _totalAdmins.toString(),
+                                  icon: Icons.admin_panel_settings,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _MasterStatCard(
+                                  label: 'Pending',
+                                  value: _pendingDocuments.toString(),
+                                  icon: Icons.pending_actions,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _MasterStatCard(
+                                  label: 'Announcements',
+                                  value: _totalAnnouncements.toString(),
+                                  icon: Icons.campaign,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _MasterStatCard(
+                                  label: 'Tickets',
+                                  value: '0',
+                                  icon: Icons.confirmation_number,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _MasterStatCard(
+                                  label: 'System Status',
+                                  value: 'OK',
+                                  icon: Icons.check_circle,
+                                  isStatus: true,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _MasterStatCard(
-                            label: 'Pending',
-                            value: '0',
-                            icon: Icons.pending_actions,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _MasterStatCard(
-                            label: 'Announcements',
-                            value: '0',
-                            icon: Icons.campaign,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _MasterStatCard(
-                            label: 'Tickets',
-                            value: '0',
-                            icon: Icons.confirmation_number,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _MasterStatCard(
-                            label: 'System Status',
-                            value: 'OK',
-                            icon: Icons.check_circle,
-                            isStatus: true,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
               
               const SizedBox(height: 32),
               
