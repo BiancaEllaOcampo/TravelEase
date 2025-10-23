@@ -54,7 +54,6 @@ class _UserViewDocumentWithAIPageState
         final data = doc.data();
         final checklists = data?['checklists'] ?? {};
         
-        // Use sanitized keys (lowercase_with_underscores)
         final sanitizedCountry = widget.country.toLowerCase().replaceAll(' ', '_');
         final sanitizedDocName = widget.documentName.toLowerCase().replaceAll(' ', '_');
         
@@ -79,7 +78,6 @@ class _UserViewDocumentWithAIPageState
 
   void _handleReupload() async {
     try {
-      // Show dialog to choose between camera or gallery
       final ImageSource? source = await showDialog<ImageSource>(
         context: context,
         builder: (BuildContext context) {
@@ -115,7 +113,6 @@ class _UserViewDocumentWithAIPageState
 
       if (source == null) return;
 
-      // Pick image
       final XFile? pickedFile = await _imagePicker.pickImage(
         source: source,
         maxWidth: 1920,
@@ -125,7 +122,6 @@ class _UserViewDocumentWithAIPageState
 
       if (pickedFile == null) return;
 
-      // Show loading
       setState(() {
         _isUploading = true;
       });
@@ -135,7 +131,6 @@ class _UserViewDocumentWithAIPageState
         throw Exception('No user logged in');
       }
 
-      // Create a reference to the storage location
       final String sanitizedDocName = widget.documentName.replaceAll(' ', '_').toLowerCase();
       final String sanitizedCountry = widget.country.replaceAll(' ', '_').toLowerCase();
       final String fileName = '${sanitizedDocName}_${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -148,7 +143,6 @@ class _UserViewDocumentWithAIPageState
           .child(sanitizedDocName)
           .child(fileName);
 
-      // Upload file
       final File file = File(pickedFile.path);
       final UploadTask uploadTask = storageRef.putFile(
         file,
@@ -163,21 +157,15 @@ class _UserViewDocumentWithAIPageState
         ),
       );
 
-      // Wait for upload to complete
       final TaskSnapshot snapshot = await uploadTask;
-
-      // Get download URL
       final String downloadUrl = await snapshot.ref.getDownloadURL();
 
-      // Update Firestore with new document URL and status
-      // Use sanitized key format (lowercase_with_underscores)
       await _firestore.collection('users').doc(currentUser.uid).update({
         'checklists.$sanitizedCountry.$sanitizedDocName.status': 'verifying',
         'checklists.$sanitizedCountry.$sanitizedDocName.url': downloadUrl,
         'checklists.$sanitizedCountry.$sanitizedDocName.updatedAt': FieldValue.serverTimestamp(),
       });
 
-      // Update local state and reload data
       await _loadDocumentData();
       
       setState(() {
@@ -208,14 +196,135 @@ class _UserViewDocumentWithAIPageState
     }
   }
 
-  void _handleManualReview() {
-    // TODO: Implement manual review request functionality
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Manual review request submitted'),
-        backgroundColor: Color(0xFF348AA7),
-      ),
+  // REMOVED: AI feedback override capability
+  // Users can now only flag documents for manual review
+  void _handleManualReview() async {
+    if (documentUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please upload a document first before requesting manual review'),
+          backgroundColor: Color(0xFFA54547),
+        ),
+      );
+      return;
+    }
+
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Request Manual Review',
+            style: TextStyle(
+              fontFamily: 'Kumbh Sans',
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF125E77),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: const [
+              Text(
+                'Your document will be manually reviewed by our admin team.',
+                style: TextStyle(
+                  fontFamily: 'Kumbh Sans',
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 12),
+              Text(
+                'This may take 1-3 business days. You will be notified once the review is complete.',
+                style: TextStyle(
+                  fontFamily: 'Kumbh Sans',
+                  fontSize: 14,
+                  height: 1.5,
+                  color: Colors.black87,
+                ),
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Do you want to proceed?',
+                style: TextStyle(
+                  fontFamily: 'Kumbh Sans',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF125E77),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontFamily: 'Kumbh Sans',
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF348AA7),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                'Request Review',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Kumbh Sans',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
+
+    if (confirm != true) return;
+
+    try {
+      final User? currentUser = _auth.currentUser;
+      if (currentUser == null) throw Exception('No user logged in');
+
+      final String sanitizedCountry = widget.country.toLowerCase().replaceAll(' ', '_');
+      final String sanitizedDocName = widget.documentName.toLowerCase().replaceAll(' ', '_');
+
+      // Flag document for manual review without changing AI feedback
+      await _firestore.collection('users').doc(currentUser.uid).update({
+        'checklists.$sanitizedCountry.$sanitizedDocName.manualReviewRequested': true,
+        'checklists.$sanitizedCountry.$sanitizedDocName.manualReviewRequestedAt': FieldValue.serverTimestamp(),
+        'checklists.$sanitizedCountry.$sanitizedDocName.updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      await _loadDocumentData();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Manual review request submitted successfully! Our team will review your document soon.'),
+            backgroundColor: Color(0xFF34C759),
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error requesting manual review: ${e.toString()}'),
+            backgroundColor: const Color(0xFFA54547),
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _handleViewOriginal() async {
@@ -229,11 +338,10 @@ class _UserViewDocumentWithAIPageState
     try {
       final Uri url = Uri.parse(documentUrl);
       
-      // Check if URL can be launched
       if (await canLaunchUrl(url)) {
         await launchUrl(
           url,
-          mode: LaunchMode.externalApplication, // Opens in browser
+          mode: LaunchMode.externalApplication,
         );
       } else {
         if (mounted) {
@@ -260,14 +368,14 @@ class _UserViewDocumentWithAIPageState
   Color _getStatusColor(String status) {
     switch (status) {
       case 'verified':
-        return const Color(0xFF34C759); // Green
+        return const Color(0xFF34C759);
       case 'needs_correction':
-        return const Color(0xFFA54547); // Red
+        return const Color(0xFFA54547);
       case 'verifying':
-        return const Color(0xFFFFA500); // Yellow/Orange
+        return const Color(0xFFFFA500);
       case 'pending':
       default:
-        return const Color(0xFF125E77); // Teal
+        return const Color(0xFF125E77);
     }
   }
 
@@ -287,7 +395,6 @@ class _UserViewDocumentWithAIPageState
 
   @override
   Widget build(BuildContext context) {
-    // Check if user is authenticated
     if (_auth.currentUser == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushAndRemoveUntil(
@@ -326,7 +433,6 @@ class _UserViewDocumentWithAIPageState
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Back Button
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
@@ -343,7 +449,6 @@ class _UserViewDocumentWithAIPageState
                     ),
                   ),
                 ),
-                // Title - Document Name
                 Flexible(
                   child: Text(
                     widget.documentName,
@@ -360,7 +465,6 @@ class _UserViewDocumentWithAIPageState
                     ),
                   ),
                 ),
-                // Menu Button
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.2),
@@ -388,14 +492,11 @@ class _UserViewDocumentWithAIPageState
       ),
       body: Stack(
         children: [
-          // Background
           Container(
             width: double.infinity,
             height: double.infinity,
             color: const Color(0xFFD9D9D9),
           ),
-
-          // Main content - Full screen without card
           Positioned(
             top: 0,
             left: 0,
@@ -411,9 +512,7 @@ class _UserViewDocumentWithAIPageState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                    // Check if document exists
                     if (documentUrl.isEmpty && extractedData.isEmpty)
-                      // No document uploaded message - Full screen
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 80, horizontal: 20),
                         child: Column(
@@ -516,11 +615,9 @@ class _UserViewDocumentWithAIPageState
                         ),
                       )
                     else
-                      // Document details - Full screen layout
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Status badge header with card background
                           Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
@@ -586,10 +683,7 @@ class _UserViewDocumentWithAIPageState
                               ],
                             ),
                           ),
-
                           const SizedBox(height: 24),
-
-                          // Document image preview with enhanced card
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.white,
@@ -693,10 +787,7 @@ class _UserViewDocumentWithAIPageState
                               ),
                             ),
                           ),
-
                           const SizedBox(height: 24),
-
-                          // Extracted Data section with enhanced card
                           Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
@@ -734,15 +825,11 @@ class _UserViewDocumentWithAIPageState
                                   ],
                                 ),
                                 const SizedBox(height: 16),
-                                // Extracted data fields - customize based on document type
                                 _buildExtractedDataFields(),
                               ],
                             ),
                           ),
-
                           const SizedBox(height: 24),
-
-                          // AI Feedback section with enhanced styling
                           Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
@@ -810,8 +897,6 @@ class _UserViewDocumentWithAIPageState
                               ],
                             ),
                           ),
-
-                          // AI Limitation Notice (if document contains sensitive info)
                           if (documentStatus == 'needs_correction' && 
                               aiFeedback.toLowerCase().contains('sorry'))
                             Container(
@@ -845,10 +930,7 @@ class _UserViewDocumentWithAIPageState
                                 ],
                               ),
                             ),
-
                           const SizedBox(height: 28),
-
-                          // Action buttons with enhanced design
                           Row(
                             children: [
                               Expanded(
@@ -934,7 +1016,7 @@ class _UserViewDocumentWithAIPageState
                               ),
                             ],
                           ),
-                          const SizedBox(height: 14), // Space between button rows
+                          const SizedBox(height: 14),
                           Container(
                             width: double.infinity,
                             decoration: BoxDecoration(
@@ -948,7 +1030,7 @@ class _UserViewDocumentWithAIPageState
                               ],
                             ),
                             child: ElevatedButton.icon(
-                              onPressed: _handleManualReview, //no function for now shhhhhhhh,
+                              onPressed: _handleManualReview,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF348AA7),
                                 foregroundColor: Colors.white,
@@ -979,8 +1061,6 @@ class _UserViewDocumentWithAIPageState
             ),
           ),
           ),
-
-          // Bottom help links
           Positioned(
             bottom: 30,
             left: 28,
@@ -989,9 +1069,7 @@ class _UserViewDocumentWithAIPageState
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 GestureDetector(
-                  onTap: () {
-                    // Handle Need Help navigation
-                  },
+                  onTap: () {},
                   child: const Text(
                     'Need Help?',
                     style: TextStyle(
@@ -1004,9 +1082,7 @@ class _UserViewDocumentWithAIPageState
                   ),
                 ),
                 GestureDetector(
-                  onTap: () {
-                    // Handle Send a Ticket navigation
-                  },
+                  onTap: () {},
                   child: const Text(
                     'Send a Ticket',
                     style: TextStyle(
@@ -1021,8 +1097,6 @@ class _UserViewDocumentWithAIPageState
               ],
             ),
           ),
-
-          // Loading overlay
           if (_isUploading)
             Container(
               width: double.infinity,
@@ -1063,7 +1137,6 @@ class _UserViewDocumentWithAIPageState
   }
 
   Widget _buildExtractedDataFields() {
-    // If no extracted data exists, show placeholder text
     if (extractedData.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(16),
@@ -1096,17 +1169,14 @@ class _UserViewDocumentWithAIPageState
       );
     }
 
-    // Customize extracted data based on document type
     if (widget.documentName == 'Flight Ticket') {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildDataField('Passenger', extractedData['passenger'] ?? 'Not available'),
           _buildDataField('Airline', extractedData['airline'] ?? 'Not available'),
-          _buildDataField('Departure Airport',
-              extractedData['departure'] ?? 'Not available'),
-          _buildDataField('Arrival Airport',
-              extractedData['arrival'] ?? 'Not available'),
+          _buildDataField('Departure Airport', extractedData['departure'] ?? 'Not available'),
+          _buildDataField('Arrival Airport', extractedData['arrival'] ?? 'Not available'),
           _buildDataField('Booking Code', extractedData['bookingCode'] ?? 'Not available'),
         ],
       );
@@ -1144,7 +1214,6 @@ class _UserViewDocumentWithAIPageState
         ],
       );
     } else {
-      // Generic extracted data for other document types
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
