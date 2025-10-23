@@ -924,6 +924,43 @@ class _UserViewDocumentWithAIPageState
                               ),
                             ],
                           ),
+                          const SizedBox(height: 14), // Space between button rows
+                          Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF348AA7).withOpacity(0.3),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton.icon(
+                              onPressed: //no function for now shhhhhhhh,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF348AA7),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 18),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                elevation: 0,
+                              ),
+                              icon: const Icon(Icons.person_search, size: 22, color: Colors.white),
+                              label: const Text(
+                                'Request Manual Review',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Kumbh Sans',
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                   ],
