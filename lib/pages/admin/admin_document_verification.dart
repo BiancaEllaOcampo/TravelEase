@@ -11,25 +11,99 @@ class AdminDocumentVerificationPage extends StatefulWidget {
 }
 
 class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificationPage> {
-  // Firebase instances
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  
   // UI state
-  late Stream<QuerySnapshot> documentStream;
-  String searchQuery = '';
+  String selectedCountry = 'All Countries';
   String selectedStatus = 'All Status';
-  String selectedType = 'All Types';
+  String selectedDocType = 'All Types';
+  String searchQuery = '';
   final TextEditingController searchController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    // Initialize document stream for all documents in user checklists
-    documentStream = _firestore
-        .collectionGroup('checklists')
-        .where('status', whereIn: ['pending', 'verifying', 'verified', 'needs_correction'])
-        .snapshots();
+  // Get document stream with proper data structure
+  Stream<List<Map<String, dynamic>>> get documentStream {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .snapshots()
+        .asyncMap((snapshot) async {
+      List<Map<String, dynamic>> allDocuments = [];
+      
+      for (var userDoc in snapshot.docs) {
+        final userData = userDoc.data();
+        final checklists = userData['checklists'] as Map<String, dynamic>? ?? {};
+        final userId = userDoc.id;
+        final userName = userData['fullName'] ?? 'Unknown User';
+        
+        checklists.forEach((country, countryData) {
+          if (countryData is Map<String, dynamic>) {
+            countryData.forEach((docType, docData) {
+              if (docData is Map<String, dynamic>) {
+                String displayDocType = docType
+                    .split('_')
+                    .map((word) => word.isNotEmpty 
+                        ? word[0].toUpperCase() + word.substring(1) 
+                        : '')
+                    .join(' ');
+                
+                String displayCountry = country
+                    .split('_')
+                    .map((word) => word.isNotEmpty 
+                        ? word[0].toUpperCase() + word.substring(1) 
+                        : '')
+                    .join(' ');
+                
+                allDocuments.add({
+                  'userId': userId,
+                  'userName': userName,
+                  'country': displayCountry,
+                  'type': displayDocType,
+                  'documentId': docType,
+                  'status': docData['status'] ?? 'pending',
+                  'url': docData['url'] ?? '',
+                  'submittedAt': docData['submittedAt'] ?? DateTime.now(),
+                  'feedback': docData['feedback'],
+                  'reviewedAt': docData['reviewedAt'],
+                  'reviewedBy': docData['reviewedBy'],
+                });
+              }
+            });
+          }
+        });
+      }
+      
+      // Sort by submission date descending
+      allDocuments.sort((a, b) {
+        final aDate = a['submittedAt'];
+        final bDate = b['submittedAt'];
+        return bDate.compareTo(aDate);
+      });
+      
+      return allDocuments;
+    });
+  }
+
+  // Filter documents based on search and filters
+  List<Map<String, dynamic>> filterDocuments(List<Map<String, dynamic>> docs) {
+    return docs.where((doc) {
+      // Search filter
+      final searchMatch = searchQuery.isEmpty ||
+          doc['userName'].toString().toLowerCase().contains(searchQuery.toLowerCase()) ||
+          doc['documentId'].toString().toLowerCase().contains(searchQuery.toLowerCase());
+
+      // Status filter
+      final statusMatch = selectedStatus == 'All Status' ||
+          doc['status'].toString().toLowerCase() == selectedStatus.toLowerCase().replaceAll(' ', '_');
+
+      // Country filter
+      final countryMatch = selectedCountry == 'All Countries' ||
+          doc['country'].toString() == selectedCountry;
+
+      // Document type filter
+      final typeMatch = selectedDocType == 'All Types' ||
+          doc['type'].toString() == selectedDocType;
+
+      return searchMatch && statusMatch && countryMatch && typeMatch;
+    }).toList();
   }
 
   // Helper functions
@@ -49,7 +123,7 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
   }
 
   IconData getDocTypeIcon(String type) {
-    switch (type.toLowerCase()) {
+    switch (type.toLowerCase().replaceAll(' ', '_')) {
       case 'passport':
         return Icons.badge;
       case 'visa':
@@ -63,34 +137,8 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
     }
   }
 
-  // Filter documents based on search and filters
-  List<DocumentSnapshot> filterDocuments(List<DocumentSnapshot> docs) {
-    return docs.where((doc) {
-      final data = doc.data() as Map<String, dynamic>;
-      
-      // Search filter
-      final searchMatch = searchQuery.isEmpty ||
-          (data['userName']?.toString().toLowerCase().contains(searchQuery.toLowerCase()) ?? false) ||
-          (data['documentId']?.toString().toLowerCase().contains(searchQuery.toLowerCase()) ?? false);
-
-      // Status filter
-      final statusMatch = selectedStatus == 'All Status' ||
-          data['status']?.toString().toLowerCase() ==
-              selectedStatus.toLowerCase().replaceAll(' ', '_');
-
-      // Type filter  
-      final typeMatch = selectedType == 'All Types' ||
-          data['type']?.toString().toLowerCase() ==
-              selectedType.toLowerCase().replaceAll(' ', '_');
-
-      return searchMatch && statusMatch && typeMatch;
-    }).toList();
-  }
-
   // View document dialog
-  Future<void> _viewDocument(DocumentSnapshot doc) async {
-    final data = doc.data() as Map<String, dynamic>;
-    
+  Future<void> _viewDocument(Map<String, dynamic> document) async {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -124,7 +172,7 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
-                    data['url'] ?? '',
+                    document['url'],
                     fit: BoxFit.contain,
                     loadingBuilder: (context, child, loadingProgress) {
                       if (loadingProgress == null) return child;
@@ -167,11 +215,10 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
   }
 
   // Review document dialog with status update
-  Future<void> _reviewDocument(DocumentSnapshot doc) async {
-    final data = doc.data() as Map<String, dynamic>;
-    String newStatus = data['status'] ?? 'pending';
-    String feedback = '';
-
+  Future<void> _reviewDocument(Map<String, dynamic> document) async {
+    String newStatus = document['status'];
+    String feedback = document['feedback'] ?? '';
+    
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -192,47 +239,57 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                 ),
               ),
               const SizedBox(height: 24),
-              DropdownButtonFormField<String>(
-                value: newStatus,
-                items: ['pending', 'verifying', 'verified', 'needs_correction']
-                    .map((status) => DropdownMenuItem(
-                          value: status,
-                          child: Text(
-                            status.replaceAll('_', ' ').toUpperCase(),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontFamily: 'Kumbh Sans',
-                            ),
+              StatefulBuilder(
+                builder: (context, setState) {
+                  return Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8F9FA),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: const Color(0xFF348AA7).withOpacity(0.3),
                           ),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    newStatus = value!;
-                  });
+                        ),
+                        child: DropdownButtonFormField<String>(
+                          value: newStatus,
+                          items: ['pending', 'verifying', 'verified', 'needs_correction']
+                              .map((status) => DropdownMenuItem(
+                                    value: status,
+                                    child: Text(
+                                      status.replaceAll('_', ' ').toUpperCase(),
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: 'Kumbh Sans',
+                                      ),
+                                    ),
+                                  ))
+                              .toList(),
+                          onChanged: (value) => setState(() => newStatus = value!),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        initialValue: feedback,
+                        maxLines: 3,
+                        onChanged: (value) => feedback = value,
+                        decoration: InputDecoration(
+                          hintText: 'Add feedback or notes...',
+                          filled: true,
+                          fillColor: const Color(0xFFF8F9FA),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
                 },
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                maxLines: 3,
-                onChanged: (value) => feedback = value,
-                decoration: InputDecoration(
-                  hintText: 'Add feedback or notes...',
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
               ),
               const SizedBox(height: 24),
               Row(
@@ -250,17 +307,35 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                     onPressed: () async {
                       try {
                         // Update document status in Firestore
-                        await doc.reference.update({
-                          'status': newStatus,
-                          'feedback': feedback,
-                          'reviewedAt': FieldValue.serverTimestamp(),
-                          'reviewedBy': _auth.currentUser?.email,
-                        });
+                        await FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(document['userId'])
+                            .collection('checklists')
+                            .doc(document['country'].toLowerCase().replaceAll(' ', '_'))
+                            .update({
+                              'status': newStatus,
+                              'feedback': feedback,
+                              'reviewedAt': FieldValue.serverTimestamp(),
+                              'reviewedBy': _auth.currentUser?.email,
+                            });
+                            
                         if (mounted) Navigator.pop(context);
-                      } catch (e) {
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error: $e')),
+                            const SnackBar(
+                              content: Text('Document review updated successfully'),
+                              backgroundColor: Color(0xFF348AA7),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        print('Error updating document review: $e');
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Error: $e'),
+                              backgroundColor: Colors.red,
+                            ),
                           );
                         }
                       }
@@ -282,37 +357,10 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
     );
   }
 
-  Widget _buildStatItem(String label, String value, IconData icon) {
-    return Column(
-      children: [
-        Icon(icon, color: Colors.white, size: 28),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Kumbh Sans',
-          ),
-        ),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: 14,
-            fontFamily: 'Kumbh Sans',
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const AdminAppDrawer(),
-      backgroundColor: const Color(0xFFD9D9D9),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(130),
         child: Container(
@@ -347,159 +395,118 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
       ),
       body: Container(
         color: const Color(0xFFD9D9D9),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Filters Card
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Search bar
-                    TextField(
-                      controller: searchController,
-                      onChanged: (value) => setState(() => searchQuery = value),
-                      decoration: InputDecoration(
-                        hintText: 'Search documents...',
-                        prefixIcon: const Icon(Icons.search),
-                        filled: true,
-                        fillColor: const Color(0xFFF8F9FA),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Filter dropdowns
-                    Row(
-                      children: [
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            value: selectedStatus,
-                            items: ['All Status', 'Pending', 'Verifying', 'Verified', 'Needs Correction']
-                                .map((status) => DropdownMenuItem(
-                                      value: status,
-                                      child: Text(status),
-                                    ))
-                                .toList(),
-                            onChanged: (value) => setState(() => selectedStatus = value!),
-                            decoration: InputDecoration(
-                              labelText: 'Status',
-                              filled: true,
-                              fillColor: const Color(0xFFF8F9FA),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            value: selectedType,
-                            items: ['All Types', 'Passport', 'Visa', 'Flight Ticket', 'Accommodation']
-                                .map((type) => DropdownMenuItem(
-                                      value: type,
-                                      child: Text(type),
-                                    ))
-                                .toList(),
-                            onChanged: (value) => setState(() => selectedType = value!),
-                            decoration: InputDecoration(
-                              labelText: 'Document Type',
-                              filled: true,
-                              fillColor: const Color(0xFFF8F9FA),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                          ),
+        child: StreamBuilder<List<Map<String, dynamic>>>(
+          stream: documentStream,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(color: Color(0xFF348AA7)),
+              );
+            }
+
+            if (snapshot.hasError) {
+              return Center(
+                child: Text('Error: ${snapshot.error}'),
+              );
+            }
+
+            final documents = filterDocuments(snapshot.data ?? []);
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Filters Card
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Documents Stream
-              StreamBuilder<QuerySnapshot>(
-                stream: documentStream,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(40),
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF348AA7),
-                        ),
-                      ),
-                    );
-                  }
-
-                  if (snapshot.hasError) {
-                    return Container(
-                      padding: const EdgeInsets.all(40),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color(0xFF348AA7).withOpacity(0.2),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 64,
-                            color: Colors.red[400],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Error loading documents',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey[600],
-                              fontFamily: 'Kumbh Sans',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Search bar
+                        TextField(
+                          controller: searchController,
+                          onChanged: (value) => setState(() => searchQuery = value),
+                          decoration: InputDecoration(
+                            hintText: 'Search documents...',
+                            prefixIcon: const Icon(Icons.search),
+                            filled: true,
+                            fillColor: const Color(0xFFF8F9FA),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: BorderSide.none,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Please try again later',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[500],
-                              fontFamily: 'Kumbh Sans',
+                        ),
+                        const SizedBox(height: 16),
+                        // Filter dropdowns
+                        Row(
+                          children: [
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                value: selectedStatus,
+                                items: ['All Status', 'Pending', 'Verifying', 'Verified', 'Needs Correction']
+                                    .map((status) => DropdownMenuItem(
+                                          value: status,
+                                          child: Text(status),
+                                        ))
+                                    .toList(),
+                                onChanged: (value) => setState(() => selectedStatus = value!),
+                                decoration: InputDecoration(
+                                  labelText: 'Status',
+                                  filled: true,
+                                  fillColor: const Color(0xFFF8F9FA),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: DropdownButtonFormField<String>(
+                                value: selectedDocType,
+                                items: ['All Types', 'Passport', 'Visa', 'Flight Ticket', 'Accommodation']
+                                    .map((type) => DropdownMenuItem(
+                                          value: type,
+                                          child: Text(type),
+                                        ))
+                                    .toList(),
+                                onChanged: (value) => setState(() => selectedDocType = value!),
+                                decoration: InputDecoration(
+                                  labelText: 'Document Type',
+                                  filled: true,
+                                  fillColor: const Color(0xFFF8F9FA),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
 
-                  final documents = filterDocuments(snapshot.data?.docs ?? []);
+                  const SizedBox(height: 24),
 
-                  if (documents.isEmpty) {
-                    return Container(
+                  // Documents List
+                  if (documents.isEmpty)
+                    Container(
                       padding: const EdgeInsets.all(40),
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -537,75 +544,14 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                           ),
                         ],
                       ),
-                    );
-                  }
-
-                  return Column(
-                    children: [
-                      // Stats header
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        margin: const EdgeInsets.only(bottom: 16),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF348AA7), Color(0xFF125E77)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildStatItem(
-                              'Total',
-                              documents.length.toString(),
-                              Icons.folder_open,
-                            ),
-                            Container(
-                              width: 1,
-                              height: 40,
-                              color: Colors.white30,
-                            ),
-                            _buildStatItem(
-                              'Pending',
-                              documents
-                                  .where((doc) =>
-                                      (doc.data() as Map<String, dynamic>)['status'] ==
-                                      'pending')
-                                  .length
-                                  .toString(),
-                              Icons.schedule,
-                            ),
-                            Container(
-                              width: 1,
-                              height: 40,
-                              color: Colors.white30,
-                            ),
-                            _buildStatItem(
-                              'Verified',
-                              documents
-                                  .where((doc) =>
-                                      (doc.data() as Map<String, dynamic>)['status'] ==
-                                      'verified')
-                                  .length
-                                  .toString(),
-                              Icons.check_circle,
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Document List
-                      ...documents.map((doc) {
-                        final data = doc.data() as Map<String, dynamic>;
+                    )
+                  else
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: documents.length,
+                      itemBuilder: (context, index) {
+                        final doc = documents[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
                           child: Container(
@@ -616,13 +562,6 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                                 color: const Color(0xFF348AA7).withOpacity(0.2),
                                 width: 1.5,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
                             ),
                             child: Padding(
                               padding: const EdgeInsets.all(16),
@@ -645,7 +584,7 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                                           borderRadius: BorderRadius.circular(10),
                                         ),
                                         child: Icon(
-                                          getDocTypeIcon(data['type'] ?? ''),
+                                          getDocTypeIcon(doc['type']),
                                           size: 28,
                                           color: Colors.white,
                                         ),
@@ -660,7 +599,7 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                                               children: [
                                                 Expanded(
                                                   child: Text(
-                                                    data['userName'] ?? 'Unknown User',
+                                                    doc['userName'] ?? 'Unknown User',
                                                     style: const TextStyle(
                                                       fontSize: 18,
                                                       fontWeight: FontWeight.bold,
@@ -675,18 +614,18 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                                                     vertical: 4,
                                                   ),
                                                   decoration: BoxDecoration(
-                                                    color: getStatusColor(data['status'] ?? ''),
+                                                    color: getStatusColor(doc['status']),
                                                     borderRadius: BorderRadius.circular(6),
                                                   ),
                                                   child: Text(
-                                                    (data['status'] ?? 'pending')
+                                                    (doc['status'] ?? 'pending')
                                                         .toUpperCase()
                                                         .replaceAll('_', ' '),
                                                     style: const TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 11,
-                                                      fontFamily: 'Kumbh Sans',
                                                       fontWeight: FontWeight.bold,
+                                                      fontFamily: 'Kumbh Sans',
                                                     ),
                                                   ),
                                                 ),
@@ -699,7 +638,7 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                                                     size: 14, color: Colors.grey[600]),
                                                 const SizedBox(width: 4),
                                                 Text(
-                                                  'Doc ID: ${data['documentId'] ?? 'Unknown'}',
+                                                  'Doc ID: ${doc['documentId']}',
                                                   style: TextStyle(
                                                     fontSize: 13,
                                                     fontFamily: 'Kumbh Sans',
@@ -711,8 +650,7 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                                                     size: 14, color: Colors.grey[600]),
                                                 const SizedBox(width: 4),
                                                 Text(
-                                                  data['submittedAt']?.toString() ??
-                                                      'Unknown Date',
+                                                  doc['submittedAt'].toString(),
                                                   style: TextStyle(
                                                     fontSize: 13,
                                                     fontFamily: 'Kumbh Sans',
@@ -724,12 +662,11 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                                             const SizedBox(height: 6),
                                             Row(
                                               children: [
-                                                Icon(Icons.description,
+                                                Icon(Icons.location_on,
                                                     size: 14, color: Colors.grey[600]),
                                                 const SizedBox(width: 4),
                                                 Text(
-                                                  data['type']?.toString().toUpperCase() ??
-                                                      'Unknown Type',
+                                                  doc['country'],
                                                   style: TextStyle(
                                                     fontSize: 13,
                                                     fontFamily: 'Kumbh Sans',
@@ -759,16 +696,11 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(8),
                                             ),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                              vertical: 12,
-                                            ),
                                           ),
-                                          icon: const Icon(Icons.visibility, size: 18),
+                                          icon: const Icon(Icons.visibility),
                                           label: const Text(
                                             'View',
                                             style: TextStyle(
-                                              fontSize: 14,
                                               fontWeight: FontWeight.bold,
                                               fontFamily: 'Kumbh Sans',
                                             ),
@@ -782,20 +714,15 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: const Color(0xFF348AA7),
                                             foregroundColor: Colors.white,
+                                            elevation: 0,
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(8),
                                             ),
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                              vertical: 12,
-                                            ),
-                                            elevation: 0,
                                           ),
-                                          icon: const Icon(Icons.rate_review, size: 18),
+                                          icon: const Icon(Icons.rate_review),
                                           label: const Text(
                                             'Review',
                                             style: TextStyle(
-                                              fontSize: 14,
                                               fontWeight: FontWeight.bold,
                                               fontFamily: 'Kumbh Sans',
                                             ),
@@ -809,13 +736,12 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                             ),
                           ),
                         );
-                      }).toList(),
-                    ],
-                  );
-                },
+                      },
+                    ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
