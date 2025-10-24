@@ -412,346 +412,320 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
 
             final documents = filterDocuments(snapshot.data ?? []);
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Filters Card
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.08),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Search bar
-                        TextField(
-                          controller: searchController,
-                          onChanged: (value) => setState(() => searchQuery = value),
-                          decoration: InputDecoration(
-                            hintText: 'Search documents...',
-                            prefixIcon: const Icon(Icons.search),
-                            filled: true,
-                            fillColor: const Color(0xFFF8F9FA),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // Filter dropdowns
-                        Wrap(
-                          spacing: 16,
-                          runSpacing: 16,
-                          children: [
-                            SizedBox(
-                              width: 200,
-                              child: DropdownButtonFormField<String>(
-                                value: selectedStatus,
-                                items: ['All Status', 'Pending', 'Verifying', 'Verified', 'Needs Correction']
-                                    .map((status) => DropdownMenuItem(
-                                          value: status,
-                                          child: Text(
-                                            status,
-                                            style: const TextStyle(fontSize: 14),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ))
-                                    .toList(),
-                                onChanged: (value) => setState(() => selectedStatus = value!),
-                                decoration: InputDecoration(
-                                  labelText: 'Status',
-                                  filled: true,
-                                  fillColor: const Color(0xFFF8F9FA),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 200,
-                              child: DropdownButtonFormField<String>(
-                                value: selectedDocType,
-                                items: ['All Types', 'Passport', 'Visa', 'Flight Ticket', 'Accommodation']
-                                    .map((type) => DropdownMenuItem(
-                                          value: type,
-                                          child: Text(
-                                            type,
-                                            style: const TextStyle(fontSize: 14),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ))
-                                    .toList(),
-                                onChanged: (value) => setState(() => selectedDocType = value!),
-                                decoration: InputDecoration(
-                                  labelText: 'Document Type',
-                                  filled: true,
-                                  fillColor: const Color(0xFFF8F9FA),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                ),
-                              ),
+            return Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Filters Card
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Documents List
-                  if (documents.isEmpty)
-                    Container(
-                      padding: const EdgeInsets.all(40),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: const Color(0xFF348AA7).withOpacity(0.2),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.search_off,
-                            size: 64,
-                            color: Colors.grey[400],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'No documents found',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey[600],
-                              fontFamily: 'Kumbh Sans',
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Try adjusting your filters',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[500],
-                              fontFamily: 'Kumbh Sans',
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  else
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: documents.length,
-                      itemBuilder: (context, index) {
-                        final doc = documents[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: const Color(0xFF348AA7).withOpacity(0.2),
-                                width: 1.5,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Search bar
+                            TextField(
+                              controller: searchController,
+                              onChanged: (value) => setState(() => searchQuery = value),
+                              decoration: InputDecoration(
+                                hintText: 'Search documents...',
+                                prefixIcon: const Icon(Icons.search),
+                                filled: true,
+                                fillColor: const Color(0xFFF8F9FA),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide.none,
+                                ),
                               ),
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
+                            const SizedBox(height: 16),
+                            // Filter dropdowns
+                            Wrap(
+                              spacing: 16,
+                              runSpacing: 16,
+                              children: [
+                                SizedBox(
+                                  width: 200,
+                                  child: DropdownButtonFormField<String>(
+                                    value: selectedStatus,
+                                    items: ['All Status', 'Pending', 'Verifying', 'Verified', 'Needs Correction']
+                                        .map((status) => DropdownMenuItem(
+                                              value: status,
+                                              child: Text(
+                                                status,
+                                                style: const TextStyle(fontSize: 14),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ))
+                                        .toList(),
+                                    onChanged: (value) => setState(() => selectedStatus = value!),
+                                    decoration: InputDecoration(
+                                      labelText: 'Status',
+                                      filled: true,
+                                      fillColor: const Color(0xFFF8F9FA),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 200,
+                                  child: DropdownButtonFormField<String>(
+                                    value: selectedDocType,
+                                    items: ['All Types', 'Passport', 'Visa', 'Flight Ticket', 'Accommodation']
+                                        .map((type) => DropdownMenuItem(
+                                              value: type,
+                                              child: Text(
+                                                type,
+                                                style: const TextStyle(fontSize: 14),
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ))
+                                        .toList(),
+                                    onChanged: (value) => setState(() => selectedDocType = value!),
+                                    decoration: InputDecoration(
+                                      labelText: 'Document Type',
+                                      filled: true,
+                                      fillColor: const Color(0xFFF8F9FA),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Documents List
+                      if (documents.isEmpty)
+                        Container(
+                          padding: const EdgeInsets.all(40),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: const Color(0xFF348AA7).withOpacity(0.2),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.search_off,
+                                size: 64,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No documents found',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey[600],
+                                  fontFamily: 'Kumbh Sans',
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Try adjusting your filters',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[500],
+                                  fontFamily: 'Kumbh Sans',
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: documents.length,
+                          itemBuilder: (context, index) {
+                            final doc = documents[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      // Document type icon
-                                      Container(
-                                        width: 56,
-                                        height: 56,
-                                        decoration: BoxDecoration(
-                                          gradient: const LinearGradient(
-                                            colors: [Color(0xFF348AA7), Color(0xFF125E77)],
-                                            begin: Alignment.topLeft,
-                                            end: Alignment.bottomRight,
-                                          ),
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: Icon(
-                                          getDocTypeIcon(doc['type']),
-                                          size: 28,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      // Document info
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    doc['userName'] ?? 'Unknown User',
-                                                    style: const TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight: FontWeight.bold,
-                                                      fontFamily: 'Kumbh Sans',
-                                                      color: Color(0xFF125E77),
-                                                    ),
-                                                  ),
-                                                ),
-                                                Container(
-                                                  padding: const EdgeInsets.symmetric(
-                                                    horizontal: 10,
-                                                    vertical: 4,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: getStatusColor(doc['status']),
-                                                    borderRadius: BorderRadius.circular(6),
-                                                  ),
-                                                  child: Text(
-                                                    (doc['status'] ?? 'pending')
-                                                        .toUpperCase()
-                                                        .replaceAll('_', ' '),
-                                                    style: const TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 11,
-                                                      fontWeight: FontWeight.bold,
-                                                      fontFamily: 'Kumbh Sans',
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          // Document type icon
+                                          Container(
+                                            width: 48,
+                                            height: 48,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF348AA7),
+                                              borderRadius: BorderRadius.circular(8),
                                             ),
-                                            const SizedBox(height: 8),
-                                            Row(
+                                            child: Icon(
+                                              getDocTypeIcon(doc['type']),
+                                              size: 24,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          // Document info
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
-                                                Icon(Icons.badge,
-                                                    size: 14, color: Colors.grey[600]),
-                                                const SizedBox(width: 4),
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text(
+                                                        doc['userName'] ?? 'Unknown User',
+                                                        style: const TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight: FontWeight.bold,
+                                                          color: Color(0xFF125E77),
+                                                        ),
+                                                        overflow: TextOverflow.ellipsis,
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      padding: const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 4,
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        color: getStatusColor(doc['status']),
+                                                        borderRadius: BorderRadius.circular(4),
+                                                      ),
+                                                      child: Text(
+                                                        (doc['status'] ?? 'pending')
+                                                            .toUpperCase()
+                                                            .replaceAll('_', ' '),
+                                                        style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 12,
+                                                          fontWeight: FontWeight.bold,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 4),
                                                 Text(
                                                   'Doc ID: ${doc['documentId']}',
                                                   style: TextStyle(
                                                     fontSize: 13,
-                                                    fontFamily: 'Kumbh Sans',
-                                                    color: Colors.grey[700],
+                                                    color: Colors.grey[600],
                                                   ),
+                                                  overflow: TextOverflow.ellipsis,
                                                 ),
-                                                const SizedBox(width: 16),
-                                                Icon(Icons.calendar_today,
-                                                    size: 14, color: Colors.grey[600]),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  doc['submittedAt'].toString(),
-                                                  style: TextStyle(
-                                                    fontSize: 13,
-                                                    fontFamily: 'Kumbh Sans',
-                                                    color: Colors.grey[700],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Row(
-                                              children: [
-                                                Icon(Icons.location_on,
-                                                    size: 14, color: Colors.grey[600]),
-                                                const SizedBox(width: 4),
+                                                const SizedBox(height: 2),
                                                 Text(
                                                   doc['country'],
                                                   style: TextStyle(
                                                     fontSize: 13,
-                                                    fontFamily: 'Kumbh Sans',
-                                                    color: Colors.grey[700],
+                                                    color: Colors.grey[600],
                                                   ),
+                                                  overflow: TextOverflow.ellipsis,
                                                 ),
                                               ],
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 12),
+                                      // Action buttons
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: OutlinedButton(
+                                              onPressed: () => _viewDocument(doc),
+                                              style: OutlinedButton.styleFrom(
+                                                foregroundColor: const Color(0xFF348AA7),
+                                                side: const BorderSide(
+                                                  color: Color(0xFF348AA7),
+                                                  width: 1.5,
+                                                ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              child: const Text(
+                                                'View',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: ElevatedButton(
+                                              onPressed: () => _reviewDocument(doc),
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: const Color(0xFF348AA7),
+                                                foregroundColor: Colors.white,
+                                                elevation: 0,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              child: const Text(
+                                                'Review',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 12),
-                                  // Action buttons
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: OutlinedButton.icon(
-                                          onPressed: () => _viewDocument(doc),
-                                          style: OutlinedButton.styleFrom(
-                                            foregroundColor: const Color(0xFF348AA7),
-                                            side: const BorderSide(
-                                              color: Color(0xFF348AA7),
-                                              width: 1.5,
-                                            ),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(8),
-                                            ),
-                                          ),
-                                          icon: const Icon(Icons.visibility),
-                                          label: const Text(
-                                            'View',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontFamily: 'Kumbh Sans',
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: ElevatedButton.icon(
-                                          onPressed: () => _reviewDocument(doc),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: const Color(0xFF348AA7),
-                                            foregroundColor: Colors.white,
-                                            elevation: 0,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(8),
-                                            ),
-                                          ),
-                                          icon: const Icon(Icons.rate_review),
-                                          label: const Text(
-                                            'Review',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontFamily: 'Kumbh Sans',
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                ],
+                            );
+                          },
+                        ),
+                    ],
+                  ),
+                ),
               ),
             );
           },
