@@ -66,6 +66,38 @@ users/{userId} {
 ```
 **Login pattern**: Authenticate → Fetch Firestore profile → Check `role` field → Route to dashboard.
 
+**App Initialization Flow (main.dart):**
+```dart
+// Two-step authentication with role-based routing
+StreamBuilder<User?>(
+  stream: FirebaseAuth.instance.authStateChanges(),
+  builder: (context, authSnapshot) {
+    if (!authSnapshot.hasData) return SplashScreen();
+    
+    // Step 2: Fetch user role from Firestore
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance
+        .collection('users')
+        .doc(authSnapshot.data!.uid)
+        .get(),
+      builder: (context, roleSnapshot) {
+        if (!roleSnapshot.hasData) return CircularProgressIndicator();
+        
+        final role = roleSnapshot.data?.get('role') as String?;
+        
+        // Route based on role
+        switch (role) {
+          case 'admin': return AdminDashboardPage();
+          case 'master': return MasterDashboardPage();
+          default: return UserHomePage();
+        }
+      },
+    );
+  },
+)
+```
+**⚠️ CRITICAL**: This ensures admin/master users are always routed to their dashboards when reopening the app, not to the user homepage.
+
 ### 5. Firestore Naming Convention: `lowercase_with_underscores`
 **⚠️ CRITICAL: These exact strings are hardcoded in multiple places!**
 ```dart
@@ -101,6 +133,29 @@ const ROLES = ['user', 'admin', 'master'];
 - [ ] Update any hardcoded string literals across codebase
 
 ## Essential Development Patterns
+
+### Role-Based Document Verification Pages
+**Admin and Master verification pages MUST be identical except for imports/class names:**
+```dart
+// admin_document_verification.dart
+import '../../utils/admin_app_drawer.dart';
+class AdminDocumentVerificationPage extends StatefulWidget { ... }
+
+// master_document_verification.dart  
+import '../../utils/master_app_drawer.dart';
+class MasterDocumentVerificationPage extends StatefulWidget { ... }
+```
+
+**⚠️ CRITICAL Implementation Details:**
+1. **Document Field**: Use `document['url']` (NOT `document['file']`) - this is the Storage download URL
+2. **Status Format**: Always use database format `lowercase_with_underscores` - dropdown items are `['pending', 'verifying', 'verified', 'needs_correction']`
+3. **Document Map Structure**: Must include `countryKey` and `docTypeKey` for Firestore updates using dot notation
+4. **Update Pattern**: Use `'checklists.${document['countryKey']}.${document['docTypeKey']}.status'` for nested updates
+
+**Common Bugs Fixed:**
+- ❌ Null reference: `document['file'].toString()` → ✅ `document['url']?.toString() ?? ''`
+- ❌ Dropdown assertion: Using display format like 'Needs Correction' → ✅ Use database format 'needs_correction'
+- ❌ Inconsistent implementations between admin/master → ✅ Copy from admin, update only imports/class names
 
 ### Centralized Navigation Drawers (NEVER Copy/Paste)
 ```dart
@@ -664,7 +719,9 @@ intl: ^0.20.2               # Date formatting
 ## Key Files Reference
 
 **Must-read for context:**
-- `lib/main.dart` - Entry point, Firebase init, StreamBuilder auth routing
+- `lib/main.dart` - Entry point, Firebase init, two-step auth routing (Firebase Auth → Firestore role lookup → route by role)
+- `lib/pages/admin/admin_document_verification.dart` - Template for document verification (use as reference)
+- `lib/pages/master/master_document_verification.dart` - Identical to admin version except imports/class names
 - `firebase/firestore.rules` - Role-based access control helpers (`isAdmin()`, `isMaster()`)
 - `firebase/storage.rules` - Public read for AI, size limits (5MB profiles, 10MB docs)
 - `functions/index.js` - OpenAI integration, document analysis prompts
@@ -675,3 +732,29 @@ intl: ^0.20.2               # Date formatting
 - `ADMIN_MASTER_SETUP.md` - Manual account creation via Firebase Console
 - `functions/SECRETS_SETUP.md` - OpenAI API key setup (Secret Manager vs .env)
 - `README.md` - Full setup instructions and architecture overview
+
+## Recent Fixes & Known Issues
+
+### ✅ Fixed Issues (October 2025)
+1. **Role-Based Routing Persistence**: 
+   - **Problem**: Admin/master users redirected to user homepage when reopening app
+   - **Solution**: Added FutureBuilder in main.dart to fetch user role from Firestore before routing
+   - **Implementation**: StreamBuilder (auth) → FutureBuilder (role query) → switch statement routing
+
+2. **Document Verification Null Reference**:
+   - **Problem**: `document['file']` caused null reference error in master_document_verification.dart
+   - **Solution**: Changed to `document['url']` with null safety checks throughout
+
+3. **Status Dropdown Assertion Error**:
+   - **Problem**: Dropdown initial value 'needs_correction' didn't match display format 'Needs Correction'
+   - **Solution**: Use database format consistently throughout - no conversion between formats
+
+4. **Code Inconsistency Between Admin/Master**:
+   - **Problem**: Admin and master verification pages had different implementations
+   - **Solution**: Synchronized by copying admin version, updating only imports/class names/drawer widgets
+
+### ⚠️ Known Limitations
+- **AI Passport Verification**: OpenAI API may reject passport images due to PII policy → requires manual admin review
+- **Single Country Per User**: Firestore structure allows only one country checklist per user
+- **No State Management**: Pure StatefulWidget pattern - no Provider/Bloc/Riverpod
+- **Android-First**: iOS structure exists but untested - Android is the primary target platform
