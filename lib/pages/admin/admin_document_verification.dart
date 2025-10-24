@@ -451,15 +451,22 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                         ),
                         const SizedBox(height: 16),
                         // Filter dropdowns
-                        Row(
+                        Wrap(
+                          spacing: 16,
+                          runSpacing: 16,
                           children: [
-                            Expanded(
+                            SizedBox(
+                              width: 200,
                               child: DropdownButtonFormField<String>(
                                 value: selectedStatus,
                                 items: ['All Status', 'Pending', 'Verifying', 'Verified', 'Needs Correction']
                                     .map((status) => DropdownMenuItem(
                                           value: status,
-                                          child: Text(status),
+                                          child: Text(
+                                            status,
+                                            style: const TextStyle(fontSize: 14),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ))
                                     .toList(),
                                 onChanged: (value) => setState(() => selectedStatus = value!),
@@ -471,17 +478,22 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                                     borderRadius: BorderRadius.circular(8),
                                     borderSide: BorderSide.none,
                                   ),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            Expanded(
+                            SizedBox(
+                              width: 200,
                               child: DropdownButtonFormField<String>(
                                 value: selectedDocType,
                                 items: ['All Types', 'Passport', 'Visa', 'Flight Ticket', 'Accommodation']
                                     .map((type) => DropdownMenuItem(
                                           value: type,
-                                          child: Text(type),
+                                          child: Text(
+                                            type,
+                                            style: const TextStyle(fontSize: 14),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
                                         ))
                                     .toList(),
                                 onChanged: (value) => setState(() => selectedDocType = value!),
@@ -493,6 +505,7 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                                     borderRadius: BorderRadius.circular(8),
                                     borderSide: BorderSide.none,
                                   ),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 ),
                               ),
                             ),
