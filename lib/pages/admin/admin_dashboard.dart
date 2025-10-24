@@ -97,14 +97,38 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
     }
   }
 
-  // Count pending documents across all users
+  // Count pending documents across all users and their checklists
   Future<int> _getPendingDocumentsCount() async {
     try {
-      final querySnapshot = await _firestore
-          .collectionGroup('checklists')
-          .where('status', whereIn: ['pending', 'needs_correction'])
-          .get();
-      return querySnapshot.docs.length;
+      int pendingCount = 0;
+      
+      // Get all users
+      final usersSnapshot = await _firestore.collection('users').get();
+      
+      // Iterate through each user's checklists
+      for (var userDoc in usersSnapshot.docs) {
+        final userData = userDoc.data();
+        
+        // Check if user has checklists
+        if (userData.containsKey('checklists') && userData['checklists'] is Map) {
+          final checklists = userData['checklists'] as Map<String, dynamic>;
+          
+          // Count documents with pending status in each checklist
+          for (var checklist in checklists.values) {
+            if (checklist is Map) {
+              for (var document in checklist.values) {
+                if (document is Map && 
+                    document.containsKey('status') && 
+                    (document['status'] == 'pending' || document['status'] == 'needs_correction')) {
+                  pendingCount++;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      return pendingCount;
     } catch (e) {
       print('Error getting pending documents count: $e');
       return 0;
