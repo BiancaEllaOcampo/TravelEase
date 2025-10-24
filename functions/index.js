@@ -4,6 +4,7 @@
  */
 
 const {onObjectFinalized} = require("firebase-functions/v2/storage");
+const {onCall} = require("firebase-functions/v2/https");
 const {setGlobalOptions} = require("firebase-functions/v2");
 const {defineSecret} = require("firebase-functions/params");
 const admin = require("firebase-admin");
@@ -32,72 +33,72 @@ exports.analyzeDocument = onObjectFinalized(
         console.error("❌ OPENAI_API_KEY not configured!");
         return null;
       }
-  const object = event.data;
-  const filePath = object.name;
+      const object = event.data;
+      const filePath = object.name;
 
-  // Only process files in user_documents folder
-  if (!filePath || !filePath.startsWith("user_documents/")) {
-    console.log("Skipping non-document file:", filePath);
-    return null;
-  }
+      // Only process files in user_documents folder
+      if (!filePath || !filePath.startsWith("user_documents/")) {
+        console.log("Skipping non-document file:", filePath);
+        return null;
+      }
 
-  // Parse path: user_documents/{userId}/{country}/{docType}/{fileName}
-  const pathParts = filePath.split("/");
-  if (pathParts.length < 5) {
-    console.log("Invalid path structure:", filePath);
-    return null;
-  }
+      // Parse path: user_documents/{userId}/{country}/{docType}/{fileName}
+      const pathParts = filePath.split("/");
+      if (pathParts.length < 5) {
+        console.log("Invalid path structure:", filePath);
+        return null;
+      }
 
-  const [, userId, country, docType] = pathParts;
+      const [, userId, country, docType] = pathParts;
 
-  // Construct public download URL (no signed URL needed)
-  const encodedPath = encodeURIComponent(filePath);
-  const url = `https://firebasestorage.googleapis.com/v0/b/${object.bucket}/o/${encodedPath}?alt=media`;
+      // Construct public download URL (no signed URL needed)
+      const encodedPath = encodeURIComponent(filePath);
+      const url = `https://firebasestorage.googleapis.com/v0/b/${object.bucket}/o/${encodedPath}?alt=media`;
 
-  console.log(`🔍 Analyzing ${docType} for user ${userId} (${country})`);
+      console.log(`🔍 Analyzing ${docType} for user ${userId} (${country})`);
 
-  try {
-    // Update status to 'verifying'
-    const userDocRef = admin.firestore().collection("users").doc(userId);
+      try {
+        // Update status to 'verifying'
+        const userDocRef = admin.firestore().collection("users").doc(userId);
 
-    await userDocRef.update({
-      [`checklists.${country}.${docType}.status`]: "verifying",
-      [`checklists.${country}.${docType}.url`]: url,
-      [`checklists.${country}.${docType}.updatedAt`]: admin.firestore.FieldValue.serverTimestamp(),
-    });
+        await userDocRef.update({
+          [`checklists.${country}.${docType}.status`]: "verifying",
+          [`checklists.${country}.${docType}.url`]: url,
+          [`checklists.${country}.${docType}.updatedAt`]: admin.firestore.FieldValue.serverTimestamp(),
+        });
 
-    // Call OpenAI to analyze the document
-    const analysisResult = await analyzeWithOpenAI(url, docType);
+        // Call OpenAI to analyze the document
+        const analysisResult = await analyzeWithOpenAI(url, docType, OPENAI_API_KEY);
 
-    // Update Firestore with results
-    await userDocRef.update({
-      [`checklists.${country}.${docType}.extractedData`]: analysisResult.extractedData,
-      [`checklists.${country}.${docType}.aiFeedback`]: analysisResult.feedback,
-      [`checklists.${country}.${docType}.status`]: analysisResult.isValid ? "verified" : "needs_correction",
-      [`checklists.${country}.${docType}.url`]: url,
-      [`checklists.${country}.${docType}.analyzedAt`]: admin.firestore.FieldValue.serverTimestamp(),
-    });
+        // Update Firestore with results
+        await userDocRef.update({
+          [`checklists.${country}.${docType}.extractedData`]: analysisResult.extractedData,
+          [`checklists.${country}.${docType}.aiFeedback`]: analysisResult.feedback,
+          [`checklists.${country}.${docType}.status`]: analysisResult.isValid ? "verified" : "needs_correction",
+          [`checklists.${country}.${docType}.url`]: url,
+          [`checklists.${country}.${docType}.analyzedAt`]: admin.firestore.FieldValue.serverTimestamp(),
+        });
 
-    console.log(`✅ Analysis complete: ${analysisResult.isValid ? "VALID" : "INVALID"}`);
-  } catch (error) {
-    console.error("❌ Error analyzing document:", error);
+        console.log(`✅ Analysis complete: ${analysisResult.isValid ? "VALID" : "INVALID"}`);
+      } catch (error) {
+        console.error("❌ Error analyzing document:", error);
 
-    // Mark as needs correction on error
-    const errorData = error.message || "Unknown error";
-    await admin.firestore().collection("users").doc(userId).update({
-      [`checklists.${country}.${docType}.status`]: "needs_correction",
-      [`checklists.${country}.${docType}.aiFeedback`]: `Error: ${errorData}. Please try again.`,
-    });
-  }
+        // Mark as needs correction on error
+        const errorData = error.message || "Unknown error";
+        await admin.firestore().collection("users").doc(userId).update({
+          [`checklists.${country}.${docType}.status`]: "needs_correction",
+          [`checklists.${country}.${docType}.aiFeedback`]: `Error: ${errorData}. Please try again.`,
+        });
+      }
 
-  return null;
+      return null;
     }, // Close the async event handler
 ); // Close onObjectFinalized
 
 /**
- * Analyze document using OpenAI GPT-4 Vision
+ * Helper function to call OpenAI API for document analysis
  */
-async function analyzeWithOpenAI(imageUrl, docType) {
+async function analyzeWithOpenAI(imageUrl, docType, apiKey) {
   const prompt = getPromptForDocType(docType);
 
   try {
@@ -128,7 +129,7 @@ async function analyzeWithOpenAI(imageUrl, docType) {
         },
         {
           headers: {
-            "Authorization": `Bearer ${OPENAI_API_KEY}`,
+            "Authorization": `Bearer ${apiKey}`,
             "Content-Type": "application/json",
           },
         },
@@ -144,6 +145,103 @@ async function analyzeWithOpenAI(imageUrl, docType) {
     throw new Error("Failed to analyze document with AI");
   }
 }
+
+/**
+ * Cloud Function: Create User or Admin Account
+ * Creates both Firebase Auth account and Firestore document
+ * Can only be called by authenticated Master users
+ */
+exports.createAccount = onCall(async (request) => {
+  const {auth, data} = request;
+
+  // Check if caller is authenticated
+  if (!auth) {
+    throw new Error("Authentication required");
+  }
+
+  // Get caller's role from Firestore
+  const callerDoc = await admin.firestore().collection("users").doc(auth.uid).get();
+  const callerData = callerDoc.data();
+
+  if (!callerData) {
+    throw new Error("User profile not found");
+  }
+
+  const callerRole = callerData.role;
+
+  // Verify caller has permission (master or admin)
+  if (callerRole !== "master" && callerRole !== "admin") {
+    throw new Error("Permission denied: Admin or Master role required");
+  }
+
+  // Validate input data
+  const {email, password, fullName, phoneNumber, address, role} = data;
+
+  if (!email || !password || !fullName || !role) {
+    throw new Error("Missing required fields: email, password, fullName, role");
+  }
+
+  if (role !== "user" && role !== "admin") {
+    throw new Error("Invalid role: must be 'user' or 'admin'");
+  }
+
+  // Admins can only create users, not other admins
+  if (callerRole === "admin" && role === "admin") {
+    throw new Error("Permission denied: Only Masters can create Admin accounts");
+  }
+
+  if (password.length < 6) {
+    throw new Error("Password must be at least 6 characters");
+  }
+
+  try {
+    console.log(`Creating ${role} account for ${email}`);
+
+    // Step 1: Create Firebase Auth account
+    const userRecord = await admin.auth().createUser({
+      email: email,
+      password: password,
+      displayName: fullName,
+      emailVerified: false,
+    });
+
+    console.log(`✅ Firebase Auth account created: ${userRecord.uid}`);
+
+    // Step 2: Create Firestore document
+    await admin.firestore().collection("users").doc(userRecord.uid).set({
+      email: email,
+      fullName: fullName,
+      phoneNumber: phoneNumber || null,
+      address: address || null,
+      role: role,
+      profileImageUrl: null,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      checklists: {},
+    });
+
+    console.log(`✅ Firestore document created for ${role}: ${fullName}`);
+
+    return {
+      success: true,
+      userId: userRecord.uid,
+      message: `${role.charAt(0).toUpperCase() + role.slice(1)} account created successfully`,
+    };
+  } catch (error) {
+    console.error(`❌ Error creating ${role} account:`, error);
+
+    // Return user-friendly error messages
+    if (error.code === "auth/email-already-exists") {
+      throw new Error("Email already registered");
+    } else if (error.code === "auth/invalid-email") {
+      throw new Error("Invalid email format");
+    } else if (error.code === "auth/invalid-password") {
+      throw new Error("Password must be at least 6 characters");
+    } else {
+      throw new Error(`Failed to create account: ${error.message}`);
+    }
+  }
+});
 
 /**
  * Get document-specific prompts for OpenAI
@@ -295,3 +393,93 @@ function parseAIResponse(aiResponse, docType) {
     };
   }
 }
+
+/**
+ * Cloud Function: Delete Account
+ * Deletes both Firebase Auth account and Firestore document
+ * Callable by Master (can delete anyone) or Admin (can delete users only)
+ */
+exports.deleteAccount = onCall(async (request) => {
+  const {auth, data} = request;
+
+  // Check if caller is authenticated
+  if (!auth) {
+    throw new Error("Authentication required");
+  }
+
+  // Get caller's role from Firestore
+  const callerDoc = await admin.firestore().collection("users").doc(auth.uid).get();
+  const callerData = callerDoc.data();
+
+  if (!callerData) {
+    throw new Error("User profile not found");
+  }
+
+  const callerRole = callerData.role;
+
+  // Verify caller has permission (master or admin)
+  if (callerRole !== "master" && callerRole !== "admin") {
+    throw new Error("Permission denied: Admin or Master role required");
+  }
+
+  // Validate input data
+  const {userId} = data;
+
+  if (!userId) {
+    throw new Error("Missing required field: userId");
+  }
+
+  // Get target user's role to check permissions
+  const targetDoc = await admin.firestore().collection("users").doc(userId).get();
+  if (!targetDoc.exists) {
+    throw new Error("User not found");
+  }
+
+  const targetRole = targetDoc.data().role;
+
+  // Admins can only delete users, not other admins or masters
+  if (callerRole === "admin" && (targetRole === "admin" || targetRole === "master")) {
+    throw new Error("Permission denied: Only Masters can delete Admin or Master accounts");
+  }
+
+  // Masters cannot delete themselves
+  if (userId === auth.uid) {
+    throw new Error("Cannot delete your own account");
+  }
+
+  try {
+    console.log(`Deleting account: ${userId} (role: ${targetRole})`);
+
+    // Step 1: Delete Firebase Auth account
+    await admin.auth().deleteUser(userId);
+    console.log(`✅ Firebase Auth account deleted: ${userId}`);
+
+    // Step 2: Delete Firestore document
+    await admin.firestore().collection("users").doc(userId).delete();
+    console.log(`✅ Firestore document deleted: ${userId}`);
+
+    return {
+      success: true,
+      message: "Account deleted successfully",
+    };
+  } catch (error) {
+    console.error(`❌ Error deleting account ${userId}:`, error);
+
+    // Return user-friendly error messages
+    if (error.code === "auth/user-not-found") {
+      // Auth account doesn't exist, but Firestore doc might - delete it anyway
+      try {
+        await admin.firestore().collection("users").doc(userId).delete();
+        return {
+          success: true,
+          message: "Account deleted successfully (Auth account was already deleted)",
+        };
+      } catch (firestoreError) {
+        throw new Error("Failed to delete user data");
+      }
+    } else {
+      throw new Error(error.message || "Failed to delete account");
+    }
+  }
+});
+

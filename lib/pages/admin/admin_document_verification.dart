@@ -58,6 +58,8 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                   'country': displayCountry,
                   'type': displayDocType,
                   'documentId': docType,
+                  'countryKey': country,
+                  'docTypeKey': docType,
                   'status': docData['status'] ?? 'pending',
                   'url': docData['url'] ?? '',
                   'submittedAt': docData['submittedAt'] ?? DateTime.now(),
@@ -318,17 +320,16 @@ class _AdminDocumentVerificationPageState extends State<AdminDocumentVerificatio
                   ElevatedButton(
                     onPressed: () async {
                       try {
-                        // Update document status in Firestore
+                        // Update document status in Firestore using dot notation
+                        // Checklists are stored as nested maps, not subcollections
                         await FirebaseFirestore.instance
                             .collection('users')
                             .doc(document['userId'])
-                            .collection('checklists')
-                            .doc(document['country'].toLowerCase().replaceAll(' ', '_'))
                             .update({
-                              'status': newStatus,
-                              'feedback': feedback,
-                              'reviewedAt': FieldValue.serverTimestamp(),
-                              'reviewedBy': _auth.currentUser?.email,
+                              'checklists.${document['countryKey']}.${document['docTypeKey']}.status': newStatus,
+                              'checklists.${document['countryKey']}.${document['docTypeKey']}.feedback': feedback,
+                              'checklists.${document['countryKey']}.${document['docTypeKey']}.reviewedAt': FieldValue.serverTimestamp(),
+                              'checklists.${document['countryKey']}.${document['docTypeKey']}.reviewedBy': _auth.currentUser?.email,
                             });
                             
                         if (mounted) Navigator.pop(context);

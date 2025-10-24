@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import '../../utils/master_app_drawer.dart';
 
 class MasterAdminUserManagement extends StatefulWidget {
@@ -371,6 +372,14 @@ class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
+              // Add Button
+              IconButton(
+                onPressed: () => _showAddDialog(role),
+                icon: const Icon(Icons.add_circle, color: Color(0xFF348AA7)),
+                tooltip: 'Add ${role == 'user' ? 'User' : 'Admin'}',
+                iconSize: 28,
+              ),
             ],
           ),
           const SizedBox(height: 20),
@@ -620,6 +629,16 @@ class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
                             ],
                           ),
                         ),
+                        // Edit Button
+                        IconButton(
+                          onPressed: () => _showEditDialog(userId, name, role, data),
+                          icon: const Icon(
+                            Icons.edit_outlined,
+                            color: Color(0xFF348AA7),
+                            size: 24,
+                          ),
+                          tooltip: 'Edit ${role}',
+                        ),
                         // Delete Button
                         IconButton(
                           onPressed: () => _showDeleteDialog(userId, name, role),
@@ -640,6 +659,456 @@ class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
         ],
       ),
     );
+  }
+
+  void _showAddDialog(String role) {
+    final formKey = GlobalKey<FormState>();
+    final nameController = TextEditingController();
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    final phoneController = TextEditingController();
+    final addressController = TextEditingController();
+    bool obscurePassword = true;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text(
+            'Add New ${role.capitalize()}',
+            style: const TextStyle(
+              fontFamily: 'Kumbh Sans',
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF125E77),
+            ),
+          ),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: nameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Full Name',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.person, color: Color(0xFF348AA7)),
+                    ),
+                    style: const TextStyle(fontFamily: 'Kumbh Sans'),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter a name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: emailController,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.email, color: Color(0xFF348AA7)),
+                    ),
+                    style: const TextStyle(fontFamily: 'Kumbh Sans'),
+                    keyboardType: TextInputType.emailAddress,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter an email';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Please enter a valid email';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: passwordController,
+                    obscureText: obscurePassword,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.lock, color: Color(0xFF348AA7)),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          obscurePassword ? Icons.visibility : Icons.visibility_off,
+                          color: const Color(0xFF348AA7),
+                        ),
+                        onPressed: () {
+                          setDialogState(() {
+                            obscurePassword = !obscurePassword;
+                          });
+                        },
+                      ),
+                    ),
+                    style: const TextStyle(fontFamily: 'Kumbh Sans'),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter a password';
+                      }
+                      if (value.length < 6) {
+                        return 'Password must be at least 6 characters';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: phoneController,
+                    decoration: const InputDecoration(
+                      labelText: 'Phone Number (Optional)',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.phone, color: Color(0xFF348AA7)),
+                    ),
+                    style: const TextStyle(fontFamily: 'Kumbh Sans'),
+                    keyboardType: TextInputType.phone,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: addressController,
+                    decoration: const InputDecoration(
+                      labelText: 'Address (Optional)',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.location_on, color: Color(0xFF348AA7)),
+                    ),
+                    style: const TextStyle(fontFamily: 'Kumbh Sans'),
+                    maxLines: 2,
+                  ),
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF34C759).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFF34C759)),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.check_circle_outline, color: Color(0xFF34C759), size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Account will be created with Firebase Auth & Firestore',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontFamily: 'Kumbh Sans',
+                              color: Color(0xFF34C759),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                nameController.dispose();
+                emailController.dispose();
+                passwordController.dispose();
+                phoneController.dispose();
+                addressController.dispose();
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  fontFamily: 'Kumbh Sans',
+                  color: Color(0xFF348AA7),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  Navigator.pop(context);
+                  await _addAccount(
+                    nameController.text.trim(),
+                    emailController.text.trim(),
+                    passwordController.text.trim(),
+                    phoneController.text.trim(),
+                    addressController.text.trim(),
+                    role,
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF348AA7),
+                foregroundColor: Colors.white,
+              ),
+              child: Text(
+                'Add ${role.capitalize()}',
+                style: const TextStyle(
+                  fontFamily: 'Kumbh Sans',
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _addAccount(String name, String email, String password, String phone, String address, String role) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: Color(0xFF348AA7)),
+        ),
+      );
+
+      // Call Cloud Function to create Firebase Auth + Firestore account
+      // Must specify region where function is deployed (us-central1)
+      final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
+      final callable = functions.httpsCallable('createAccount');
+      
+      final result = await callable.call<Map<String, dynamic>>({
+        'email': email,
+        'password': password,
+        'fullName': name,
+        'phoneNumber': phone.isNotEmpty ? phone : null,
+        'address': address.isNotEmpty ? address : null,
+        'role': role,
+      });
+
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        
+        final data = result.data;
+        if (data['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                data['message'] ?? '${role.capitalize()} "$name" created successfully',
+                style: const TextStyle(fontFamily: 'Kumbh Sans'),
+              ),
+              backgroundColor: const Color(0xFF34C759),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        
+        String errorMessage = 'Error creating ${role}: ${e.toString()}';
+        
+        // Extract user-friendly error message
+        if (e.toString().contains('Email already registered')) {
+          errorMessage = 'This email is already registered';
+        } else if (e.toString().contains('Invalid email')) {
+          errorMessage = 'Invalid email format';
+        } else if (e.toString().contains('Password must be at least 6 characters')) {
+          errorMessage = 'Password must be at least 6 characters';
+        } else if (e.toString().contains('Permission denied')) {
+          errorMessage = 'Permission denied: Master role required';
+        } else if (e.toString().contains('Authentication required')) {
+          errorMessage = 'Please log in again';
+        }
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              errorMessage,
+              style: const TextStyle(fontFamily: 'Kumbh Sans'),
+            ),
+            backgroundColor: const Color(0xFFA54547),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    }
+  }
+
+  void _showEditDialog(String userId, String userName, String role, Map<String, dynamic> userData) {
+    final formKey = GlobalKey<FormState>();
+    final nameController = TextEditingController(text: userData['fullName'] ?? '');
+    final emailController = TextEditingController(text: userData['email'] ?? '');
+    final phoneController = TextEditingController(text: userData['phoneNumber'] ?? '');
+    final addressController = TextEditingController(text: userData['address'] ?? '');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+          'Edit ${role.capitalize()}',
+          style: const TextStyle(
+            fontFamily: 'Kumbh Sans',
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF125E77),
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Full Name',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person, color: Color(0xFF348AA7)),
+                  ),
+                  style: const TextStyle(fontFamily: 'Kumbh Sans'),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a name';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.email, color: Color(0xFF348AA7)),
+                  ),
+                  style: const TextStyle(fontFamily: 'Kumbh Sans'),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter an email';
+                    }
+                    if (!value.contains('@')) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: phoneController,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone Number (Optional)',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.phone, color: Color(0xFF348AA7)),
+                  ),
+                  style: const TextStyle(fontFamily: 'Kumbh Sans'),
+                  keyboardType: TextInputType.phone,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: addressController,
+                  decoration: const InputDecoration(
+                    labelText: 'Address (Optional)',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.location_on, color: Color(0xFF348AA7)),
+                  ),
+                  style: const TextStyle(fontFamily: 'Kumbh Sans'),
+                  maxLines: 2,
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              nameController.dispose();
+              emailController.dispose();
+              phoneController.dispose();
+              addressController.dispose();
+              Navigator.pop(context);
+            },
+            child: const Text(
+              'Cancel',
+              style: TextStyle(
+                fontFamily: 'Kumbh Sans',
+                color: Color(0xFF348AA7),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (formKey.currentState!.validate()) {
+                Navigator.pop(context);
+                await _updateAccount(
+                  userId,
+                  nameController.text.trim(),
+                  emailController.text.trim(),
+                  phoneController.text.trim(),
+                  addressController.text.trim(),
+                  role,
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF348AA7),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text(
+              'Save Changes',
+              style: TextStyle(
+                fontFamily: 'Kumbh Sans',
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _updateAccount(String userId, String name, String email, String phone, String address, String role) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: Color(0xFF348AA7)),
+        ),
+      );
+
+      // Update user/admin document in Firestore
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'fullName': name,
+        'email': email,
+        'phoneNumber': phone.isNotEmpty ? phone : null,
+        'address': address.isNotEmpty ? address : null,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${role.capitalize()} "$name" updated successfully',
+              style: const TextStyle(fontFamily: 'Kumbh Sans'),
+            ),
+            backgroundColor: const Color(0xFF34C759),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error updating ${role}: $e',
+              style: const TextStyle(fontFamily: 'Kumbh Sans'),
+            ),
+            backgroundColor: const Color(0xFFA54547),
+          ),
+        );
+      }
+    }
   }
 
   void _showDeleteDialog(String userId, String userName, String role) {
@@ -704,32 +1173,50 @@ class _MasterAdminUserManagementState extends State<MasterAdminUserManagement> {
         ),
       );
 
-      // Delete user/admin document from Firestore
-      await FirebaseFirestore.instance.collection('users').doc(userId).delete();
-
-      // Note: Firebase Auth account deletion requires admin SDK (Cloud Functions)
-      // For now, we only delete the Firestore document
-      // TODO: Implement Cloud Function to also delete Firebase Auth account
+      // Call Cloud Function to delete Firebase Auth + Firestore account
+      // Must specify region where function is deployed (us-central1)
+      final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
+      final callable = functions.httpsCallable('deleteAccount');
+      
+      final result = await callable.call<Map<String, dynamic>>({
+        'userId': userId,
+      });
 
       if (mounted) {
         Navigator.pop(context); // Close loading dialog
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${role.capitalize()} "$userName" deleted successfully',
-              style: const TextStyle(fontFamily: 'Kumbh Sans'),
+        
+        final data = result.data;
+        if (data['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                data['message'] ?? '${role.capitalize()} "$userName" deleted successfully',
+                style: const TextStyle(fontFamily: 'Kumbh Sans'),
+              ),
+              backgroundColor: const Color(0xFF34C759),
             ),
-            backgroundColor: const Color(0xFF34C759),
-          ),
-        );
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
         Navigator.pop(context); // Close loading dialog
+        
+        String errorMessage = 'Error deleting ${role}: ${e.toString()}';
+        
+        // Extract user-friendly error message
+        if (e.toString().contains('permission-denied')) {
+          errorMessage = 'You do not have permission to delete this ${role}';
+        } else if (e.toString().contains('User not found')) {
+          errorMessage = '${role.capitalize()} not found';
+        } else if (e.toString().contains('Cannot delete your own account')) {
+          errorMessage = 'You cannot delete your own account';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Error deleting ${role}: $e',
+              errorMessage,
               style: const TextStyle(fontFamily: 'Kumbh Sans'),
             ),
             backgroundColor: const Color(0xFFA54547),

@@ -38,8 +38,9 @@ service cloud.firestore {
       allow create: if isAuthenticated() && request.auth.uid == userId;
       
       // Users can update their own data
+      // Admins can update user checklists (for document verification)
       // Masters can update any user/admin data (for role changes, profile updates)
-      allow update: if isOwner(userId) || isMaster();
+      allow update: if isOwner(userId) || isAdmin() || isMaster();
       
       // Only masters can delete accounts
       allow delete: if isMaster();
@@ -47,10 +48,10 @@ service cloud.firestore {
       // Subcollection: checklists
       match /checklists/{country}/{document=**} {
         // Users can read/write their own checklists
-        // Admins can read user checklists (for document verification)
-        // Masters can read all checklists
+        // Admins can read/write user checklists (for document verification - updating status)
+        // Masters can read/write all checklists
         allow read: if isOwner(userId) || isAdmin() || isMaster();
-        allow write: if isOwner(userId);
+        allow write: if isOwner(userId) || isAdmin() || isMaster();
       }
     }
 
