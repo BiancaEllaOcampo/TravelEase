@@ -68,10 +68,10 @@ class _MasterDashboardPageState extends State<MasterDashboardPage> {
 
       if (mounted) {
         setState(() {
-          _totalUsers = results[0] as int;
-          _totalAdmins = results[1] as int;
-          _pendingDocuments = results[2] as int;
-          _totalAnnouncements = results[3] as int;
+          _totalUsers = results[0];
+          _totalAdmins = results[1];
+          _pendingDocuments = results[2];
+          _totalAnnouncements = results[3];
           _isLoadingStats = false;
         });
       }
@@ -541,9 +541,9 @@ class _MasterStatCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             value,
-            style: TextStyle(
-              color: const Color(0xFF125E77),
-              fontSize: isStatus ? 20 : 28,
+            style: const TextStyle(
+              color: Color(0xFF125E77),
+              fontSize: 28,
               fontFamily: 'Kumbh Sans',
               fontWeight: FontWeight.bold,
             ),

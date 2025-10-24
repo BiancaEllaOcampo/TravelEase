@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import '../../utils/master_app_drawer.dart';
 
 class MasterDocumentVerificationPage extends StatefulWidget {
@@ -253,6 +252,7 @@ class _MasterDocumentVerificationPageState extends State<MasterDocumentVerificat
     );
   }
 
+  // Get document stream with proper data structure
   Stream<List<Map<String, dynamic>>> get documentStream {
     return FirebaseFirestore.instance
         .collection('users')
@@ -285,18 +285,19 @@ class _MasterDocumentVerificationPageState extends State<MasterDocumentVerificat
                     .join(' ');
                 
                 allDocuments.add({
-                  'name': userName,
-                  'id': userId,
-                  'type': displayDocType,
+                  'userId': userId,
+                  'userName': userName,
                   'country': displayCountry,
-                  'date': docData['updatedAt'] != null 
-                      ? (docData['updatedAt'] as Timestamp).toDate().toString().split('.')[0]
-                      : 'Unknown Date',
-                  'file': docData['url'] ?? '',
-                  'status': _formatStatus(docData['status'] ?? 'pending'),
-                  'docPath': 'users/$userId',
+                  'type': displayDocType,
+                  'documentId': docType,
                   'countryKey': country,
                   'docTypeKey': docType,
+                  'status': docData['status'] ?? 'pending',
+                  'url': docData['url'] ?? '',
+                  'submittedAt': docData['submittedAt'] ?? DateTime.now(),
+                  'feedback': docData['feedback'],
+                  'reviewedAt': docData['reviewedAt'],
+                  'reviewedBy': docData['reviewedBy'],
                   'manualReviewRequested': docData['manualReviewRequested'] ?? false,
                   'manualReviewRequestedAt': docData['manualReviewRequestedAt'],
                 });
@@ -306,23 +307,49 @@ class _MasterDocumentVerificationPageState extends State<MasterDocumentVerificat
         });
       }
       
+      // Sort by submission date descending (newest first), then by userId for stability
+      allDocuments.sort((a, b) {
+        final aDate = a['submittedAt'];
+        final bDate = b['submittedAt'];
+        if (aDate == null && bDate == null) return a['userId'].toString().compareTo(b['userId'].toString());
+        if (aDate == null) return 1;
+        if (bDate == null) return -1;
+        
+        final dateComparison = bDate.compareTo(aDate);
+        if (dateComparison != 0) return dateComparison;
+        
+        // If dates are equal, sort by userId for consistent ordering
+        return a['userId'].toString().compareTo(b['userId'].toString());
+      });
+      
       return allDocuments;
     });
   }
-  
-  String _formatStatus(String status) {
-    switch (status.toLowerCase()) {
-      case 'verified':
-        return 'Verified';
-      case 'needs_correction':
-        return 'Needs Correction';
-      case 'pending':
-        return 'Pending';
-      case 'verifying':
-        return 'Verifying';
-      default:
-        return 'Pending';
-    }
+
+  // Filter documents based on search and filters
+  List<Map<String, dynamic>> filterDocuments(List<Map<String, dynamic>> docs) {
+    return docs.where((doc) {
+      // Search filter
+      final searchMatch = searchQuery.isEmpty ||
+          doc['userName'].toString().toLowerCase().contains(searchQuery.toLowerCase()) ||
+          doc['documentId'].toString().toLowerCase().contains(searchQuery.toLowerCase());
+
+      // Status filter
+      final statusMatch = selectedStatus == 'All Status' ||
+          doc['status'].toString().toLowerCase() == selectedStatus.toLowerCase().replaceAll(' ', '_');
+
+      // Country filter - normalize both sides for comparison
+      final countryMatch = selectedCountry == 'All Countries' ||
+          doc['country'].toString().toLowerCase().replaceAll('_', ' ') == 
+              selectedCountry.toLowerCase();
+
+      // Document type filter - normalize both sides for comparison
+      final typeMatch = selectedDocType == 'All Types' ||
+          doc['type'].toString().toLowerCase().replaceAll('_', ' ').replaceAll('  ', ' ') == 
+              selectedDocType.toLowerCase();
+
+      return searchMatch && statusMatch && countryMatch && typeMatch;
+    }).toList();
   }
 
   List<Map<String, dynamic>> entries = [];
@@ -342,8 +369,8 @@ class _MasterDocumentVerificationPageState extends State<MasterDocumentVerificat
 	List<Map<String, dynamic>> get filteredEntries {
 		return entries.where((entry) {
 			if (searchQuery.isNotEmpty) {
-				final matchesSearch = entry['name'].toLowerCase().contains(searchQuery.toLowerCase()) ||
-					entry['id'].toLowerCase().contains(searchQuery.toLowerCase());
+				final matchesSearch = entry['userName'].toLowerCase().contains(searchQuery.toLowerCase()) ||
+					entry['userId'].toLowerCase().contains(searchQuery.toLowerCase());
 				if (!matchesSearch) return false;
 			}
 			
@@ -364,13 +391,14 @@ class _MasterDocumentVerificationPageState extends State<MasterDocumentVerificat
 	}
 
 	Color getStatusColor(String status) {
-		switch (status) {
-			case 'Verified':
+		switch (status.toLowerCase()) {
+			case 'verified':
 				return const Color(0xFF34C759);
-			case 'Pending':
-			case 'Verifying':
+			case 'pending':
+				return const Color(0xFF348AA7);
+			case 'verifying':
 				return const Color(0xFFFFA500);
-			case 'Needs Correction':
+			case 'needs_correction':
 				return const Color(0xFFA54547);
 			default:
 				return Colors.grey;
@@ -515,13 +543,12 @@ class _MasterDocumentVerificationPageState extends State<MasterDocumentVerificat
 										
 										entries = snapshot.data ?? [];
 										
-										// FIXED: Count by database status types, not display status
 										final totalDocs = entries.length;
 										final pendingDocs = entries.where((e) => 
-											e['status'] == 'Pending' || e['status'] == 'Verifying'
+											e['status'] == 'pending' || e['status'] == 'verifying'
 										).length;
 										final verifiedDocs = entries.where((e) => 
-											e['status'] == 'Verified'
+											e['status'] == 'verified'
 										).length;
 										
 										return Container(
@@ -959,7 +986,7 @@ class _MasterDocumentVerificationPageState extends State<MasterDocumentVerificat
 																				crossAxisAlignment: CrossAxisAlignment.start,
 																				children: [
 																					Text(
-																						entry['name'],
+																						entry['userName'],
 																						style: const TextStyle(
 																							fontSize: 16,
 																							fontWeight: FontWeight.bold,
@@ -976,7 +1003,7 @@ class _MasterDocumentVerificationPageState extends State<MasterDocumentVerificat
 																							const SizedBox(width: 4),
 																							Expanded(
 																								child: Text(
-																									'ID: ${entry['id'].toString().substring(0, entry['id'].toString().length > 15 ? 15 : entry['id'].toString().length)}...',
+																									'ID: ${entry['userId'].toString().substring(0, entry['userId'].toString().length > 15 ? 15 : entry['userId'].toString().length)}...',
 																									style: TextStyle(
 																										fontSize: 10,
 																										fontFamily: 'Kumbh Sans',
@@ -999,7 +1026,7 @@ class _MasterDocumentVerificationPageState extends State<MasterDocumentVerificat
 																				borderRadius: BorderRadius.circular(6),
 																			),
 																			child: Text(
-																				entry['status'],
+																				entry['status'].toString().replaceAll('_', ' ').toUpperCase(),
 																				style: const TextStyle(
 																					color: Colors.white,
 																					fontSize: 10,
@@ -1011,63 +1038,108 @@ class _MasterDocumentVerificationPageState extends State<MasterDocumentVerificat
 																	],
 																),
 																const SizedBox(height: 12),
+																// Document details - Updated to match admin page layout
 																Row(
 																	children: [
-																		Icon(Icons.category, size: 12, color: Colors.grey[600]),
-																		const SizedBox(width: 4),
 																		Expanded(
-																			child: Text(
-																				entry['type'],
-																				style: TextStyle(
-																					fontSize: 11,
-																					fontFamily: 'Kumbh Sans',
-																					color: Colors.grey[700],
-																				),
-																				maxLines: 1,
-																				overflow: TextOverflow.ellipsis,
+																			child: Column(
+																				crossAxisAlignment: CrossAxisAlignment.start,
+																				children: [
+																					Row(
+																						children: [
+																							Icon(Icons.event_note, size: 14, color: Colors.grey[600]),
+																							const SizedBox(width: 6),
+																							Expanded(
+																								child: Text(
+																									entry['type'],
+																									style: TextStyle(
+																										fontSize: 12,
+																										fontWeight: FontWeight.w500,
+																										color: Colors.grey[800],
+																										fontFamily: 'Kumbh Sans',
+																									),
+																									overflow: TextOverflow.ellipsis,
+																								),
+																							),
+																						],
+																					),
+																					const SizedBox(height: 8),
+																					Row(
+																						children: [
+																							Icon(Icons.calendar_today, size: 14, color: Colors.grey[600]),
+																							const SizedBox(width: 6),
+																							Expanded(
+																								child: Text(
+																									entry['submittedAt'] != null 
+																										? (entry['submittedAt'] is Timestamp 
+																												? (entry['submittedAt'] as Timestamp).toDate().toString().split(' ')[0]
+																												: entry['submittedAt'].toString().split(' ')[0])
+																										: 'Unknown date',
+																									style: TextStyle(
+																										fontSize: 12,
+																										color: Colors.grey[700],
+																										fontFamily: 'Kumbh Sans',
+																									),
+																									overflow: TextOverflow.ellipsis,
+																								),
+																							),
+																						],
+																					),
+																				],
 																			),
 																		),
-																		const SizedBox(width: 12),
-																		Icon(Icons.public, size: 12, color: Colors.grey[600]),
-																		const SizedBox(width: 4),
-																		Text(
-																			entry['country'],
-																			style: TextStyle(
-																				fontSize: 11,
-																				fontFamily: 'Kumbh Sans',
-																				color: Colors.grey[700],
-																			),
-																		),
-																	],
-																),
-																const SizedBox(height: 6),
-																Row(
-																	children: [
-																		Icon(Icons.calendar_today, size: 12, color: Colors.grey[600]),
-																		const SizedBox(width: 4),
+																		const SizedBox(width: 8),
 																		Expanded(
-																			child: Text(
-																				entry['date'].split(' ')[0],
-																				style: TextStyle(
-																					fontSize: 11,
-																					fontFamily: 'Kumbh Sans',
-																					color: Colors.grey[700],
-																				),
-																			),
-																		),
-																		const SizedBox(width: 12),
-																		Icon(
-																			entry['file'].isNotEmpty ? Icons.check_circle : Icons.cancel,
-																			size: 12,
-																			color: entry['file'].isNotEmpty ? Colors.green : Colors.grey,
-																		),
-																		const SizedBox(width: 4),
-																		Text(
-																			entry['file'].isNotEmpty ? 'Uploaded' : 'No doc',
-																			style: TextStyle(
-																				fontSize: 11,
-																				fontFamily: 'Kumbh Sans',
-																				color: Colors.grey[700],
+																			child: Column(
+																				crossAxisAlignment: CrossAxisAlignment.start,
+																				children: [
+																					Row(
+																						children: [
+																							Icon(Icons.location_on, size: 14, color: Colors.grey[600]),
+																							const SizedBox(width: 6),
+																							Expanded(
+																								child: Text(
+																									entry['country'],
+																									style: TextStyle(
+																										fontSize: 12,
+																										fontWeight: FontWeight.w500,
+																										color: Colors.grey[800],
+																										fontFamily: 'Kumbh Sans',
+																									),
+																									overflow: TextOverflow.ellipsis,
+																								),
+																							),
+																						],
+																					),
+																					const SizedBox(height: 8),
+																					Row(
+																						children: [
+																							Icon(
+																								entry['url'] != null && entry['url'].toString().isNotEmpty 
+																									? Icons.check_circle 
+																									: Icons.cancel,
+																								size: 14,
+																								color: entry['url'] != null && entry['url'].toString().isNotEmpty 
+																									? Colors.green 
+																									: Colors.grey[600],
+																							),
+																							const SizedBox(width: 6),
+																							Expanded(
+																								child: Text(
+																									entry['url'] != null && entry['url'].toString().isNotEmpty 
+																										? 'Has document' 
+																										: 'No doc',
+																									style: TextStyle(
+																										fontSize: 12,
+																										color: Colors.grey[700],
+																										fontFamily: 'Kumbh Sans',
+																									),
+																									overflow: TextOverflow.ellipsis,
+																								),
+																							),
+																						],
+																					),
+																				],
 																			),
 																		),
 																	],
