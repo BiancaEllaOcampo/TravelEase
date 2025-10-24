@@ -1,14 +1,167 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'admin_user_management.dart';
 import 'admin_document_verification.dart';
 import 'admin_announcement.dart';
 import '../../utils/admin_app_drawer.dart';
+import '../splash_screen.dart';
 
-class AdminDashboardPage extends StatelessWidget {
+class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
 
   @override
+  State<AdminDashboardPage> createState() => _AdminDashboardPageState();
+}
+
+class _AdminDashboardPageState extends State<AdminDashboardPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  
+  // Stats variables
+  int _totalUsers = 0;
+  int _pendingDocuments = 0;
+  int _totalAnnouncements = 0;
+  int _totalTickets = 0;
+  bool _isLoadingStats = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuthStatus();
+    _loadDashboardStats();
+  }
+
+  // Check if user is logged in
+  void _checkAuthStatus() {
+    final currentUser = _auth.currentUser;
+    
+    if (currentUser == null) {
+      // User is not logged in, redirect to splash screen
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const SplashScreen()),
+            (route) => false,
+          );
+        }
+      });
+    }
+  }
+
+  // Load all dashboard statistics
+  Future<void> _loadDashboardStats() async {
+    try {
+      setState(() {
+        _isLoadingStats = true;
+      });
+
+      // Fetch all stats concurrently for better performance
+      final results = await Future.wait([
+        _getUserCount(),
+        _getPendingDocumentsCount(),
+        _getAnnouncementsCount(),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _totalUsers = results[0];
+          _pendingDocuments = results[1];
+          _totalAnnouncements = results[2];
+          _totalTickets = 0; // Reserved for future ticketing system
+          _isLoadingStats = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading dashboard stats: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingStats = false;
+        });
+      }
+    }
+  }
+
+  // Count users with role "user"
+  Future<int> _getUserCount() async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .where('role', isEqualTo: 'user')
+          .get();
+      return querySnapshot.docs.length;
+    } catch (e) {
+      print('Error getting user count: $e');
+      return 0;
+    }
+  }
+
+  // Count pending documents across all users and their checklists
+  Future<int> _getPendingDocumentsCount() async {
+    try {
+      int pendingCount = 0;
+      
+      // Get all users
+      final usersSnapshot = await _firestore.collection('users').get();
+      
+      // Iterate through each user's checklists
+      for (var userDoc in usersSnapshot.docs) {
+        final userData = userDoc.data();
+        
+        // Check if user has checklists
+        if (userData.containsKey('checklists') && userData['checklists'] is Map) {
+          final checklists = userData['checklists'] as Map<String, dynamic>;
+          
+          // Count documents with pending status in each checklist
+          for (var checklist in checklists.values) {
+            if (checklist is Map) {
+              for (var document in checklist.values) {
+                if (document is Map && 
+                    document.containsKey('status') && 
+                    (document['status'] == 'pending' || document['status'] == 'needs_correction')) {
+                  pendingCount++;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      return pendingCount;
+    } catch (e) {
+      print('Error getting pending documents count: $e');
+      return 0;
+    }
+  }
+
+  // Count total announcements
+  Future<int> _getAnnouncementsCount() async {
+    try {
+      final querySnapshot = await _firestore.collection('announcements').get();
+      return querySnapshot.docs.length;
+    } catch (e) {
+      print('Error getting announcements count: $e');
+      return 0;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Check if user is still logged in
+    final currentUser = _auth.currentUser;
+    
+    if (currentUser == null) {
+      // Return a loading screen while navigating
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFF348AA7),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       drawer: const AdminAppDrawer(),
       appBar: PreferredSize(
@@ -136,52 +289,61 @@ class AdminDashboardPage extends StatelessWidget {
               const SizedBox(height: 12),
               
               // Stats Cards Grid
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _AdminStatCard(
-                            label: 'Users',
-                            value: '0',
-                            icon: Icons.people,
-                          ),
+              _isLoadingStats
+                  ? const Padding(
+                      padding: EdgeInsets.all(40),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF348AA7),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _AdminStatCard(
-                            label: 'Pending',
-                            value: '0',
-                            icon: Icons.pending_actions,
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _AdminStatCard(
+                                  label: 'Users',
+                                  value: _totalUsers.toString(),
+                                  icon: Icons.people,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _AdminStatCard(
+                                  label: 'Pending',
+                                  value: _pendingDocuments.toString(),
+                                  icon: Icons.pending_actions,
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _AdminStatCard(
+                                  label: 'Announcements',
+                                  value: _totalAnnouncements.toString(),
+                                  icon: Icons.campaign,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _AdminStatCard(
+                                  label: 'Tickets',
+                                  value: _totalTickets.toString(),
+                                  icon: Icons.confirmation_number,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _AdminStatCard(
-                            label: 'Announcements',
-                            value: '0',
-                            icon: Icons.campaign,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _AdminStatCard(
-                            label: 'Tickets',
-                            value: '0',
-                            icon: Icons.confirmation_number,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
               
               const SizedBox(height: 32),
               
