@@ -296,15 +296,6 @@ firebase/
 
 ### Before Production
 - [ ] Remove debug system (`lib/dev/debug_page.dart` and red buttons)
-- [ ] Deploy Firebase Security Rules: `firebase deploy --only firestore:rules,storage`
-- [ ] Deploy Cloud Functions: `firebase deploy --only functions`
-- [ ] Set OpenAI API key: `firebase functions:secrets:set OPENAI_API_KEY`
-- [ ] Test all three roles (User, Admin, Master)
-- [ ] Test document upload and AI verification
-- [ ] Test profile picture upload
-- [ ] Verify security rules in Firebase Console
-- [ ] Enable Firebase Analytics (optional)
-- [ ] Set up Firebase Crashlytics (optional)
 
 ### Production Monitoring
 - Monitor Cloud Functions logs in Firebase Console
