@@ -160,13 +160,16 @@ The project uses a `.env` file for sensitive configuration, for more information
    cd functions
    npm install
    ```
-   - Create `.env` file in `functions/` directory with your OpenAI API key
-   - For local development: Use `.env` file
-   - For production: Configure via Firebase Secret Manager (see `functions/SECRETS_SETUP.md`)
+   - **Set OpenAI API key as Firebase Secret**:
+     ```bash
+     firebase functions:secrets:set OPENAI_API_KEY
+     ```
+   - For local development: Create `.env` file in `functions/` directory with `OPENAI_API_KEY=sk-proj-...`
    - Deploy functions:
      ```bash
      firebase deploy --only functions
      ```
+   - **Never commit API keys to Git!** Secrets are stored encrypted in Google Secret Manager
 
 5. **Run on Android device or emulator**:
    ```bash
@@ -181,8 +184,35 @@ The project uses a `.env` file for sensitive configuration, for more information
 ### Admin/Master Account Setup
 
 Admin and Master accounts must be created manually via Firebase Console:
-- See `ADMIN_MASTER_SETUP.md` for detailed instructions
-- Never allow self-promotion to admin/master roles in the app
+
+**Method 1: Firebase Console (Recommended)**
+1. Go to Firebase Console → Authentication → Users → "Add user"
+2. Create account with email/password, copy the User UID
+3. Go to Firestore Database → `users` collection → "Add document"
+4. Use the User UID as Document ID and add fields:
+   ```javascript
+   {
+     "email": "admin@travelease.com",
+     "fullName": "Admin Name",
+     "role": "admin",  // or "master"
+     "phoneNumber": "",
+     "address": "",
+     "profileImageUrl": null,
+     "createdAt": [timestamp],
+     "updatedAt": [timestamp]
+   }
+   ```
+
+**Method 2: Promote Existing User**
+1. Go to Firestore Database → `users` collection
+2. Find user's document by UID
+3. Edit document and change `role: "user"` to `role: "admin"` or `role: "master"`
+
+**Security Notes:**
+- ❌ NEVER store passwords in Firestore (only in Firebase Auth)
+- ❌ Never allow self-promotion to admin/master roles in the app
+- ✅ Use Firebase Security Rules to enforce role-based access control
+- ✅ Verify roles on both client and server side
 
 ## Project Structure
 
@@ -234,13 +264,11 @@ firebase/
 
 ## Key Documentation Files
 
-- `ADMIN_MASTER_SETUP.md` - Guide for creating admin/master accounts
-- `FIREBASE_SETUP.md` - Firebase project configuration
-- `DOCUMENT_CHECKLIST_SETUP.md` - Document checklist implementation
-- `PROFILE_PICTURE_IMPLEMENTATION.md` - Profile picture upload feature
-- `TRAVEL_DOCUMENTS_UPLOAD.md` - Travel document upload feature
-- `functions/SECRETS_SETUP.md` - OpenAI API key setup for Cloud Functions
-- `.github/copilot-instructions.md` - AI coding assistant guidelines
+- `.github/copilot-instructions.md` - Comprehensive development guidelines and architecture decisions
+- `functions/index.js` - Cloud Function for AI document analysis with OpenAI integration
+- `firebase/firestore.rules` - Database security rules with role-based access control
+- `firebase/storage.rules` - File storage security rules (5MB profiles, 10MB documents)
+- `android/app/src/main/AndroidManifest.xml` - Android permissions for camera and storage
 
 ## Design System
 
@@ -262,8 +290,48 @@ firebase/
 - **iOS Platform**: Untested - Android-only development
 - **AI Passport Analysis**: OpenAI blocks sensitive PII - admin manual review required
 - **No Automated Tests**: `test/` directory unused
-- **Admin Workflows**: Partially implemented - manual review UI in progress
+- **Single Country Per User**: Firestore structure allows only one country checklist per user
+
+## Deployment Checklist
+
+### Before Production
+- [ ] Remove debug system (`lib/dev/debug_page.dart` and red buttons)
+- [ ] Deploy Firebase Security Rules: `firebase deploy --only firestore:rules,storage`
+- [ ] Deploy Cloud Functions: `firebase deploy --only functions`
+- [ ] Set OpenAI API key: `firebase functions:secrets:set OPENAI_API_KEY`
+- [ ] Test all three roles (User, Admin, Master)
+- [ ] Test document upload and AI verification
+- [ ] Test profile picture upload
+- [ ] Verify security rules in Firebase Console
+- [ ] Enable Firebase Analytics (optional)
+- [ ] Set up Firebase Crashlytics (optional)
+
+### Production Monitoring
+- Monitor Cloud Functions logs in Firebase Console
+- Check OpenAI API usage and billing
+- Monitor Firebase Storage usage
+- Review Firestore security rules regularly
+- Set up usage alerts for Firebase services
 
 ## Contributing
 
 This project is currently in active development. Please follow the coding guidelines in `.github/copilot-instructions.md` for consistency.
+
+## Project Information
+
+**Educational Purpose**: This project was developed as an academic requirement for **Mapúa University**.
+
+**Course**: ITS120L - Application Development and Emerging Technologies Laboratory
+
+**Development Team**:
+- Eugene Cayle L. Maniego
+- John Ivan Gabriel G. Gacay
+- Bianca Ella D. Ocampo
+- Zaki Nathaniel U. Tanig
+
+**Institution**: Mapúa University
+**Academic Year**: 2025-2026
+
+## License
+
+This project is developed for educational purposes.

@@ -660,17 +660,62 @@ flutter run                               # Run on default device
 flutter run -d <device-id>                # Specify device
 flutter clean                             # Clean build cache
 flutter build apk                         # Production build
+flutter analyze                           # Check for code issues
 
 # Firebase Deployment
+firebase login                            # Authenticate with Firebase
 firebase deploy --only firestore:rules    # Deploy Firestore security rules
 firebase deploy --only storage            # Deploy Storage security rules
 firebase deploy --only functions          # Deploy Cloud Functions
 firebase emulators:start                  # Local testing (requires .env in functions/)
 
+# Firebase Secrets (OpenAI API Key)
+firebase functions:secrets:set OPENAI_API_KEY      # Set secret (run once)
+firebase functions:secrets:access OPENAI_API_KEY   # View secret value
+firebase deploy --only functions                   # Deploy after setting secret
+
 # Local AI Testing
 cd functions; echo "OPENAI_API_KEY=sk-..." > .env; cd ..
 firebase emulators:start
 ```
+
+## Deployment Checklist
+
+### Initial Setup (One-Time)
+- [ ] Create Firebase project at https://console.firebase.google.com
+- [ ] Add `google-services.json` to `android/app/` directory
+- [ ] Enable Firebase Authentication, Firestore, Storage, and Functions
+- [ ] Set OpenAI API key: `firebase functions:secrets:set OPENAI_API_KEY`
+- [ ] Deploy security rules: `firebase deploy --only firestore:rules,storage`
+- [ ] Deploy Cloud Functions: `firebase deploy --only functions`
+
+### Before Each Release
+- [ ] Remove debug system (`lib/dev/debug_page.dart` and red debug buttons)
+- [ ] Test all three roles (User, Admin, Master)
+- [ ] Test document upload → AI verification → status update flow
+- [ ] Test profile picture upload (gallery and camera)
+- [ ] Verify role-based routing (admin/master → dashboards, user → homepage)
+- [ ] Test admin document review and status changes
+- [ ] Test announcements CRUD operations (admin/master only)
+- [ ] Run `flutter analyze` to check for issues
+- [ ] Build production APK: `flutter build apk --release`
+
+### Production Monitoring
+- [ ] Check Cloud Functions logs for errors: Firebase Console → Functions → Logs
+- [ ] Monitor OpenAI API usage and billing: https://platform.openai.com/usage
+- [ ] Check Firebase Storage usage: Firebase Console → Storage → Usage
+- [ ] Review Firestore security rules: Firebase Console → Firestore → Rules
+- [ ] Set up usage alerts for Firebase services
+
+### Troubleshooting Common Issues
+| Issue | Solution |
+|-------|----------|
+| "OPENAI_API_KEY not configured" | Run `firebase functions:secrets:set OPENAI_API_KEY` and redeploy functions |
+| Status stuck on "verifying" | Check Cloud Functions logs for timeout/crash errors |
+| "Permission denied" in Storage | Deploy storage rules: `firebase deploy --only storage` |
+| Admin/Master routes to user homepage | Verify role field exists in Firestore users/{uid} document |
+| Dropdown assertion error | Ensure status values use database format ('needs_correction' not 'Needs Correction') |
+| Document viewing null error | Use `document['url']` not `document['file']` |
 
 ## Critical Dependencies & Versions
 
@@ -728,10 +773,99 @@ intl: ^0.20.2               # Date formatting
 - `lib/utils/checklist_helper.dart` - Shared checklist navigation logic
 - `lib/dev/template.dart` - Page template with standard layout
 
-**Documentation:**
-- `ADMIN_MASTER_SETUP.md` - Manual account creation via Firebase Console
-- `functions/SECRETS_SETUP.md` - OpenAI API key setup (Secret Manager vs .env)
-- `README.md` - Full setup instructions and architecture overview
+## Admin/Master Account Creation
+
+**⚠️ CRITICAL**: Admin and Master accounts MUST be created manually via Firebase Console. Never implement self-promotion in the app.
+
+### Method 1: Firebase Console (Recommended)
+1. **Create Firebase Auth account:**
+   - Go to Firebase Console → Authentication → Users → "Add user"
+   - Enter email and password
+   - Copy the User UID
+
+2. **Create Firestore profile:**
+   - Go to Firestore Database → `users` collection → "Add document"
+   - Use the User UID as Document ID
+   - Add fields:
+     ```javascript
+     {
+       "email": "admin@example.com",
+       "fullName": "Admin Name",
+       "role": "admin",  // or "master"
+       "phoneNumber": "",
+       "address": "",
+       "profileImageUrl": null,
+       "createdAt": [timestamp],
+       "updatedAt": [timestamp]
+     }
+     ```
+
+### Method 2: Promote Existing User
+1. Go to Firestore Database → `users` collection
+2. Find user's document by UID
+3. Edit document: Change `role: "user"` to `role: "admin"` or `role: "master"`
+4. Save changes
+
+### Security Rules for Role Management
+```javascript
+// In firestore.rules
+match /users/{userId} {
+  // Only masters can update roles
+  allow update: if isOwner(userId) 
+                || (isMaster() && 
+                    request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']));
+  
+  // Users cannot change their own role
+  allow update: if isOwner(userId) 
+                && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']);
+}
+```
+
+**⚠️ NEVER:**
+- Store passwords in Firestore (only Firebase Auth)
+- Allow users to self-promote to admin/master
+- Expose role-changing functionality in app UI
+- Use hardcoded admin credentials
+
+## OpenAI API Key Setup (Firebase Secrets)
+
+**For Production:**
+```powershell
+# Set the secret (run once per project)
+firebase functions:secrets:set OPENAI_API_KEY
+
+# When prompted, paste your OpenAI API key
+# sk-proj-YOUR_ACTUAL_KEY_HERE
+
+# Deploy functions with secret access
+firebase deploy --only functions
+
+# Verify secret is set
+firebase functions:secrets:access OPENAI_API_KEY
+```
+
+**For Local Development:**
+```powershell
+# Create .env file in functions/ directory (gitignored)
+cd functions
+echo "OPENAI_API_KEY=sk-proj-..." > .env
+cd ..
+
+# Start emulators (uses .env automatically)
+firebase emulators:start
+```
+
+**Important Notes:**
+- ✅ Secrets are encrypted in Google Secret Manager
+- ✅ Not visible in GitHub or version control
+- ✅ Can be rotated without code changes
+- ❌ NEVER commit API keys to Git
+- ❌ NEVER add keys to `.env`, `config.js`, or code files in the repo
+
+**Troubleshooting:**
+- "OPENAI_API_KEY not configured" → Run `firebase functions:secrets:set OPENAI_API_KEY` and redeploy
+- "Permission denied" → Run `firebase login` to authenticate
+- Update secret → Run `firebase functions:secrets:set OPENAI_API_KEY` with new value
 
 ## Recent Fixes & Known Issues
 
