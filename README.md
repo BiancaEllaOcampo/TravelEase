@@ -315,10 +315,10 @@ This project is currently in active development. Please follow the coding guidel
 **Course**: ITS120L - Application Development and Emerging Technologies Laboratory
 
 **Development Team**:
-- Eugene Cayle L. Maniego
-- John Ivan Gabriel G. Gacay
-- Bianca Ella D. Ocampo
-- Zaki Nathaniel U. Tanig
+- [Eugene Cayle L. Maniego](https://github.com/Kreprep)
+- [John Ivan Gabriel G. Gacay](https://github.com/VanjiKusanagi)
+- [Bianca Ella D. Ocampo](https://github.com/BiancaEllaOcampo)
+- [Zaki Nathaniel U. Tanig](https://github.com/Ztanig)
 
 **Institution**: Mapúa University
 **Academic Year**: 2025-2026
