@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'master_admin&user_management.dart';
 import 'master_document_verification.dart';
 import 'master_announcement.dart';
-import 'master_requirement_configuration.dart';
 import '../../utils/master_app_drawer.dart';
 import '../splash_screen.dart';
 
@@ -462,18 +461,6 @@ class _MasterDashboardPageState extends State<MasterDashboardPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => const MasterAnnouncementPage(),
-                          ),
-                        );
-                      },
-                    ),
-                    _MasterActionButton(
-                      text: 'Requirement Configuration',
-                      icon: Icons.settings,
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const MasterReqConfigPage(),
                           ),
                         );
                       },

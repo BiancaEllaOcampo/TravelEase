@@ -20,7 +20,6 @@ import '../pages/master/master_dashboard.dart';
 import '../pages/master/master_admin&user_management.dart';
 import '../pages/master/master_document_verification.dart';
 import '../pages/master/master_announcement.dart';
-import '../pages/master/master_requirement_configuration.dart';
 
 class DebugPage extends StatelessWidget {
   const DebugPage({super.key});
@@ -393,22 +392,6 @@ class DebugPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const MasterAnnouncementPage()),
-                  );
-                }
-              },
-            ),
-
-            _buildDebugButton(
-              context,
-              'Master Requirement Configuration',
-              'Configure travel requirements per country - auto-login',
-              Icons.settings,
-              () async {
-                await _autoLoginMaster(context);
-                if (context.mounted) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const MasterReqConfigPage()),
                   );
                 }
               },

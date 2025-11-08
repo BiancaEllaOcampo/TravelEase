@@ -4,7 +4,6 @@ import '../pages/master/master_announcement.dart';
 import '../pages/master/master_admin&user_management.dart';
 import '../pages/master/master_dashboard.dart';
 import '../pages/master/master_document_verification.dart';
-import '../pages/master/master_requirement_configuration.dart';
 import '../pages/splash_screen.dart';
 
 /// TravelEase Master Navigation Drawer
@@ -107,18 +106,6 @@ class MasterAppDrawer extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const MasterDocumentVerificationPage()),
-                      );
-                    },
-                  ),
-                  _buildMenuItem(
-                    context,
-                    'Requirement Configuration',
-                    Icons.settings,
-                    () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const MasterReqConfigPage()),
                       );
                     },
                   ),
