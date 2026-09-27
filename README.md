@@ -6,6 +6,9 @@ A Flutter mobile application for Philippine travel document verification with AI
 
 TravelEase is a comprehensive mobile application that helps Filipino travelers prepare and verify required travel documents for international destinations. The app provides destination-specific document checklists, AI-powered document verification, and a multi-tier role system for document review and administration. Currently focused on Android as the primary development platform.
 
+## Demo Video
+[![Video Title](https://img.youtube.com/vi/fS2SoIeM3h0/0.jpg)](https://www.youtube.com/watch?v=fS2SoIeM3h0&t=677)
+
 ## Key Features
 
 ### For Travelers (User Role)
